@@ -1,0 +1,28 @@
+{
+  "name": "@ninja/root",
+  "version": "0.0.1",
+  "description": "5 client & server packages for web development",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NinjaInShade/ninja.git"
+  },
+  "keywords": [
+    "svelte",
+    "typescript",
+    "node",
+    "vite"
+  ],
+  "author": "Leon Michalak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NinjaInShade/ninja/issues"
+  },
+  "homepage": "https://github.com/NinjaInShade/ninja#readme"
+}

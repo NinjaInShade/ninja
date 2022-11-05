@@ -1,0 +1,6 @@
+{
+  "name": "@ninja/svelte",
+  "version": "0.0.1",
+  "description": "Ninja's frontend svelte lib, with many widgets, components and actions",
+  "main": "src/index.ts"
+}
