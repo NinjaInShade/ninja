@@ -1,0 +1,34 @@
+{
+    "name": "@ninja/sql",
+    "version": "0.0.1",
+    "description": "SQL ORM",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "test": "node ./dist/test/temp.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/NinjaInShade/ninja.git"
+    },
+    "bugs": {
+        "url": "https://github.com/NinjaInShade/ninja/issues"
+    },
+    "homepage": "https://github.com/NinjaInShade/ninja#readme",
+    "keywords": [
+        "sql",
+        "orm",
+        "database",
+        "mysql"
+    ],
+    "author": "Leon Michalak",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^18.14.0",
+        "typescript": "^4.9.5"
+    },
+    "dependencies": {
+        "mysql2": "^3.1.2"
+    }
+}
