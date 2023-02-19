@@ -1,8 +1,8 @@
 {
-    "name": "@ninja/sql",
+    "name": "@ninjalib/sql",
     "version": "0.0.1",
     "description": "SQL ORM",
-    "main": "index.js",
+    "main": "dist/index.js",
     "type": "module",
     "scripts": {
         "build": "tsc",
