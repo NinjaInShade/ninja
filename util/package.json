@@ -1,0 +1,31 @@
+{
+    "name": "@ninjalib/util",
+    "version": "0.0.1",
+    "description": "Utility package",
+    "main": "dist/index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "test": "npm run build & node --test-reporter=spec --test ./dist/test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/NinjaInShade/ninja/tree/master/util"
+    },
+    "bugs": {
+        "url": "https://github.com/NinjaInShade/ninja/issues"
+    },
+    "homepage": "https://github.com/NinjaInShade/ninja/tree/master/util",
+    "keywords": [
+        "utility",
+        "typescript",
+        "javascript",
+        "nodeJS"
+    ],
+    "author": "Leon Michalak",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^18.14.0",
+        "typescript": "^4.9.5"
+    }
+}
