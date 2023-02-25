@@ -45,7 +45,7 @@ export const loadEnv = async (filePath?: string, force = false): Promise<void> =
             value = value.substring(1, value.length - 1);
         }
 
-        prev[name] = value;
+        prev[name] = value.trim();
         return prev;
     }, {});
 
