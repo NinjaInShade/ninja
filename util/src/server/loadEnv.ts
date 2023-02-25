@@ -45,7 +45,7 @@ export const loadEnv = async (filePath?: string, force = false): Promise<void> =
             value = value.substring(1, value.length - 1);
         }
 
-        prev[name] = value.trim();
+        prev[name] = value;
         return prev;
     }, {});
 
@@ -55,6 +55,6 @@ export const loadEnv = async (filePath?: string, force = false): Promise<void> =
             throw new Error(`Env variable '${key}' already exists. Call with 'force' parameter true if you want to forcefully overwrite it`);
         }
 
-        process.env[key] = value;
+        process.env[key] = value.trim();
     }
 };
