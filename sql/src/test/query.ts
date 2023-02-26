@@ -15,21 +15,7 @@ type User = {
 describe('MySQL queries', () => {
     let db: sql.MySQL;
 
-    const rollbackHook = async (fn: Function) => {
-        try {
-            await db.transaction(async () => {
-                await fn();
-                throw new Error('rollback');
-            });
-        } catch (err) {
-            if (err.message === 'rollback') {
-                return;
-            }
-            throw err;
-        }
-    };
-
-    const setupData = async (db) => {
+    const setupData = async () => {
         const createDBQuery = `CREATE DATABASE testing`;
         const createTableQuery = `
             CREATE TABLE testing.users (
@@ -60,7 +46,7 @@ describe('MySQL queries', () => {
         });
     };
 
-    const destroyData = async (db) => {
+    const destroyData = async () => {
         await db.transaction(async () => {
             await db.query(`DROP DATABASE testing`);
         });
@@ -76,11 +62,11 @@ describe('MySQL queries', () => {
         };
         db = new sql.MySQL(settings);
         await db.connect();
-        await setupData(db);
+        await setupData();
     });
 
     after(async () => {
-        await destroyData(db);
+        await destroyData();
         await db.dispose();
     });
 
