@@ -34,7 +34,7 @@ export default class MySQL {
             throw new Error('You already have an open pool, do not try to connect again!');
         }
         try {
-            this.pool = await mysql.createPool(this.options);
+            this.pool = mysql.createPool(this.options);
         } catch (err) {
             throw new Error(`Failed to create pool: ${err.message}`);
         }
@@ -69,9 +69,10 @@ export default class MySQL {
      * Returns the type of query being performed
      */
     private getQueryType(query: string): QueryType | null {
-        const re = /(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/im;
-        const match = query.match(re)[0] || null;
-        return match as QueryType | null;
+        const re = /(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|USE)/im;
+        const match = query.match(re);
+        const queryType = match.length ? match[0] : null;
+        return queryType as QueryType | null;
     }
 
     /**
