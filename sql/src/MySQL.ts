@@ -128,7 +128,7 @@ export default class MySQL {
     }
 
     /**
-     * Performs a select query and returns data
+     * Returns rows found from the given table and conditions
      */
     public async getRows<T extends Record<string, any>>(table: string, where: Record<string, any> = {}) {
         const args = [table];
@@ -147,12 +147,28 @@ export default class MySQL {
     }
 
     /**
-     * Performs a select query and returns the first row found
+     * Returns first row found from the given table and conditions
      */
     public async getRow<T extends Record<string, any>>(table: string, where?: Record<string, any>): Promise<T>;
     public async getRow<T extends Record<string, any>, K = any>(table: string, where?: Record<string, any>, defaultValue?: K): Promise<T | K>;
     public async getRow<T>(table: string, where: Record<string, any> = {}, defaultValue: boolean = null) {
         const rows = await this.getRows<T>(table, where);
         return rows.length ? rows[0] : defaultValue;
+    }
+
+    /**
+     *  Inserts one row into the given table and returns the created rows' id
+     */
+    public async insertOne<T = number>(table: string, data: Record<string, any>): Promise<T> {
+        const fields = Object.keys(data);
+        const values = Object.values(data);
+
+        let query = `
+            INSERT INTO ?? (${fields.map(() => '??').join(', ')})
+            VALUES (${values.map(() => '?').join(', ')})
+        `;
+        const args = [table, ...fields, ...values];
+
+        return ((await this._query<T>(query, args)) as unknown as mysql.ResultSetHeader).insertId as T;
     }
 }

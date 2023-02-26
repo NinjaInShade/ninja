@@ -15,6 +15,20 @@ type User = {
 describe('MySQL queries', () => {
     let db: sql.MySQL;
 
+    const rollbackHook = async (fn: Function) => {
+        try {
+            await db.transaction(async () => {
+                await fn();
+                throw new Error('rollback');
+            });
+        } catch (err) {
+            if (err.message === 'rollback') {
+                return;
+            }
+            throw err;
+        }
+    };
+
     const setupData = async () => {
         const createDBQuery = `CREATE DATABASE testing`;
         const createTableQuery = `
@@ -114,5 +128,15 @@ describe('MySQL queries', () => {
     it('[getRow] should return default value if no row found', async () => {
         const user = await db.getRow<User, string>('testing.users', { first_name: 'made', last_name: 'up' }, 'not_found');
         assert.equal(user, 'not_found');
+    });
+
+    it(`[insertOne] should insert an entry into the database and return created row's id`, async () => {
+        await rollbackHook(async () => {
+            const id = await db.insertOne('testing.users', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' });
+            const newRow = await db.getRow<User>('testing.users', { id });
+            assert.equal(newRow.first_name, 'new');
+            assert.equal(newRow.last_name, 'guy');
+            assert.equal(newRow.email, 'newguy@gmail.com');
+        });
     });
 });

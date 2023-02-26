@@ -44,12 +44,13 @@ await db.transaction(async () => {
 -   [Helpers](#helpers)
     -   [getRows](#getrows)
     -   [getRow](#getrow)
+    -   [insertOne](#insertone)
 
 ## Helpers
 
 ### getRows
 
-Performs a select query and returns the results
+Returns rows found from the given table and conditions
 
 Parameters:
 
@@ -62,7 +63,7 @@ const users = await db.getRows<User>('auth.users', { archived: null });
 
 ### getRow
 
-Performs a select query and returns the first row found
+Returns first row found from the given table and conditions
 
 Parameters:
 
@@ -75,4 +76,17 @@ const user = await db.getRow<User>('auth.users', { first_name: 'mike', last_name
 
 // Can easily type fallback value
 const notFoundUser = await db.getRow<User, 'not_found'>('auth.users', { first_name: 'not', last_name: 'defined' }, 'not_found');
+```
+
+### insertOne
+
+Inserts one row into the given table and returns the created rows' id
+
+Parameters:
+
+-   table: name of the table to insert into
+-   data: object of data that maps to the field and value that will be inserted
+
+```ts
+const id = await db.insertOne<number>('auth.users', { first_name: 'mike', last_name: 'tyson' });
 ```
