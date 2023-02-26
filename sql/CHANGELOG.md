@@ -3,6 +3,18 @@
 All changes worth documenting will be listed in this file. The convention of versions used is semantic versioning.<br />
 Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br />
 
+## [0.1.0] - 26/02/2023
+
+-   updated @ninjalib/util to 0.0.4 for type declarations
+-   updated docs
+-   added private `getQueryType` method
+-   banned use of manual transaction handling
+-   adding check to make sure user is in transaction if running certain query types (INSERT, DELETE, etc...)
+-   added transaction tests
+-   added helpers
+    -   `insertOne`
+    -   `insertMany`
+
 ## [0.0.4] - 26/02/2023
 
 -   fixed type declarations
