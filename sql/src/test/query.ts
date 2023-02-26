@@ -25,6 +25,7 @@ describe('MySQL queries', () => {
             if (err.message === 'rollback') {
                 return;
             }
+            console.log(err);
             throw err;
         }
     };
@@ -130,13 +131,42 @@ describe('MySQL queries', () => {
         assert.equal(user, 'not_found');
     });
 
-    it(`[insertOne] should insert an entry into the database and return created row's id`, async () => {
+    it(`[insertOne] should insert an entry into the database and return every created rows' id`, async () => {
         await rollbackHook(async () => {
             const id = await db.insertOne('testing.users', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' });
             const newRow = await db.getRow<User>('testing.users', { id });
             assert.equal(newRow.first_name, 'new');
             assert.equal(newRow.last_name, 'guy');
             assert.equal(newRow.email, 'newguy@gmail.com');
+        });
+    });
+
+    it(`[insertMany] should throw when datasets fields don't all match`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com', unexpected_field: 'test' },
+                { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' },
+            ];
+            await assert.rejects(async () => await db.insertMany('testing.users', data), { message: `Got field mismatch, 'unexpected_field' isn't part of the fields. Make sure every dataset has the same fields` });
+        });
+    });
+
+    it(`[insertMany] should insert many entries into the database and returns the id of the first inserted row`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' },
+                { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' },
+                { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' },
+                { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' },
+            ];
+            await db.insertMany('testing.users', data);
+            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' }));
+            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' }));
+            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' }));
+            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' }));
+            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' }));
         });
     });
 });

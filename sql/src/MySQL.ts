@@ -171,4 +171,36 @@ export default class MySQL {
 
         return ((await this._query<T>(query, args)) as unknown as mysql.ResultSetHeader).insertId as T;
     }
+
+    /**
+     * Inserts multiple rows into the given table and returns the first created rows' id
+     */
+    public async insertMany<T = number>(table: string, dataset: Record<string, any>[]): Promise<T> {
+        const fields: string[] = [];
+        const values: Array<Array<any>> = [];
+
+        // Populate fields from first data object
+        for (const field of Object.keys(dataset[0])) {
+            fields.push(field);
+        }
+
+        for (const entry of dataset) {
+            const _values: any[] = [];
+            for (const [key, value] of Object.entries(entry)) {
+                if (!fields.includes(key)) {
+                    throw new Error(`Got field mismatch, '${key}' isn't part of the fields. Make sure every dataset has the same fields`);
+                }
+                _values.push(value);
+            }
+            values.push(_values);
+        }
+
+        let query = `
+            INSERT INTO ?? (${fields.map(() => '??').join(', ')})
+            VALUES ${values.map((_values) => `\n(${_values.map(() => '?').join(', ')})`).join(',')}
+        `;
+        const args = [table, ...fields, ...values.flat()];
+
+        return ((await this._query<T>(query, args)) as unknown as mysql.ResultSetHeader).insertId as T;
+    }
 }

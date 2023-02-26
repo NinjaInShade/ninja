@@ -45,6 +45,7 @@ await db.transaction(async () => {
     -   [getRows](#getrows)
     -   [getRow](#getrow)
     -   [insertOne](#insertone)
+    -   [insertMany](#insertmany)
 
 ## Helpers
 
@@ -89,4 +90,25 @@ Parameters:
 
 ```ts
 const id = await db.insertOne<number>('auth.users', { first_name: 'mike', last_name: 'tyson' });
+```
+
+### insertMany
+
+Inserts multiple rows into the given table and returns the first created rows' id
+
+Parameters:
+
+-   table: name of the table to insert into
+-   data: array of data that maps to the field and value that will be inserted per object
+
+```ts
+const data = [
+    { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+    { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' },
+    { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' },
+    { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' },
+    { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' },
+];
+
+const firstId = await db.insertMany<number>('auth.users', data);
 ```
