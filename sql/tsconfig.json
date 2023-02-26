@@ -1,12 +1,14 @@
 {
-  "compilerOptions": {
-    "module": "es2022",
-    "target": "es2022",
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "strict": false,
-    "outDir": "dist",
-    "baseUrl": "./src"
-  },
-  "include": ["./*", "./**/*"]
+    "compilerOptions": {
+        "module": "es2022",
+        "target": "es2022",
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "declaration": true,
+        "strict": false,
+        "allowSyntheticDefaultImports": true,
+        "outDir": "dist",
+        "baseUrl": "."
+    },
+    "include": ["./src/*", "./src/**/*", "./test/*", "./test/**/*"]
 }

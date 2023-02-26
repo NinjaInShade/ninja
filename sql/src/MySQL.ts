@@ -57,7 +57,7 @@ export default class MySQL {
             await connection.commit();
         } catch (err) {
             await connection.rollback();
-            throw new Error(`Error whilst in transaction: ${err.message}`);
+            throw err;
         } finally {
             this.transactionConnection = null;
         }
@@ -66,13 +66,13 @@ export default class MySQL {
     /**
      * Proxy method that every query method should go through
      */
-    private async _query<T>(query: string, values: any[]): Promise<T>;
-    private async _query<T>(query: string, values: any[], includeFields?): Promise<[T, mysql.FieldPacket[]]>;
+    private async _query<T extends Record<string, any>>(query: string, values?: any[]): Promise<T[]>;
+    private async _query<T extends Record<string, any>>(query: string, values?: any[], includeFields?): Promise<[T[], mysql.FieldPacket[]]>;
     private async _query(query, values = [], includeFields = false) {
         for (let i = 0; i < values.length; i++) {
             const value = values[i];
             if (value === undefined) {
-                throw new Error(`Query parameter ${i} is undefined`);
+                throw new Error(`Query parameter ${i + 1} is undefined`);
             }
         }
 
@@ -96,7 +96,36 @@ export default class MySQL {
     /**
      * Performs a query and returns the results
      */
-    public async query<T>(query: string, values?: any[]) {
+    public async query<T extends Record<string, any>>(query: string, values?: any[]) {
         return await this._query<T>(query, values);
+    }
+
+    /**
+     * Performs a select query and returns data
+     */
+    public async getRows<T extends Record<string, any>>(table: string, where: Record<string, any> = {}) {
+        const args = [table];
+        let query = `
+            SELECT *
+            FROM ??
+            WHERE TRUE
+        `;
+
+        for (const [key, value] of Object.entries(where)) {
+            query += `AND ?? = ?`;
+            args.push(key, value);
+        }
+
+        return await this._query<T>(query, args);
+    }
+
+    /**
+     * Performs a select query and returns the first row found
+     */
+    public async getRow<T extends Record<string, any>>(table: string, where?: Record<string, any>): Promise<T>;
+    public async getRow<T extends Record<string, any>, K = any>(table: string, where?: Record<string, any>, defaultValue?: K): Promise<T | K>;
+    public async getRow<T>(table, where = {}, defaultValue = null) {
+        const rows = await this.getRows<T>(table, where);
+        return rows.length ? rows[0] : defaultValue;
     }
 }

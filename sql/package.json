@@ -1,21 +1,22 @@
 {
     "name": "@ninjalib/sql",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "description": "SQL ORM",
     "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
         "build": "tsc",
-        "test": "node ./dist/test/temp.js"
+        "test": "npm run build & node --test-reporter=spec --test ./dist/test"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/NinjaInShade/ninja.git"
+        "url": "git+https://github.com/NinjaInShade/ninja/tree/master/sql"
     },
     "bugs": {
         "url": "https://github.com/NinjaInShade/ninja/issues"
     },
-    "homepage": "https://github.com/NinjaInShade/ninja#readme",
+    "homepage": "https://github.com/NinjaInShade/ninja/tree/master/sql",
     "keywords": [
         "sql",
         "orm",
@@ -29,6 +30,7 @@
         "typescript": "^4.9.5"
     },
     "dependencies": {
+        "@ninjalib/util": "^0.0.3",
         "mysql2": "^3.1.2"
     }
 }

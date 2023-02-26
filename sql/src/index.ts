@@ -1,6 +1,1 @@
-// TODO: fix the annoying, unnecessary .js at end
-import MySQL from './MySQL.js';
-
-export default {
-    MySQL,
-};
+export * as default from './_project.js';

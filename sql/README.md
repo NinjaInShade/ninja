@@ -1,6 +1,8 @@
-# Ninja SQL ORM
+# **Ninja SQL library**
 
-This is a lightweight MySQL ORM
+A lightweight MySQL ORM
+
+**Note:** Requires node v19.6.0 for testing
 
 ## Features
 
@@ -8,14 +10,15 @@ This is a lightweight MySQL ORM
 -   Prepared statement support
 -   Transaction support
 -   Plenty of helper functions
+-   Easily type return values with generics
 
 ## Usage
 
 First, create a new instance and connect
 
 ```ts
-import ns from '@ninjalib/sql';
-const db = new ns.MySQL({ user: 'root', host: 'localhost', database: 'application', password: 'the_password', port: 3306 });
+import sql from '@ninjalib/sql';
+const db = new sql.MySQL({ user: 'root', host: 'localhost', database: 'application', password: 'the_password', port: 3306 });
 await db.connect();
 ```
 
@@ -34,4 +37,42 @@ await db.transaction(async () => {
         VALUES ('Bob', 'bob@gmail.com')
     `);
 });
+```
+
+## Docs
+
+-   [Helpers](#helpers)
+    -   [getRows](#getrows)
+    -   [getRow](#getrow)
+
+## Helpers
+
+### getRows
+
+Performs a select query and returns the results
+
+Parameters:
+
+-   table: name of the table to query from
+-   where?: object of conditions for the select (defaults to no conditions)
+
+```ts
+const users = await db.getRows<User>('auth.users', { archived: null });
+```
+
+### getRow
+
+Performs a select query and returns the first row found
+
+Parameters:
+
+-   table: name of the table to query from
+-   where?: object of conditions for the select (defaults to no conditions)
+-   defaultValue?: the fallback value to use if no row was found (defaults to null)
+
+```ts
+const user = await db.getRow<User>('auth.users', { first_name: 'mike', last_name: 'tyson', archived: null });
+
+// Can easily type fallback value
+const notFoundUser = await db.getRow<User, 'not_found'>('auth.users', { first_name: 'not', last_name: 'defined' }, 'not_found');
 ```
