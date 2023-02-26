@@ -2,7 +2,7 @@
 
 A bunch of utilities for use on the browser, server or both
 
-**Note:** Requires node v19.6.0
+**Note:** Requires node v19.6.0 for testing
 
 ## Features
 

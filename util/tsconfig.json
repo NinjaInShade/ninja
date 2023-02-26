@@ -4,6 +4,7 @@
         "target": "es2022",
         "moduleResolution": "node",
         "skipLibCheck": true,
+        "declaration": true,
         "strict": false,
         "allowSyntheticDefaultImports": true,
         "outDir": "dist",
