@@ -30,7 +30,7 @@
         "typescript": "^4.9.5"
     },
     "dependencies": {
-        "@ninjalib/util": "^0.0.4",
+        "@ninjalib/util": "^0.1.0",
         "mysql2": "^3.1.2"
     }
 }

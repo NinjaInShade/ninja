@@ -53,7 +53,7 @@ describe('MySQL transactions', () => {
     };
 
     before(async () => {
-        await util.server.loadEnv();
+        await util.loadEnv();
         const settings = {
             user: process.env.DB_USER,
             host: process.env.DB_HOST,
