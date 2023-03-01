@@ -11,17 +11,15 @@ A bunch of utilities for use on the browser, server or both
 
 ## Usage
 
-To import and use util you can do:
+Import util and start using straight away:
 
 ```ts
 import util from '@ninjalib/util';
+
+if (!util.isNode()) {
+    throw new Error('This code must be run on the server');
+}
 ```
-
-This will give you access to the following:
-
--   `util.shared`
--   `util.client`
--   `util.server`
 
 ## Docs
 
@@ -39,7 +37,7 @@ This will give you access to the following:
 Returns true if in a browser/client context
 
 ```ts
-if (util.shared.isBrowser()) {
+if (util.isBrowser()) {
     throw new Error('This code can only be run on the server');
 }
 ```
@@ -49,7 +47,7 @@ if (util.shared.isBrowser()) {
 Returns true if in a server context
 
 ```ts
-if (util.shared.isNode()) {
+if (util.isNode()) {
     throw new Error('This code can only be run on the client');
 }
 ```
@@ -69,5 +67,5 @@ Parameters:
 
 ```ts
 // call this as early in your application as possible
-util.server.loadEnv();
+util.loadEnv();
 ```

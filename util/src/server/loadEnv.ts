@@ -19,7 +19,7 @@ const isEnclosedIn = (value: string, quoteType: 'single' | 'double') => {
 };
 
 export const loadEnv = async (filePath?: string, force = false): Promise<void> => {
-    if (project.shared.isBrowser()) {
+    if (project.isBrowser()) {
         throw new Error('Load env can only be used on the server');
     }
 

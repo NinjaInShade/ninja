@@ -3,6 +3,10 @@
 All changes worth documenting will be listed in this file. The convention of versions used is semantic versioning.<br />
 Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br />
 
+## [0.1.0] - 01/03/2023
+
+-   import util and using it doesn't require the client/server/shared methods first anymore
+
 ## [0.0.4] - 26/02/2023
 
 -   added type declarations

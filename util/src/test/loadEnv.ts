@@ -30,11 +30,11 @@ describe('[loadEnv] file reading', () => {
 
     it('should throw if no .env file exists', async () => {
         const cwdPath = path.join(process.cwd(), '.env');
-        await assert.rejects(async () => await util.server.loadEnv(), { message: `Error reading .env file, make sure it exists at: '${cwdPath}'` });
+        await assert.rejects(async () => await util.loadEnv(), { message: `Error reading .env file, make sure it exists at: '${cwdPath}'` });
     });
 
     it('should throw if no .env file exists with custom path', async () => {
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `Error reading .env file, make sure it exists at: '${_path}'` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `Error reading .env file, make sure it exists at: '${_path}'` });
     });
 });
 
@@ -44,7 +44,7 @@ describe('[loadEnv] variable parsing', () => {
 
     it('should parse every variable', async () => {
         await createEnv(_path);
-        await util.server.loadEnv(_path);
+        await util.loadEnv(_path);
         assert.equal(process.env.FOO, 'var1');
         assert.equal(process.env.BAR, 'var2');
     });
@@ -53,7 +53,7 @@ describe('[loadEnv] variable parsing', () => {
         process.env.FOO = 'existing';
         assert.equal(process.env.FOO, 'existing');
         await createEnv(_path);
-        await util.server.loadEnv(_path, true);
+        await util.loadEnv(_path, true);
         assert.equal(process.env.FOO, 'var1');
     });
 
@@ -61,14 +61,14 @@ describe('[loadEnv] variable parsing', () => {
         process.env.FOO = 'existing';
         assert.equal(process.env.FOO, 'existing');
         await createEnv(_path);
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `Env variable 'FOO' already exists. Call with 'force' parameter true if you want to forcefully overwrite it` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `Env variable 'FOO' already exists. Call with 'force' parameter true if you want to forcefully overwrite it` });
         assert.equal(process.env.FOO, 'existing');
     });
 
     it('should strip leading and trailing whitespace', async () => {
         const variables = `     FOO=var1\nBAR=var2             `;
         await createEnv(_path, variables);
-        await util.server.loadEnv(_path, true);
+        await util.loadEnv(_path, true);
         assert.equal(process.env.FOO, 'var1');
         assert.equal(process.env.BAR, 'var2');
     });
@@ -76,7 +76,7 @@ describe('[loadEnv] variable parsing', () => {
     it('should strip leading and trailing quotes off values', async () => {
         const variables = `SINGLE_QUOTE='test'\nDOUBLE_QUOTE="test"\nSINGLE_QUOTE_INBETWEEN='te'st'\nDOUBLE_QUOTE_INBETWEEN="te'st"`;
         await createEnv(_path, variables);
-        await util.server.loadEnv(_path);
+        await util.loadEnv(_path);
         assert.equal(process.env.SINGLE_QUOTE, 'test');
         assert.equal(process.env.DOUBLE_QUOTE, 'test');
         assert.equal(process.env.SINGLE_QUOTE_INBETWEEN, `te'st`);
@@ -86,28 +86,28 @@ describe('[loadEnv] variable parsing', () => {
     it('should throw if value is using single quotes but leading quote missing', async () => {
         const variables = `MISSING_LEADING=test'`;
         await createEnv(_path, variables);
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `String is not fully enclosed in single quotes` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `String is not fully enclosed in single quotes` });
         assert.equal(process.env.MISSING_LEADING, undefined);
     });
 
     it('should throw if value is using single quotes but trailing quote missing', async () => {
         const variables = `MISSING_LEADING='test`;
         await createEnv(_path, variables);
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `String is not fully enclosed in single quotes` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `String is not fully enclosed in single quotes` });
         assert.equal(process.env.MISSING_LEADING, undefined);
     });
 
     it('should throw if value is using double quotes but leading quote missing', async () => {
         const variables = `MISSING_LEADING=test"`;
         await createEnv(_path, variables);
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `String is not fully enclosed in double quotes` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `String is not fully enclosed in double quotes` });
         assert.equal(process.env.MISSING_LEADING, undefined);
     });
 
     it('should throw if value is using double quotes but trailing quote missing', async () => {
         const variables = `MISSING_LEADING="test`;
         await createEnv(_path, variables);
-        await assert.rejects(async () => await util.server.loadEnv(_path), { message: `String is not fully enclosed in double quotes` });
+        await assert.rejects(async () => await util.loadEnv(_path), { message: `String is not fully enclosed in double quotes` });
         assert.equal(process.env.MISSING_LEADING, undefined);
     });
 });
