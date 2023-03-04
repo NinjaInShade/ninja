@@ -1,5 +1,9 @@
 # Logs
 logs
+*.log
+npm-debug.log*
+
+# Standard
 node_modules
 dist
 
