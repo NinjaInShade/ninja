@@ -2,7 +2,7 @@ import { describe, it, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import util from '../index.js';
+import util from '~/index';
 
 const createEnv = async (_path, contents?: string) => {
     const variables = contents ?? `FOO=var1\nBAR=var2`;

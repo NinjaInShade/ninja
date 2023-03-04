@@ -1,3 +1,3 @@
-export * from './shared/index.js';
-export * from './server/index.js';
-export * from './client/index.js';
+export * from './shared/index';
+export * from './server/index';
+export * from './client/index';

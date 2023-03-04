@@ -3,6 +3,13 @@
 All changes worth documenting will be listed in this file. The convention of versions used is semantic versioning.<br />
 Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br />
 
+## [0.1.1] - 04/03/2023
+
+-   add runtime support and ts path alias support for both run & build time support
+-   updated to use path aliases
+-   updated build script
+-   added non-default exports
+
 ## [0.1.0] - 01/03/2023
 
 -   import util and using it doesn't require the client/server/shared methods first anymore

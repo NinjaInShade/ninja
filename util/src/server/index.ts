@@ -1,1 +1,1 @@
-export * from './loadEnv.js';
+export * from './loadEnv';

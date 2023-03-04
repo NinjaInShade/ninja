@@ -1,4 +1,4 @@
-import project from '../index.js';
+import util from '~/index';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
@@ -19,7 +19,7 @@ const isEnclosedIn = (value: string, quoteType: 'single' | 'double') => {
 };
 
 export const loadEnv = async (filePath?: string, force = false): Promise<void> => {
-    if (project.isBrowser()) {
+    if (util.isBrowser()) {
         throw new Error('Load env can only be used on the server');
     }
 
