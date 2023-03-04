@@ -1,1 +1,1 @@
-export { default as MySQL } from './MySQL.js';
+export { default as MySQL } from './MySQL';

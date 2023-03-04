@@ -3,6 +3,14 @@
 All changes worth documenting will be listed in this file. The convention of versions used is semantic versioning.<br />
 Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br />
 
+## [0.1.2] - 04/03/2023
+
+-   updated @ninjalib/util to 0.1.1
+-   add runtime support and ts path alias support for both run & build time support
+-   updated to use path aliases
+-   updated build script
+-   added non-default exports
+
 ## [0.1.1] - 26/02/2023
 
 -   added template .env file

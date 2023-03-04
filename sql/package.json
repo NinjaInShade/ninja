@@ -4,10 +4,10 @@
     "description": "SQL ORM",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "type": "module",
     "scripts": {
-        "build": "tsc",
-        "test": "npm run build & node --test-reporter=spec --test ./dist/test"
+        "build": "rmdir /s /q dist & tsc & tsc-alias",
+        "test": "npm run build & node --test-reporter=spec --test ./dist/test",
+        "runtimePlaceholder": "ts-node --transpile-only -r tsconfig-paths/register src/server/main.ts"
     },
     "repository": {
         "type": "git",
@@ -25,12 +25,15 @@
     ],
     "author": "Leon Michalak",
     "license": "ISC",
-    "devDependencies": {
-        "@types/node": "^18.14.0",
-        "typescript": "^4.9.5"
-    },
     "dependencies": {
-        "@ninjalib/util": "^0.1.0",
+        "@ninjalib/util": "^0.1.1",
         "mysql2": "^3.1.2"
+    },
+    "devDependencies": {
+        "@types/node": "^18.14.5",
+        "ts-node": "^10.9.1",
+        "tsc-alias": "^1.8.2",
+        "tsconfig-paths": "^3.14.2",
+        "typescript": "^4.9.5"
     }
 }

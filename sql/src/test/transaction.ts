@@ -1,7 +1,7 @@
 import util from '@ninjalib/util';
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
-import sql from '../index.js';
+import sql from '~/index';
 
 type User = {
     id: number;

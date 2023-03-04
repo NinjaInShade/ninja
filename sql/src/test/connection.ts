@@ -1,6 +1,6 @@
 import util from '@ninjalib/util';
 import { describe, it, after } from 'node:test';
-import sql from '../index.js';
+import sql from '~/index';
 
 describe('MySQL connection', () => {
     let db: sql.MySQL;
