@@ -4,12 +4,12 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
-  root: './',
-  publicDir: 'static',
-  resolve: {
-    alias: {
-      '~': path.resolve(__dirname, './src'),
+    plugins: [svelte()],
+    root: '.',
+    publicDir: './src/static',
+    resolve: {
+        alias: {
+            '~': path.resolve(__dirname, './src'),
+        },
     },
-  },
 });

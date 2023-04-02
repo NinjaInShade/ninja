@@ -1,6 +1,5 @@
 <script lang="ts">
-  import Navigation from '~/components/local/Navigation.svelte';
-  import Button from '~/components/Button.svelte';
+  import NW from '@ninjalib/svelte';
   import Phone from './Phone.svelte';
   import TechnologyCard from './TechnologyCard.svelte';
   import PackageCard from './PackageCard.svelte';
@@ -21,18 +20,16 @@
   ];
 </script>
 
-<Navigation />
-
 <main class="outer">
   <section class="container">
     <div class="outer-flex">
       <div>
         <header>
           <h1 class="title">Create <span>full-stack</span> apps with less boilerplate</h1>
-          <p class="subtitle">5 client & server packages that let you build svelte apps without thinking about the repetitive tasks</p>
+          <p class="subtitle">5 client & server packages that helps you build svelte web apps without all the usual boilerplate</p>
           <div class="buttons">
-            <Button theme="primary-400">View docs</Button>
-            <Button theme="black" icon="brands fa-github">Source code</Button>
+            <NW.Button theme="primary-400" onClick={() => NW.nav.go('/docs')}>View docs</NW.Button>
+            <NW.Button theme="white" icon="brands fa-github" textColor="var(--black)" iconColor="var(--black)">Source code</NW.Button>
           </div>
         </header>
         <ul class="technologies">
@@ -46,7 +43,7 @@
   </section>
 
   <section class="container features">
-    <h2 class="features-title">What kind of stuff is NINJA capable of?</h2>
+    <h2 class="features-title">What kind of stuff <br />can you even do?</h2>
     <p class="features-subtitle">Below is a quick glimpse at some cool stuff provided by each package</p>
     <div class="showcase">
       <div class="packages">
@@ -152,7 +149,7 @@
 
   .box {
     background-color: var(--grey-900);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     height: 750px;
     flex-grow: 1;
   }

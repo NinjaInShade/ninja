@@ -17,7 +17,7 @@
   .card {
     transition: transform 0.2s ease-in-out;
     background-color: var(--grey-900);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     padding: 24px;
   }
 

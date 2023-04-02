@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from '~/components/Icon.svelte';
+  import NW from '@ninjalib/svelte';
 
   export let icon: string;
   export let packageSelected: string;
@@ -13,7 +13,7 @@
 </script>
 
 <button on:click={changePackage} class="showcase-card" class:showcase-card-active={_packageSelected} class:shadow-black={_packageSelected}>
-  <Icon name={icon} colour="var(--primary-400)" size="32px" />
+  <NW.Icon name={icon} --color="var(--primary-400)" --size="32px" />
   <div>
     <b class="package-name">{packageName}</b>
     <p>{packageDescription}</p>
@@ -26,7 +26,7 @@
     align-items: center;
     transition: background-color 0.2s ease-in-out;
     padding: 16px 24px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     gap: 24px;
   }

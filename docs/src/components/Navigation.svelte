@@ -5,7 +5,7 @@
     <small class="version"><span>v</span>0.0.1</small>
   </div>
   <ul class="links">
-    <li><a href="/tracker">tracker</a></li>
+    <li><a href="/">ninja</a></li>
     <li><a href="/docs">docs</a></li>
   </ul>
   <div class="flex">
@@ -30,7 +30,7 @@
 
   .flex {
     justify-content: flex-start;
-    width: 175px;
+    width: 250px;
     gap: 0.5em;
   }
 
@@ -55,14 +55,15 @@
     display: block;
     border: 1px solid var(--primary-400);
     color: var(--primary-400);
-    border-radius: 50px;
-    font-size: 12px;
     padding: 5px 10px 3px 10px;
+    border-radius: 50px;
     line-height: 10px;
+    font-weight: 600;
+    font-size: 12px;
   }
 
   .version span {
-    display: block;
+    display: inline-block;
     font-size: 10px;
   }
 </style>
