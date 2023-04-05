@@ -1,6 +1,6 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logError } from '../helpers.js';
+import { logLine, logInfo, logError } from '../helpers.js';
 import child_process from 'node:child_process';
 
 /**
@@ -20,10 +20,25 @@ export async function node(args: Record<string, string>) {
     const loader = path.join(__dirname, 'loader.js');
     const entryPoint = path.join(cwd, entryPointFile);
 
-    // typical run async util doesn't actually output logs to the console
-    // const stdout = await runAsync(`node --experimental-specifier-resolution=node --loader file://${loader} ${entryPoint}`);
+    // TODO: the idea was to use ts-node-dev however this doesn't work with custom esm loader?? https://github.com/wclr/ts-node-dev/issues/314
+    const nodemon = path.join(__dirname, '../../../node_modules/.bin/nodemon');
+    const subprocess = child_process.spawn(nodemon, ['--exec', 'node', '--experimental-specifier-resolution=node', `--loader=file://${loader}`, entryPoint], { stdio: 'inherit', shell: true });
 
-    child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, entryPoint], { stdio: 'inherit' });
+    subprocess.on('error', (err) => {
+        logError(`failed to start subprocess: ${err}`);
+    });
+
+    subprocess.stdout?.on('data', (data) => {
+        logInfo(`stdout: ${data}`);
+    });
+
+    subprocess.stderr?.on('data', (data) => {
+        logError(`stderr: ${data}`);
+    });
+
+    subprocess.on('close', (code) => {
+        logInfo(`child process exited with code ${code}`);
+    });
 }
 
 export const nodeOptions = {

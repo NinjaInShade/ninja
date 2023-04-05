@@ -103,7 +103,7 @@ export const parseArgs = (rawArgs: string[]): Record<string, string | boolean> =
         const split = arg.split('=');
         const option = split[0];
         const value = split.length > 2 ? split.slice(1).join('=') : split[1];
-        parsedArgs[option] = value.trim();
+        parsedArgs[option] = value?.trim();
     }
 
     return parsedArgs;

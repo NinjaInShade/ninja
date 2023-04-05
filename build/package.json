@@ -13,15 +13,15 @@
     "scripts": {
         "build": "rmdir /s /q dist & tsc & tsc-alias",
         "build-cli": "npm run build & npm link",
-        "test": "npm run build & node --experimental-specifier-resolution=node --loader ./loader.js --test-reporter=spec --test ./dist/test",
-        "node-runtime": "ninja-cli node",
-        "ninja-cli": "node --experimental-specifier-resolution=node --loader=./cli/node/loader.js ./dist/cli/cli.js"
+        "test": "ninja-cli test",
+        "node": "ninja-cli node"
     },
     "keywords": [],
     "author": "Leon Michalak",
     "license": "ISC",
     "devDependencies": {
         "@types/node": "^18.14.5",
+        "nodemon": "^2.0.22",
         "ts-node": "^10.9.1",
         "tsc-alias": "^1.8.2",
         "tsconfig-paths": "^3.14.2",

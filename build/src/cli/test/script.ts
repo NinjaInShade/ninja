@@ -15,20 +15,21 @@ export async function test(args: Record<string, string>) {
     // const stdout = await runAsync(`node --experimental-specifier-resolution=node --loader file://${loader} ${entryPoint}`);
 
     await runAsync('npm run build');
-    const cmd = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, '--test-reporter=spec', '--test', './dist/test'], { stdio: 'inherit' });
+    const subprocess = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, '--test-reporter=spec', '--test', './dist/test'], { stdio: 'inherit' });
 
-    cmd.stdout?.on('data', (data) => {
-        logLine('');
+    subprocess.on('error', (err) => {
+        logError(`failed to start subprocess: ${err}`);
+    });
+
+    subprocess.stdout?.on('data', (data) => {
         logInfo(`stdout: ${data}`);
     });
 
-    cmd.stderr?.on('data', (data) => {
-        logLine('');
+    subprocess.stderr?.on('data', (data) => {
         logError(`stderr: ${data}`);
     });
 
-    cmd.on('close', (code) => {
-        logLine('');
+    subprocess.on('close', (code) => {
         logInfo(`child process exited with code ${code}`);
     });
 }
