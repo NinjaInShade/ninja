@@ -3,20 +3,18 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "start": "vite",
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview",
-        "check": "svelte-check --tsconfig ./tsconfig.json"
+        "start": "concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"npm:start-server\" \"npm:start-client\"",
+        "start-client": "vite",
+        "start-server": "ninja-cli node file=./src/server/server.ts"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^2.0.4",
-        "@tsconfig/svelte": "^4.0.1",
+        "concurrently": "^8.0.1",
         "svelte": "^3.58.0",
         "svelte-check": "^3.1.4",
         "svelte-preprocess": "^5.0.3",
-        "tslib": "^2.5.0",
         "typescript": "^4.8.4",
+        "tslib": "^2.5.0",
         "vite": "^4.2.1"
     },
     "dependencies": {

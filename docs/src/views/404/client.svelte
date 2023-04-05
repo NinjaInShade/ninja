@@ -2,6 +2,24 @@
     import NW from '@ninjalib/svelte';
 </script>
 
-<h1>NOT FOUND</h1>
+<div class="center">
+    <h1>NOT FOUND</h1>
+    <NW.Button
+        onClick={() => {
+            NW.nav.back();
+        }}
+    >
+        Go back
+    </NW.Button>
+</div>
 
-<button on:click={() => NW.nav.back()}>Back</button>
+<style>
+    .center {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1em;
+        height: 100%;
+    }
+</style>
