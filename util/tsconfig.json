@@ -1,16 +1,3 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "NodeNext",
-        "moduleResolution": "Node",
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "declaration": true,
-        "outDir": "dist",
-        "baseUrl": ".",
-        "paths": {
-            "~/*": ["src/*"]
-        }
-    },
-    "include": ["src/**/*.ts"]
+    "extends": "./node_modules/@ninjalib/build/shared.tsconfig.json"
 }
