@@ -1,0 +1,149 @@
+html,
+body {
+    overflow-x: hidden;
+    height: 100%;
+}
+
+#app {
+    display: flex;
+    flex-flow: column nowrap;
+    background-color: var(--grey-800);
+    min-height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+    font-family: 'poppins', sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    font-size: 16px;
+
+    --fs-sm: 0.75rem;
+    --fs-sm-lh: 1.125rem;
+
+    --fs: 1em;
+    --fs-lh: 27px;
+
+    --fs-md: 1.1875em;
+    --fs-md-lh: 30px;
+
+    --fs-lg: 2.25em;
+    --fs-lg-lh: 52px;
+
+    --fs-xl: 2.75em;
+    --fs-xl-lh: 56px;
+
+    --black: #000;
+    --white: #fff;
+
+    --black-hover: var(--grey-900);
+    --white-hover: var(--grey-300);
+
+    --grey-100: #f2f2f2;
+    --grey-200: #d9d9d9;
+    --grey-300: #bfbfbf;
+    --grey-400: #8c8c8c;
+    --grey-500: #737373;
+    --grey-600: #595959;
+    --grey-700: #404040;
+    --grey-800: #262626;
+    --grey-900: #1a1a1a;
+
+    --primary-100: #e6f3fe;
+    --primary-200: #b4dafd;
+    --primary-300: #82c1fc;
+    --primary-400: #0682f9;
+    --primary-500: #0575e0;
+    --primary-600: #045bae;
+    --primary-700: #03417d;
+    --primary-800: #02274b;
+    --primary-900: #011a32;
+
+    --error-100: #f9ecec;
+    --error-200: #ecc6c6;
+    --error-300: #df9fa0;
+    --error-400: #ac3a3a;
+    --error-500: #bf4040;
+    --error-600: #862d2d;
+    --error-700: #602020;
+    --error-800: #391313;
+    --error-900: #260d0d;
+
+    --primary-100-hover: var(--primary-300);
+    --primary-200-hover: var(--primary-400);
+    --primary-300-hover: var(--primary-500);
+    --primary-400-hover: var(--primary-600);
+    --primary-500-hover: var(--primary-700);
+    --primary-600-hover: var(--primary-400);
+    --primary-700-hover: var(--primary-500);
+    --primary-800-hover: var(--primary-600);
+    --primary-900-hover: var(--primary-700);
+
+    --focus-outline: var(--grey-100) dotted 2px;
+
+    --color-transition-time: 0.2s;
+    --border-radius: 8px;
+}
+
+p,
+a,
+em,
+small {
+    font-size: var(--fs);
+    line-height: var(--fs-lh);
+    color: var(--grey-400);
+    font-weight: 500;
+}
+
+h1 {
+    font-size: var(--fs-xl);
+    line-height: var(--fs-xl-lh);
+    color: var(--white);
+    font-weight: 900;
+}
+
+h2 {
+    font-size: var(--fs-lg);
+    line-height: var(--fs-lg-lh);
+    color: var(--white);
+    font-weight: 900;
+}
+
+a {
+    display: block;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--white);
+}
+
+a,
+button {
+    cursor: pointer;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    display: block;
+}
+
+em {
+    font-style: normal;
+}
+
+button {
+    font-size: var(--fs);
+    font-weight: 500;
+    background: none;
+    border: none;
+}
