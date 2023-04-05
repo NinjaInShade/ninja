@@ -1,0 +1,31 @@
+{
+    "ts-node": {
+        "transpileOnly": true,
+        "esm": true,
+        "require": ["tsconfig-paths/register"]
+    },
+    "extends": "./shared.tsconfig.node.json",
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "allowJs": true,
+        "checkJs": true,
+        "tsBuildInfoFile": "",
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "declaration": true,
+        "sourceMap": true,
+        "strict": false,
+        "outDir": "../../../dist",
+        "rootDir": "../../../src",
+        "baseUrl": "../../../",
+        "paths": {
+            "~/*": ["src/*"]
+        }
+    },
+    "include": ["../../../src/*.d.ts", "../../../src/**/*.d.ts", "../../../src/*.ts", "../../../src/**/*.ts", "../../../src/*.js", "../../../src/**/*.js", "../../../src/*.svelte", "../../../src/**/*.svelte"],
+    "references": [{ "path": "./shared.tsconfig.node.json" }]
+}
