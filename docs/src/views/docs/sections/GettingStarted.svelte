@@ -1,1 +1,0 @@
-<p>Getting started!</p>
