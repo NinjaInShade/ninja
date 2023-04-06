@@ -24,6 +24,7 @@
  -->
 <script lang="ts">
     import NW from './';
+    import { tick } from 'svelte';
 
     /** Sets the on click handler */
     export let onClick: ((e?: MouseEvent) => Promise<unknown> | unknown) | undefined = undefined;
@@ -56,6 +57,8 @@
     const parsedTheme = `var(--${theme})`;
     const parsedThemeHover = `var(--${theme}-hover)`;
 
+    let buttonRef: HTMLElement;
+
     $: _loading = loading;
 
     // For ghost button when hovering need to pass color dynamically
@@ -77,16 +80,24 @@
     };
 
     const _onClick = async (e: MouseEvent) => {
+        // prevents losing focus on keyboard enter
+        async function refocus() {
+            await tick();
+            buttonRef.focus();
+        }
+
         if (!onClick) {
             return;
         }
         _loading = true;
         await onClick(e);
         _loading = false;
+        await refocus();
     };
 </script>
 
 <button
+    bind:this={buttonRef}
     type={htmlType}
     class="btn btn-{size} {_class || ''}"
     class:icon
