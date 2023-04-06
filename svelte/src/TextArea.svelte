@@ -95,7 +95,7 @@
     }
 </script>
 
-<div class="container" class:error class:autoResize bind:this={containerInstance}>
+<div class="outer-container" class:error class:autoResize bind:this={containerInstance}>
     <textarea class="textarea textarea-{size} {_class || ''}" disabled={disabled || loading} {placeholder} on:input={(e) => calculateHeight(e.target.value)} bind:value bind:this={txAreaInstance} name={htmlName} id={htmlName} {title} {style} cols="99999" rows="1" />
     {#if loading}
         <div class="spinner-container">
@@ -111,7 +111,7 @@
 </div>
 
 <style>
-    .container {
+    .outer-container {
         position: relative;
         display: flex;
         flex-direction: column;
@@ -171,7 +171,7 @@
         box-shadow: 0 0 10px 0 hsla(209, 95%, 50%, 0.2);
     }
 
-    .container.error .textarea:active {
+    .outer-container.error .textarea:active {
         box-shadow: 0 0 10px 0 hsla(0, 50%, 50%, 0.2);
     }
 
@@ -188,7 +188,7 @@
 
     /* Errors  */
 
-    .container.error .textarea {
+    .outer-container.error .textarea {
         border: 1px solid var(--error-400);
     }
 

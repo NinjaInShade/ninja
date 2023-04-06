@@ -84,7 +84,7 @@
 </script>
 
 <!-- Input -->
-<div class="container" class:error>
+<div class="outer-container" class:error>
     <div class="inner-container input-{size}" {title}>
         <input bind:value on:input={_onChange} class="input {_class || ''}" class:icon class:icon-start={iconPlacement === 'start'} disabled={disabled || _loading} {placeholder} type="text" name={htmlName} id={htmlName} size="99999" {style} />
         {#if icon}
@@ -105,7 +105,7 @@
 </div>
 
 <style>
-    .container {
+    .outer-container {
         position: relative;
         max-width: var(--input-width, 250px);
         width: 100%;
@@ -157,7 +157,7 @@
         box-shadow: 0 0 10px 0 hsla(209, 95%, 50%, 0.2);
     }
 
-    .container.error .input:active {
+    .outer-container.error .input:active {
         box-shadow: 0 0 10px 0 hsla(0, 50%, 50%, 0.2);
     }
 
@@ -231,7 +231,7 @@
 
     /* Errors  */
 
-    .container.error .input {
+    .outer-container.error .input {
         border: 1px solid var(--error-400);
     }
 

@@ -127,21 +127,25 @@
         gap: 8px;
     }
 
+    /*
+     DEV: button default heights are slightly less than other widgets as due to the vibrant filling,
+     it creates an optical size illusion, making the button look bigger than the widget
+     */
     .btn-S {
         font-size: var(--fs-sm);
         line-height: var(--fs-sm-lh);
-        height: var(--button-height, 34px);
+        height: var(--button-height, 32.5px);
         padding: 0 8px;
         gap: 4px;
     }
 
     .btn-M {
-        height: var(--button-height, 41px);
+        height: var(--button-height, 39.5px);
         padding: 0 12px;
     }
 
     .btn-L {
-        height: var(--button-height, 45px);
+        height: var(--button-height, 43.5px);
         padding: 0 18px;
     }
 
