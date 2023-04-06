@@ -12,6 +12,7 @@
     @param title? {string}: Sets the tooltip
     @param class? {string}: Sets the class
     @param style? {string}: Sets the style
+    @param size? {string}: Sets the size
     @param icon? {string}: Sets the FA 6 icon inside button
     @param theme? {string}: Sets the color theme
     @param textColor? {string}: Sets the color of the text
@@ -25,7 +26,7 @@
     import NW from './';
 
     /** Sets the on click handler */
-    export let onClick: ((e?: MouseEvent) => Promise<void> | void) | undefined = undefined;
+    export let onClick: ((e?: MouseEvent) => Promise<unknown> | unknown) | undefined = undefined;
     /** Sets the HTML button type */
     export let htmlType: 'button' | 'submit' | 'reset' | null | undefined = 'button';
     /** Sets the disabled state */
@@ -39,6 +40,8 @@
     export { _class as class };
     /** Sets the style */
     export let style: string | undefined = undefined;
+    /** Sets the size */
+    export let size: 'S' | 'M' | 'L' | undefined = 'M';
     /** Sets the FA 6 icon inside button */
     export let icon: string | undefined = undefined;
     /** Sets the color theme */
@@ -85,7 +88,7 @@
 
 <button
     type={htmlType}
-    class="btn {_class || ''}"
+    class="btn btn-{size} {_class || ''}"
     class:icon
     class:ghost
     class:ghost-disabled={ghost && (disabled || _loading)}
@@ -97,7 +100,7 @@
     {title}
 >
     {#if icon}
-        <NW.Icon name={icon} --color={iconColorParsed} />
+        <NW.Icon name={icon} --color={iconColorParsed} --size={size === 'S' ? '12px' : '16px'} />
     {/if}
     <slot />
     {#if _loading}
@@ -119,11 +122,27 @@
         color: var(--textColor);
         border-radius: var(--border-radius);
         background-color: var(--theme);
-        height: var(--button-height, 45px);
         border: 1px solid transparent;
-        padding: 0 18px;
         font-weight: 400;
-        gap: 6px;
+        gap: 8px;
+    }
+
+    .btn-S {
+        font-size: var(--fs-sm);
+        line-height: var(--fs-sm-lh);
+        height: var(--button-height, 34px);
+        padding: 0 8px;
+        gap: 4px;
+    }
+
+    .btn-M {
+        height: var(--button-height, 41px);
+        padding: 0 12px;
+    }
+
+    .btn-L {
+        height: var(--button-height, 45px);
+        padding: 0 18px;
     }
 
     /* icon */

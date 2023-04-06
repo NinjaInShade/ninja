@@ -21,8 +21,8 @@
     import { sineInOut } from 'svelte/easing';
     import { onMount } from 'svelte';
     import NW from './';
-    import './theme.css';
-    import './global.css';
+    import './default-theme.css';
+    import './utils.css';
 
     export let routes: Routes;
     export let layout: typeof SvelteComponent | null = null;

@@ -6,6 +6,7 @@
     let email: string | null = null;
 
     let isInTech = false;
+    let size: 'S' | 'M' | 'L' = 'M';
 
     const checkboxChange = async (value: boolean) => {
         console.log('Checked:', value);
@@ -16,48 +17,63 @@
     };
 </script>
 
+<div style="margin-bottom: 4em;">
+    <p>Set all widgets to the desired effect</p>
+    <div style="display: flex; gap: 8px; margin-top: 0.5em; gap: 0.5em;">
+        <NW.Button theme="white" textColor="var(--black)" onClick={() => (size = 'S')}>Set size S</NW.Button>
+        <NW.Button theme="white" textColor="var(--black)" onClick={() => (size = 'M')}>Set size M</NW.Button>
+        <NW.Button theme="white" textColor="var(--black)" onClick={() => (size = 'L')}>Set size L</NW.Button>
+    </div>
+</div>
+
 <div class="flex">
-    <NW.Button
-        onClick={async () => {
-            console.log('Before open!');
-            const valueReturned = await NW.nav.openModal(TestModal, {}, { asPromise: true });
-            console.log('After open! Returned with', valueReturned);
-        }}>Open modal</NW.Button
-    >
+    <div style="display: flex; gap: 8px;">
+        <NW.Input bind:value={username} {size} />
+        <NW.Button
+            theme="black"
+            textColor="var(--white)"
+            onClick={async () => {
+                console.log('Before open!');
+                const valueReturned = await NW.nav.openModal(TestModal, {}, { asPromise: true });
+                console.log('After open! Returned with', valueReturned);
+            }}
+            {size}>Open modal</NW.Button
+        >
+    </div>
 
     <!-- Input -->
     <div class="column">
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.Input bind:value={username} />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.Input bind:value={username} {size} />
             </NW.Fieldset>
             <p class="lead">Default</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.Input bind:value={username} placeholder="Enter your username" icon="magnifying-glass" />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.Input bind:value={username} placeholder="Enter your username" icon="magnifying-glass" {size} />
             </NW.Fieldset>
             <p class="lead">Icon</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.Input bind:value={username} placeholder="Enter your username" icon="magnifying-glass" disabled />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.Input bind:value={username} placeholder="Enter your username" icon="magnifying-glass" disabled {size} />
             </NW.Fieldset>
             <p class="lead">Disabled</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email">
-                <NW.Input bind:value={email} placeholder="Enter your email" icon="magnifying-glass" loading />
+            <NW.Fieldset label="Email" htmlName="Email" {size}>
+                <NW.Input bind:value={email} placeholder="Enter your email" icon="magnifying-glass" loading {size} />
             </NW.Fieldset>
             <p class="lead">Loading</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email">
-                <NW.Input bind:value={email} error="Enter a valid email!" placeholder="Enter your email" icon="magnifying-glass" onChange={testInputChange} />
+            <NW.Fieldset label="Email" htmlName="Email" {size}>
+                <NW.Input bind:value={email} error="Enter a valid email!" placeholder="Enter your email" icon="magnifying-glass" onChange={testInputChange} {size} />
             </NW.Fieldset>
             <p class="lead">Error</p>
         </div>
@@ -66,36 +82,36 @@
     <!-- TextArea -->
     <div class="column tx-column">
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.TextArea bind:value={username} />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.TextArea bind:value={username} {size} />
             </NW.Fieldset>
             <p class="lead">Default</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.TextArea bind:value={username} placeholder="Enter your username" />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.TextArea bind:value={username} placeholder="Enter your username" {size} />
             </NW.Fieldset>
-            <p class="lead">Icon</p>
+            <p class="lead">Placeholder</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.TextArea bind:value={username} placeholder="Enter your username" disabled />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.TextArea bind:value={username} placeholder="Enter your username" disabled {size} />
             </NW.Fieldset>
             <p class="lead">Disabled</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email">
-                <NW.TextArea bind:value={email} placeholder="Enter your email" loading />
+            <NW.Fieldset label="Email" htmlName="Email" {size}>
+                <NW.TextArea bind:value={email} placeholder="Enter your email" loading {size} />
             </NW.Fieldset>
             <p class="lead">Loading</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email">
-                <NW.TextArea bind:value={email} onChange={testInputChange} error="Not a valid email!" placeholder="Enter your email" />
+            <NW.Fieldset label="Email" htmlName="Email" {size}>
+                <NW.TextArea bind:value={email} onChange={testInputChange} error="Not a valid email!" placeholder="Enter your email" {size} />
             </NW.Fieldset>
             <p class="lead">Error</p>
         </div>
@@ -103,8 +119,8 @@
 
     <div class="column">
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username">
-                <NW.TextArea bind:value={username} autoResize />
+            <NW.Fieldset label="Username" htmlName="Username" {size}>
+                <NW.TextArea bind:value={username} autoResize {size} />
             </NW.Fieldset>
             <p class="lead">Auto resize</p>
         </div>
@@ -120,29 +136,29 @@
     <!-- Checkbox -->
     <div class="column">
         <div class="row">
-            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse">
-                <NW.Checkbox bind:value={isInTech} onChange={checkboxChange} />
+            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse" {size}>
+                <NW.Checkbox bind:value={isInTech} onChange={checkboxChange} {size} />
             </NW.Fieldset>
             <p class="lead">Default</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse">
-                <NW.Checkbox bind:value={isInTech} disabled />
+            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse" {size}>
+                <NW.Checkbox bind:value={isInTech} disabled {size} />
             </NW.Fieldset>
             <p class="lead">Disabled</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse">
-                <NW.Checkbox bind:value={isInTech} loading />
+            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse" {size}>
+                <NW.Checkbox bind:value={isInTech} loading {size} />
             </NW.Fieldset>
             <p class="lead">Loading</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse">
-                <NW.Checkbox bind:value={isInTech} error="Check it!" />
+            <NW.Fieldset label="Is in tech?" htmlName="isInTech" labelDir="row-reverse" {size}>
+                <NW.Checkbox bind:value={isInTech} error="Check it!" {size} />
             </NW.Fieldset>
             <p class="lead">Error</p>
         </div>

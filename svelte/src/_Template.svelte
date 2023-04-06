@@ -11,6 +11,7 @@
     @param title? {string}: Sets the tooltip
     @param class? {string}: Sets the class
     @param style? {string}: Sets the style
+    @param size? {string}: Sets the size
 
     @example
         <NW.A {props}>
@@ -18,21 +19,23 @@
         </NW.A>
  -->
 <script lang="ts">
-  import NW from '@ninjalib/svelte';
+    import NW from './';
 
-  /** TODO: Sets the disabled state */
-  export let disabled: boolean | undefined = undefined;
-  /** TODO: Sets the loading state */
-  export let loading: boolean | undefined = undefined;
-  /** TODO: Sets the error message */
-  export let error: string | undefined | null = undefined;
-  /** TODO: Sets the tooltip */
-  export let title: string | undefined = undefined;
-  /** TODO: Sets the class */
-  let _class: string | undefined = undefined;
-  export { _class as class };
-  /** TODO: Sets the style */
-  export let style: string | undefined = undefined;
+    /** TODO: Sets the disabled state */
+    export let disabled: boolean | undefined = undefined;
+    /** TODO: Sets the loading state */
+    export let loading: boolean | undefined = undefined;
+    /** TODO: Sets the error message */
+    export let error: string | undefined | null = undefined;
+    /** TODO: Sets the tooltip */
+    export let title: string | undefined = undefined;
+    /** TODO: Sets the class */
+    let _class: string | undefined = undefined;
+    export { _class as class };
+    /** TODO: Sets the style */
+    export let style: string | undefined = undefined;
+    /** TODO: Sets the size */
+    export let size: 'S' | 'M' | 'L' | undefined = 'M';
 </script>
 
 <!-- {#if _loading}
@@ -48,8 +51,8 @@
     </small>
   {/if} -->
 <style>
-  /* Errors  */
-  /* .container.error .input {
+    /* Errors  */
+    /* .container.error .input {
     border: 1px solid var(--error-400);
   }
 
@@ -69,8 +72,8 @@
     white-space: break-spaces;
   } */
 
-  /* Spinner */
-  /* .spinner-container {
+    /* Spinner */
+    /* .spinner-container {
     position: absolute;
     transform: translate(-50%, -50%);
     left: 50%;

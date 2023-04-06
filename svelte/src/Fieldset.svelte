@@ -10,6 +10,7 @@
     @param title? {string}: Sets the tooltip
     @param style? {string}: Sets the style
     @param class? {string}: Sets the class
+    @param size? {string}: Sets the size
 
     @example
         <NW.Fieldset label="Search for ticket">
@@ -34,20 +35,23 @@
     export { _class as class };
     /** Sets the style */
     export let style: string | undefined = undefined;
+    /** Sets the size */
+    export let size: 'S' | 'M' | 'L' | undefined = 'M';
 
     // Sets the context for children form elements to use
     setContext('htmlName', htmlName);
 </script>
 
-<fieldset style="--label-dir: {labelDir} {style || ''}" class={_class || ''} class:row={labelDir === 'row' || labelDir === 'row-reverse'} {title}>
+<fieldset class="fieldset fieldset-{size} {_class || ''}" style="--label-dir: {labelDir} {style || ''}" class:row={labelDir === 'row' || labelDir === 'row-reverse'} {title}>
     <label class:visually-hidden={hideLabel} for={htmlName}>{label}</label>
     <slot {htmlName} />
 </fieldset>
 
 <style>
-    fieldset {
+    .fieldset {
         border: none;
         display: flex;
+        position: relative;
         flex-direction: var(--label-dir, column);
         align-items: flex-start;
         user-select: none;
@@ -60,7 +64,18 @@
         gap: 4px;
     }
 
-    fieldset.row {
+    .fieldset-S {
+        font-size: var(--fs-sm);
+        line-height: var(--fs-sm-lh);
+    }
+
+    .fieldset-M {
+    }
+
+    .fieldset-L {
+    }
+
+    .fieldset.row {
         align-items: center;
         gap: 8px;
     }

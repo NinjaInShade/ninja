@@ -23,20 +23,38 @@ body {
 :root {
     font-size: 16px;
 
-    --fs-sm: 0.75rem;
-    --fs-sm-lh: 1.125rem;
+    --fs-sm: 12px;
+    --fs-sm-lh: 18px;
 
-    --fs: 1em;
+    --fs: 16px;
     --fs-lh: 27px;
 
-    --fs-md: 1.1875em;
+    --fs-md: 19px;
     --fs-md-lh: 30px;
 
-    --fs-lg: 2.25em;
+    --fs-lg: 36px;
     --fs-lg-lh: 52px;
 
-    --fs-xl: 2.75em;
-    --fs-xl-lh: 56px;
+    --fs-xl: 44px;
+    --fs-xl-lh: 60px;
+
+    --fs-h6: 13px;
+    --fs-h6-lh: 22px;
+
+    --fs-h5: 15px;
+    --fs-h5-lh: 24px;
+
+    --fs-h4: 18px;
+    --fs-h4-lh: 29px;
+
+    --fs-h3: 24px;
+    --fs-h3-lh: 36px;
+
+    --fs-h2: 34px;
+    --fs-h2-lh: 50px;
+
+    --fs-h1: 44px;
+    --fs-h1-lh: 60px;
 
     --black: #000;
     --white: #fff;
@@ -87,31 +105,69 @@ body {
     --focus-outline: var(--grey-100) dotted 2px;
 
     --color-transition-time: 0.2s;
-    --border-radius: 8px;
+    --border-radius: 4px;
 }
 
 p,
 a,
 em,
-small {
+small,
+b,
+strong {
     font-size: var(--fs);
     line-height: var(--fs-lh);
     color: var(--grey-400);
     font-weight: 500;
 }
 
-h1 {
-    font-size: var(--fs-xl);
-    line-height: var(--fs-xl-lh);
+b,
+strong {
+    font-weight: 700;
+}
+
+small {
+    font-size: var(--fs-sm);
+    line-height: var(--fs-sm-lh);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--white);
-    font-weight: 900;
+    font-weight: 700;
+}
+
+h1 {
+    font-size: var(--fs-h1);
+    line-height: var(--fs-h1-lh);
 }
 
 h2 {
-    font-size: var(--fs-lg);
-    line-height: var(--fs-lg-lh);
-    color: var(--white);
-    font-weight: 900;
+    font-size: var(--fs-h2);
+    line-height: var(--fs-h2-lh);
+}
+
+h3 {
+    font-size: var(--fs-h3);
+    line-height: var(--fs-h3-lh);
+}
+
+h4 {
+    font-size: var(--fs-h4);
+    line-height: var(--fs-h4-lh);
+}
+
+h5 {
+    font-size: var(--fs-h5);
+    line-height: var(--fs-h5-lh);
+}
+
+h6 {
+    font-size: var(--fs-h6);
+    line-height: var(--fs-h6-lh);
 }
 
 a {

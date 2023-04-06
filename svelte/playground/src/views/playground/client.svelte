@@ -2,12 +2,14 @@
     import Buttons from './Buttons.svelte';
     import Inputs from './Inputs.svelte';
     import Misc from './Misc.svelte';
+    import Typography from './Typography.svelte';
     import NW from '~/index';
 
     const tabs = [
         ['Buttons', Buttons],
         ['Inputs', Inputs],
         ['Misc', Misc],
+        ['Typography', Typography],
     ];
 </script>
 
@@ -17,6 +19,6 @@
 
 <style>
     .main {
-        padding: 0 32px;
+        padding: 0 32px 56px 32px;
     }
 </style>
