@@ -178,7 +178,7 @@
     .textarea:disabled {
         user-select: none;
         cursor: not-allowed;
-        opacity: 0.35;
+        opacity: 0.5;
     }
 
     /* TODO: Find out how to add this only on keyboard focus, chrome doesn't do this */

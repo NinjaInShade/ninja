@@ -125,7 +125,7 @@
     .inner-container:has(.checkbox:disabled) {
         user-select: none;
         cursor: not-allowed;
-        opacity: 0.35;
+        opacity: 0.5;
     }
 
     .checkbox:disabled {
