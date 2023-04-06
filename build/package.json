@@ -11,8 +11,7 @@
     },
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "rmdir /s /q dist & tsc & tsc-alias",
-        "build-cli": "npm run build & npm link",
+        "build": "rmdir /s /q dist & tsc & tsc-alias & npm link",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },

@@ -192,7 +192,9 @@ export async function copy(args: Record<string, string>) {
     logInfo(`Copying from ${srcPkgJson.name} to ${targetPkgJson.name}...`);
 
     // copy source to targets node_modules/@ninjalib/pkgName:
-    const itemsToCopy = ['dist', 'src', 'tsconfig.json', 'tsconfig.node.json', 'shared.tsconfig.json', 'shared.tsconfig.node.json', ...(copy_modules ? ['node_modules', 'package.json', 'package-lock.json'] : [])];
+    // TODO: figure out what to copy more smarter, for example only build needs configs/* to be copied with it etc...
+    // TODO: giving an item to copy like configs/tsconfig.json is bugged and fails, as it is a "file" in the eyes of this script but it's actually within a directory which needs to be also copied
+    const itemsToCopy = ['dist', 'src', 'tsconfig.json', 'tsconfig.node.json', 'configs', ...(copy_modules ? ['node_modules', 'package.json', 'package-lock.json'] : [])];
     for (const item of itemsToCopy) {
         const itemSrcPath = path.join(srcDir, item);
         const itemTargetPath = path.join(targetDir, 'node_modules', srcPkgJson.name, item);

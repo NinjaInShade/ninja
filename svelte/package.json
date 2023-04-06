@@ -2,14 +2,13 @@
     "name": "@ninjalib/svelte",
     "version": "0.0.1",
     "description": "Svelte package",
-    "main": "src/index.js",
     "keywords": [],
     "author": "Leon Michalak",
     "license": "ISC",
     "type": "module",
     "scripts": {
         "start": "vite serve playground",
-        "build": "svelte-package --input=src"
+        "build": "svelte-package --i=src"
     },
     "exports": {
         ".": {
