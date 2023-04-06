@@ -1,17 +1,22 @@
 import { type IntroLinks, type DocLinks } from '~/components/Sidebar.svelte';
-import GettingStarted from './sections/GettingStarted.svelte';
-import LearnTheBasics from './sections/LearnTheBasics.svelte';
+import Introduction from './sections/Introduction.svelte';
+import Installation from './sections/Installation.svelte';
+import Conventions from './sections/Conventions.svelte';
 import CoreNavApi from './sections/core/NavApi.svelte';
 
 export const INTRO_LINKS: IntroLinks = {
-    'Getting started': {
-        icon: 'mug-hot',
+    Introduction: {
+        icon: 'play',
         iconStyle: 'position: relative; left: 1.5px',
-        component: GettingStarted,
+        component: Introduction,
     },
-    'Learn the basics': {
-        icon: 'home',
-        component: LearnTheBasics,
+    Installation: {
+        icon: 'gear',
+        component: Installation,
+    },
+    Conventions: {
+        icon: 'globe',
+        component: Conventions,
     },
 };
 
