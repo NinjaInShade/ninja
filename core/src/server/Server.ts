@@ -14,19 +14,15 @@ export class Server {
 
     private options: ServerOptions;
     /**
-     * private http manager which contains:
-     * - disposer
-     * - http server initialiser
-     * - the actual physical http server
+     * Two core aspects of the server:
+     * - HTTP manager (express manager right now essentially - ditch at some point)
+     * - WebSocket manager
      */
-    private _http: HttpManager;
-    /**
-     * manager for all things socket related
-     */
-    private _socket: SocketManager;
+    private httpManager: HttpManager;
+    private socketManager: SocketManager;
 
     /**
-     * public API facing http manager which express provides
+     * public facing API for http things, which express provides
      */
     public http: ReturnType<typeof express>;
 
@@ -41,46 +37,49 @@ export class Server {
         };
 
         this.options = Object.assign({}, defaultOptions, options);
-        this._http = new HttpManager(this.options.port);
+        this.httpManager = new HttpManager(this.options.port);
     }
 
     /**
      * Starts the http server
+     *
+     * Also initialises the socket manager at this point
      */
     public async startServer() {
-        if (this._http.server) {
+        if (this.httpManager.server) {
             throw new Error('HTTP server cannot be started more than once');
         }
 
         await new Promise<void>((resolve) => {
-            this._http.startServer(() => {
+            this.httpManager.startServer(() => {
                 resolve();
             });
         });
 
-        this._socket = new SocketManager(this._http.server);
-        this.http = this._http.app;
+        this.socketManager = new SocketManager(this.httpManager.server);
+        this.http = this.httpManager.app;
     }
 
     /**
      * Listens for socket event from the client
      */
     public on(event: string, handler: (data: any) => void) {
-        // this._socket.on(event, handler);
+        this.socketManager.on(event, handler);
     }
 
     /**
      * Emits a socket event to the client
      */
     public emit(event: string, data: any) {
-        // this._socket.emit(event, data);
+        this.socketManager.emit(event, data);
     }
 
     /**
      * Dispose server safely
      */
     public async dispose() {
-        await this._http.dispose();
+        await this.httpManager.dispose();
+        await this.socketManager.dispose();
     }
 }
 

@@ -16,7 +16,7 @@ type ErrorListeners = ((errorType?: string) => void)[];
 export default class ClientSocketManager {
     private server: WebSocket;
 
-    private messageListeners: MessageListeners;
+    private messageListeners: MessageListeners = {};
     private openListeners: OpenListeners = [];
     private closeListeners: CloseListeners = [];
     private errorListeners: ErrorListeners = [];
@@ -37,6 +37,8 @@ export default class ClientSocketManager {
 
     private setupListeners() {
         this.server.addEventListener('open', () => {
+            console.log(`[socket] socket was opened`);
+
             // inform listeners
             for (const handler of this.openListeners) {
                 handler();
@@ -52,13 +54,15 @@ export default class ClientSocketManager {
             if (listeners) {
                 for (const handler of listeners) {
                     delete _data.__EVENT_NAME__;
-                    handler(_data.data);
+                    handler(_data);
                 }
             }
         });
 
         this.server.addEventListener('close', (event) => {
             const { code, reason, wasClean } = event;
+
+            console.error(`[socket] socket was closed with code ${code}${reason ? ` and reason '${reason}'` : ''}`);
 
             if (!wasClean) {
                 console.warn('[socket] socket was not closed cleanly');
