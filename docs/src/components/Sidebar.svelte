@@ -11,6 +11,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import NW from '@ninjalib/svelte';
+    import { checkHeartbeat } from '~/client/client';
 
     export let introLinks: IntroLinks;
     export let docLinks: DocLinks;
@@ -23,6 +24,13 @@
 
     function changeActiveSection(section: string) {
         $activeSection = section;
+    }
+
+    let pingTime;
+
+    async function ping() {
+        const _pingTime = await checkHeartbeat();
+        pingTime = `Response time: ${_pingTime}ms`;
     }
 </script>
 
@@ -82,6 +90,12 @@
         {/each}
     </ul>
 </section>
+<section class="bottom">
+    <div class="heartbeat-container">
+        <NW.Button theme="error-500" ghost icon="heart-pulse" size="L" onClick={ping} style="width: 100%; margin-bottom: 8px;">Check heartbeat</NW.Button>
+        <NW.Input value={pingTime} disabled --input-width="100%" size="L" style="text-align: center;" />
+    </div>
+</section>
 
 <style>
     .intro-link {
@@ -109,12 +123,9 @@
         background-color: var(--grey-800);
     }
 
-    .intro {
-        margin-bottom: 40px;
-    }
-
     .docs {
-        margin-left: 32px;
+        flex: 1 0 0px;
+        margin: 40px 0 40px 32px;
     }
 
     .docs .root-list {
@@ -159,5 +170,9 @@
     .child-list li button:hover,
     .child-list li button.active {
         color: var(--grey-600);
+    }
+
+    .heartbeat-container {
+        margin-left: 32px;
     }
 </style>

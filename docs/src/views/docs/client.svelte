@@ -40,6 +40,10 @@
     }
 
     .sidebar {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: flex-start;
+        align-items: stretch;
         background-color: var(--grey-900);
         box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
         padding: 42px 32px 42px 0;
