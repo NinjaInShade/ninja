@@ -3,6 +3,7 @@ import WebSocketServer from './WebSocketServer';
 
 type Listener = (data: any) => void;
 type MessageListeners = Record<string, Listener[]>;
+type MessageListenerDisposer = () => void;
 
 // TODO: Add type for accepted Serializable value
 // TODO: Error handling for JSON stringify/parse (create own encodeObject/decodeObject utils?)
@@ -39,12 +40,17 @@ export default class SocketManager {
     /**
      * Listens for socket event
      */
-    public on(eventName: string, callback: (data) => void) {
+    public on(eventName: string, callback: (data) => void): MessageListenerDisposer {
         if (eventName in this.messageListeners) {
             this.messageListeners[eventName].push(callback);
         } else {
             this.messageListeners[eventName] = [callback];
         }
+
+        return () => {
+            const filteredListeners = this.messageListeners[eventName].filter((cb) => cb !== callback);
+            this.messageListeners[eventName] = filteredListeners;
+        };
     }
 
     /**
