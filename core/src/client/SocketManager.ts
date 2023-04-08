@@ -49,14 +49,14 @@ export default class ClientSocketManager {
 
         this.server.addEventListener('message', (event) => {
             const { data } = event;
-            const _data = JSON.parse(data);
+            const fullData = JSON.parse(data);
 
             // inform listeners
-            const listeners = this.messageListeners[_data.__EVENT_NAME__];
+            const listeners = this.messageListeners[fullData.eventName];
             if (listeners) {
                 for (const handler of listeners) {
-                    delete _data.__EVENT_NAME__;
-                    handler(_data);
+                    delete fullData.eventName;
+                    handler(fullData.data);
                 }
             }
         });
@@ -87,7 +87,7 @@ export default class ClientSocketManager {
     /**
      * Listens for socket event
      */
-    public on(eventName: string, callback: (data) => void): MessageListenerDisposer {
+    public on(eventName: string, callback: (data?) => void): MessageListenerDisposer {
         if (eventName in this.messageListeners) {
             this.messageListeners[eventName].push(callback);
         } else {
@@ -103,16 +103,16 @@ export default class ClientSocketManager {
     /**
      * Emits a socket event
      */
-    public emit(eventName: string, data: any) {
+    public emit(eventName: string, data: any = undefined) {
         if (this.readyState !== 'OPEN') {
             throw new Error('[socket] socket is not open, cannot emit data');
         }
 
-        let dataToSend = {
-            __EVENT_NAME__: eventName,
+        const fullData = {
+            eventName,
             data,
         };
-        this.server.send(JSON.stringify(dataToSend));
+        this.server.send(JSON.stringify(fullData));
     }
 
     /**

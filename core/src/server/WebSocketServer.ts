@@ -38,9 +38,10 @@ export default class WebSocketServer {
     };
 
     private server: http.Server;
-    /** Essentially all clients */
-    private sockets: net.Socket[] = [];
     private messageListeners: PayloadCb[] = [];
+
+    /** Essentially all clients */
+    public clients: Map<string, net.Socket> = new Map();
 
     constructor(server: http.Server) {
         this.server = server;
@@ -88,7 +89,10 @@ export default class WebSocketServer {
         console.log('[http] server has upgraded to a websocket connection');
 
         // connection is open, can process events
-        this.sockets.push(socket);
+
+        // add client, sync to client
+        const clientId = this.generateClientId();
+        this.clients.set(clientId, socket);
 
         const queue = this.createDataQueue(socket, (payload) => {
             for (const listener of this.messageListeners) {
@@ -107,11 +111,14 @@ export default class WebSocketServer {
         socket.on('timeout', () => {
             close();
         });
+
+        socket.on('close', () => {
+            this.clients.delete(clientId);
+        });
     }
 
     /**
-     * Registers a callback to be registered,
-     * which when data comes in, will be executed with the incoming payload
+     * Registers a callback, which when data comes in, will be executed with the incoming payload
      */
     public onMessage(messageCb: PayloadCb) {
         this.messageListeners.push(messageCb);
@@ -120,13 +127,12 @@ export default class WebSocketServer {
     /**
      * Send message over the wire to all clients
      */
-    public send(data: any) {
-        // TODO: figure out how to send only to one client at a time
-        const frame = this.createFrame(data);
-        console.log('[socket] sending payload:', frame.toString('utf-8'));
-        for (const socket of this.sockets) {
+    public send(data: any = undefined) {
+        this.clients.forEach((socket, clientId) => {
+            const frame = this.createFrame(data);
+            console.log('[socket] sending payload to client', clientId, ':', frame.toString('utf-8'));
             socket.write(frame);
-        }
+        });
     }
 
     /**
@@ -350,6 +356,25 @@ export default class WebSocketServer {
         }
 
         return true;
+    }
+
+    /**
+     * Generates a unique client id
+     */
+    private generateClientId() {
+        function gen() {
+            // arbitrary
+            const length = 36;
+            return crypto
+                .randomBytes(Math.ceil(length / 2))
+                .toString('hex')
+                .slice(0, length);
+        }
+        let id = gen();
+        while (this.clients.has(id)) {
+            id = gen();
+        }
+        return id;
     }
 
     /**

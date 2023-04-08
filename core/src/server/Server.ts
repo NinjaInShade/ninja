@@ -61,16 +61,16 @@ export class Server {
     }
 
     /**
-     * Listens for socket event from the client
+     * Listens for global socket event (from any client)
      */
-    public on(event: string, handler: (data: any) => void) {
+    public on(event: string, handler: (data?: any) => void) {
         return this.socketManager.on(event, handler);
     }
 
     /**
-     * Emits a socket event to the client
+     * Emits a global socket event (to all clients)
      */
-    public emit(event: string, data: any) {
+    public emit(event: string, data?: any) {
         this.socketManager.emit(event, data);
     }
 

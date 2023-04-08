@@ -46,14 +46,14 @@ export class Client {
     /**
      * Listens for socket event from the server
      */
-    public on(event: string, handler: (data: any) => void) {
+    public on(event: string, handler: (data?: any) => void) {
         return this.socket.on(event, handler);
     }
 
     /**
      * Emits a socket event to the server
      */
-    public emit(event: string, data: any) {
+    public emit(event: string, data?: any) {
         this.socket.emit(event, data);
     }
 

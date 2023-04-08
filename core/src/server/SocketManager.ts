@@ -24,14 +24,14 @@ export default class SocketManager {
         this.httpServer = server;
         this.webSocketServer = new WebSocketServer(this.httpServer);
         this.webSocketServer.onMessage((data) => {
-            const _data = JSON.parse(data);
+            const parsedData = JSON.parse(data);
 
             // inform listeners
-            const listeners = this.messageListeners[_data.__EVENT_NAME__];
+            const listeners = this.messageListeners[parsedData.eventName];
             if (listeners) {
                 for (const handler of listeners) {
-                    delete _data.__EVENT_NAME__;
-                    handler(_data);
+                    delete parsedData.eventName;
+                    handler(parsedData.data);
                 }
             }
         });
@@ -40,7 +40,7 @@ export default class SocketManager {
     /**
      * Listens for socket event
      */
-    public on(eventName: string, callback: (data) => void): MessageListenerDisposer {
+    public on(eventName: string, callback: (data?) => void): MessageListenerDisposer {
         if (eventName in this.messageListeners) {
             this.messageListeners[eventName].push(callback);
         } else {
@@ -54,14 +54,11 @@ export default class SocketManager {
     }
 
     /**
-     * Emits a socket event
+     * Emits a socket event to all clients
      */
-    public emit(eventName: string, data: any) {
-        // if (this.readyState !== 'OPEN') {
-        //     throw new Error('[socket] socket is not open, cannot emit data');
-        // }
+    public emit(eventName: string, data?: any) {
         const fullData = {
-            __EVENT_NAME__: eventName,
+            eventName,
             data,
         };
         this.webSocketServer.send(JSON.stringify(fullData));
