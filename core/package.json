@@ -19,6 +19,7 @@
     },
     "types": "./dist/index.d.ts",
     "scripts": {
+        "start": "concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"ninja-cli node file=./playground/server/server.ts\" \"vite serve playground\"",
         "build": "rmdir /s /q dist & tsc & tsc-alias",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
@@ -27,12 +28,18 @@
     "author": "Leon Michalak",
     "license": "ISC",
     "devDependencies": {
+        "@sveltejs/vite-plugin-svelte": "^2.0.4",
         "@types/express": "^4.17.17",
         "@types/node": "^18.15.3",
+        "svelte": "^3.58.0",
+        "svelte-preprocess": "^5.0.3",
         "tsc-alias": "^1.8.2",
-        "typescript": "^4.9.5"
+        "tslib": "^2.5.0",
+        "typescript": "^4.9.5",
+        "vite": "^4.2.1"
     },
     "dependencies": {
+        "concurrently": "^8.0.1",
         "express": "^4.18.2"
     }
 }
