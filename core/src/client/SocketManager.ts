@@ -33,7 +33,7 @@ export default class ClientSocketManager {
         if (!this.serverUrl) {
             throw new Error('You must provide a serverUrl option to the client to connect to the server');
         }
-        this.server = new WebSocket(this.serverUrl);
+        this.server = new WebSocket('ws://' + this.serverUrl);
         this.setupListeners();
     }
 

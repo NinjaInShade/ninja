@@ -2,7 +2,7 @@ import SocketManager from './SocketManager';
 
 type ClientOptions = {
     /**
-     * URL of the server
+     * URL of the server (e.g. localhost:4405)
      */
     serverUrl?: string;
 };
