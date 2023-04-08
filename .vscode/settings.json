@@ -1,0 +1,64 @@
+{
+    "workbench.colorCustomizations": {
+        // core colours
+        "terminal.ansiBuild": "#1096e3",
+        "terminal.ansiCore": "#74b56e",
+        "terminal.ansiSql": "#e33b3b",
+        "terminal.ansiSvelte": "#e39210",
+        "terminal.ansiUtil": "#dbe33b",
+        // project colours
+        "terminal.ansiProject": "#7d7d7d"
+    },
+    "terminal.integrated.profiles.windows": {
+        // core profiles
+        "build": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/build"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiBuild",
+            "overrideName": true
+        },
+        "core": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/core"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiCore",
+            "overrideName": true
+        },
+        "sql": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/sql"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiSql",
+            "overrideName": true
+        },
+        "svelte": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/svelte"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiSvelte",
+            "overrideName": true
+        },
+        "util": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/util"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiUtil",
+            "overrideName": true
+        },
+        "general": {
+            "path": ["cmd.exe"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiProject",
+            "overrideName": true
+        },
+        // project profiles
+        "docs": {
+            "path": ["cmd.exe"],
+            "args": ["/k", "cd ${cwd}/docs"],
+            "icon": "circle-large-filled",
+            "color": "terminal.ansiProject",
+            "overrideName": true
+        }
+    }
+}
