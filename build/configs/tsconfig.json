@@ -19,7 +19,7 @@
         "sourceMap": true,
         "strict": false,
         "outDir": "../../../../dist",
-        "rootDir": "../../../../src",
+        "rootDirs": ["../../../../src", "../../../../dist"],
         "baseUrl": "../../../../",
         "paths": {
             "~/*": ["src/*"]
