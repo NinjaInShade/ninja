@@ -63,9 +63,9 @@
         try {
             let loadedView;
             if (projectType === 'app') {
-                loadedView = await import(`../../../../src/views/${processedViewPath}/client.svelte`);
+                loadedView = await import(`../../../src/views/${processedViewPath}/client.svelte`);
             } else if (projectType === 'lib') {
-                loadedView = await import(`../../../../playground/src/views/${processedViewPath}/client.svelte`);
+                loadedView = await import(`../../../playground/src/views/${processedViewPath}/client.svelte`);
             } else if (projectType === 'this') {
                 loadedView = await import(`../playground/src/views/${processedViewPath}/client.svelte`);
             } else {
