@@ -1,6 +1,3 @@
 {
-    "extends": "./node_modules/@ninjalib/build/configs/tsconfig.json",
-    "compilerOptions": {
-        "rootDir": "."
-    }
+    "extends": "./node_modules/@ninjalib/build/configs/tsconfig.json"
 }
