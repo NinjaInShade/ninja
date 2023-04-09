@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.9] - 09/03/2023
+
 -   exposing shared tsconfig files in package.json
 
 ## [0.1.8] - 09/03/2023
