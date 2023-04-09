@@ -194,6 +194,7 @@ export async function publish(args: Record<string, string>) {
     logSuccess('updated changelog');
 
     await runAsync(`npm version ${type} --git-tag-version true -m="${commitMessage}"`);
+    await runAsync('git push --follow-tags');
     logSuccess('updated version');
 
     await runAsync(`npm publish --access="public"`);

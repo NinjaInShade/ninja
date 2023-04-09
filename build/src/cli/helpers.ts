@@ -123,7 +123,6 @@ export async function runAsync(cmd: string, opts: { cwd?: string } = {}): Promis
     const exec = util.promisify(child_process.exec);
     const { stdout, stderr } = await exec(cmd, _opts);
     if (stderr) {
-        logLine('');
         logError(`got stderr: ${stderr}`);
         return;
     }
