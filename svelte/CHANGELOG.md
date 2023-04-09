@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.0.2] - 09/03/2023
+
 -   updated tsconfig location as it's not local anymore (so it's from @ninjalib/build)
 
 ## [0.0.1] - 09/03/2023

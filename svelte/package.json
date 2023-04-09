@@ -1,6 +1,6 @@
 {
     "name": "@ninjalib/svelte",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Svelte package",
     "keywords": [],
     "author": "Leon Michalak",
