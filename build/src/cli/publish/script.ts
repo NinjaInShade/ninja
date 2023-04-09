@@ -183,6 +183,14 @@ export async function publish(args: Record<string, string>) {
     }
     logSuccess('updated changelog');
 
+    logInfo('installing dependencies...');
+    await runAsync('npm i');
+    logSuccess('dependencies installed');
+
+    logInfo('building library...');
+    await runAsync('npm run build');
+    logSuccess('built library');
+
     const message = args.message || 'Version %s';
     if (!message.includes('%s')) {
         logError('commit message must contain %s');
