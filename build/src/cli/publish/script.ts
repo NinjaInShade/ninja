@@ -64,8 +64,10 @@ export async function publish(args: Record<string, string>) {
     }
 
     const pkgName = pkgJson.name;
+    const pkgNamePrefix = '@ninjalib/';
     const pkgCurrVersion = pkgJson.version;
-    const commitMessage = args.message || 'Version %s';
+    const libName = pkgName.substring(pkgNamePrefix.length);
+    const commitMessage = args.message || `(${libName}) version %s`;
 
     if (!pkgName.startsWith('@ninjalib')) {
         logLine('');
@@ -193,8 +195,14 @@ export async function publish(args: Record<string, string>) {
     }
     logSuccess('updated changelog');
 
-    await runAsync(`npm version ${type} --git-tag-version true -m="${commitMessage}"`, { cwd: path.join(cwd, '../') });
-    await runAsync('git push --follow-tags');
+    // https://github.com/npm/cli/issues/2010
+    // --git-tag-version doesn't seem to work, possibly due to not being at the root dir,
+    // but even with cwd set to root it doesn't actually commit, tag and push changes. Have to do this manually
+    await runAsync(`npm version ${type}`);
+    await runAsync('git add .');
+    await runAsync(`git commit -m "${commitMessage}"`);
+    await runAsync(`git tag ${newVersion}`);
+    await runAsync('git push');
     logSuccess('updated version');
 
     await runAsync(`npm publish --access="public"`);

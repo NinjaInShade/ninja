@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   adding/committing/tagging manually when running publish script
 
 ## [0.1.3] - 09/03/2023
 
