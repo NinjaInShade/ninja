@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.2] - 09/03/2023
+
 -   remove log
 -   potential fix for publish not committing using npm version command
 
