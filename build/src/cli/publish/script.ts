@@ -109,7 +109,7 @@ export async function publish(args: Record<string, string>) {
     const newVersion = semver.inc(pkgCurrVersion, type as semver.ReleaseType);
 
     logLine('');
-    logInfo(`updating package to new ${type} version (${newVersion})...`);
+    logInfo(`updating package to new ${type} version (${newVersion})`);
 
     logInfo('installing dependencies...');
     await runAsync('npm i');
