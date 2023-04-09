@@ -204,7 +204,7 @@ export async function publish(args: Record<string, string>) {
     await runAsync(`npm version ${type}`);
     await runAsync('git add .');
     await runAsync(`git commit -m "${commitMessage.replaceAll('%s', newVersion)}"`);
-    await runAsync(`git tag ${newVersion}`);
+    await runAsync(`git tag ${libName}-${newVersion}`);
     await runAsync('git push');
     logSuccess('updated version');
 
