@@ -41,7 +41,7 @@ export async function scriptSelectMenu() {
 export function scriptHelpMenu(optionName, options: Record<string, any>) {
     logLine(`\n${colours.blue}${colours.bold}Here are all available options for the '${optionName}' script:\n`);
     for (const [option, description] of Object.entries(options)) {
-        logLine(`${colours.blue}${colours.bold}[${option}]${colours.reset} ${colours.grey}${description}`);
+        logLine(`${colours.blue}${colours.bold}${option}${colours.reset} ${colours.grey}${description}`);
     }
     logLine(`\nFor more info about an option read the docs`);
 }
