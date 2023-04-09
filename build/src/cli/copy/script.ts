@@ -4,7 +4,7 @@ import { colours, logLine, logInfo, logError, logWarn, logSuccess, runAsync, cop
 import readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
-type PackageJson = {
+export type PackageJson = {
     name: string;
     version: string;
     devDependencies: Record<string, string>;
@@ -112,16 +112,19 @@ export async function copy(args: Record<string, string>) {
             logError('found 0 potential targets, make sure there are valid locations to copy to one level above from cwd/sourceDir');
             return;
         }
+        // this means user can input one of the options literally as a string or it's index
         selectedTarget = await showTargetSelectMenu(targetOptions, targetOptions[0], srcPkgJson.name);
-        const targetOptionIndex = targetOptions.findIndex((opt) => opt === selectedTarget);
-        if (targetOptionIndex === -1 && !targetOptions[Number(selectedTarget) - 1]) {
+        const targetOptionStringIndex = targetOptions.findIndex((opt) => opt === selectedTarget);
+        const targetOptionNumberIndex = targetOptions[Number(selectedTarget) - 1];
+        const index = (targetOptionStringIndex + 1 || selectedTarget) as number;
+
+        if (targetOptionStringIndex === -1 && !targetOptionNumberIndex) {
             logLine('');
             logError(`target ${selectedTarget} is not a valid option`);
             return;
         }
-        if (typeof selectedTarget === 'number') {
-            selectedTarget = targetOptions[selectedTarget - 1];
-        }
+
+        selectedTarget = targetOptions[index - 1];
     }
 
     // get target package.json

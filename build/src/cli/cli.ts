@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { scriptSelectMenu, scriptHelpMenu } from './help.js';
-import { parseArgs, colours, logLine } from './helpers.js';
+import { parseArgs, logLine, logError, logWarn } from './helpers.js';
 import { createProject, createProjectOptions } from './createProject/script.js';
 import { copy, copyOptions } from './copy/script.js';
 import { node, nodeOptions } from './node/script.js';
 import { test, testOptions } from './test/script.js';
+import { publish, publishOptions } from './publish/script.js';
 
 type ScriptFn = (args) => void;
 type ScriptOptions = {
@@ -14,11 +15,10 @@ type ScriptOptions = {
 };
 
 export const options: Record<string, ScriptOptions> = {
-    'create-project': {
-        script: createProject,
-        helpOptions: createProjectOptions,
+    publish: {
+        script: publish,
+        helpOptions: publishOptions,
     },
-    // publish: null,
     copy: {
         script: copy,
         helpOptions: copyOptions,
@@ -30,6 +30,10 @@ export const options: Record<string, ScriptOptions> = {
     test: {
         script: test,
         helpOptions: testOptions,
+    },
+    'create-project': {
+        script: createProject,
+        helpOptions: createProjectOptions,
     },
 };
 
@@ -43,7 +47,8 @@ const main = async () => {
     // Show help menu
     if (option === '--help' || option === '-h') {
         // TODO: show some sort of general help/overview menu
-        logLine(`\nHelp menu is not yet made`);
+        logLine('');
+        logWarn('Help menu is not yet made');
         return;
     }
 
@@ -56,7 +61,8 @@ const main = async () => {
     // Invalid script
     const validOption = options[option];
     if (!validOption) {
-        logLine(`\n${colours.bold}${colours.red}[ERROR]${colours.reset} invalid cli script '${option}'. Use --help to see all available scripts and what they do`);
+        logLine('');
+        logError(`invalid cli script '${option}'. Use --help to see all available scripts and what they do`);
         return;
     }
 
