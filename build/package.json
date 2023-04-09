@@ -7,7 +7,9 @@
         ".": {
             "default": "./dist/index.js",
             "types": "./dist/index.d.ts"
-        }
+        },
+        "./configs/tsconfig.json": "./configs/tsconfig.json",
+        "./configs/playground.tsconfig.json": "./configs/playground.tsconfig.json"
     },
     "types": "dist/index.d.ts",
     "scripts": {
