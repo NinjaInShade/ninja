@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.0.1] - 09/03/2023
+
 -   Added playground
 -   Added \_Template for components
 -   Added `<NW.Fieldset />` component
