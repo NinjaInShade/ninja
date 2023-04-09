@@ -200,7 +200,7 @@ export async function publish(args: Record<string, string>) {
     // but even with cwd set to root it doesn't actually commit, tag and push changes. Have to do this manually
     await runAsync(`npm version ${type}`);
     await runAsync('git add .');
-    await runAsync(`git commit -m "${commitMessage}"`);
+    await runAsync(`git commit -m "${commitMessage.replaceAll('%s', newVersion)}"`);
     await runAsync(`git tag ${newVersion}`);
     await runAsync('git push');
     logSuccess('updated version');
