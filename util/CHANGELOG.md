@@ -5,7 +5,11 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   add @ninjalib/build dependency
+-   switched to build cli commands for testing and node runtime
+-   updated tsconfig to extend from build
+-   switched to modern package.json exports structure
+-   added support for specific exports for browser/server which makes this package compatible to use with vite
 
 ## [0.1.1] - 04/03/2023
 
