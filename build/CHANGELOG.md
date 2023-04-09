@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.5] - 09/03/2023
+
 -   since doing manual committing, added manual runtime replacement of %s in commit message
 
 ## [0.1.4] - 09/03/2023
