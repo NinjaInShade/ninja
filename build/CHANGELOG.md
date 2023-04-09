@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.1] - 09/03/2023
+
 -   fix is git clean check in publish script
 -   fix npm version command in publish script
 
