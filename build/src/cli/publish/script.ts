@@ -6,6 +6,9 @@ import fs from 'node:fs/promises';
 import { stdin, stdout } from 'node:process';
 import semver from 'semver';
 
+// TODO: add dependency checks for internal @ninjalib packages
+// this would be to detect a copied @ninjalib package
+
 const VERSION_OPTIONS = ['major', 'minor', 'patch'];
 const DEFAULT_VERSION_TYPE = 'minor';
 
