@@ -32,6 +32,7 @@
     "author": "Leon Michalak",
     "license": "ISC",
     "dependencies": {
+        "@ninjalib/build": "^0.1.7",
         "@ninjalib/util": "^0.1.1",
         "mysql2": "^3.1.2"
     },

@@ -3,6 +3,12 @@
 All changes worth documenting will be listed in this file. The convention of versions used is semantic versioning.<br />
 Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br />
 
+## [Unreleased]
+
+-   add @ninjalib/build dependency
+-   switched to build cli commands for testing and node runtime
+-   updated tsconfig to extend from build
+
 ## [0.1.2] - 04/03/2023
 
 -   updated @ninjalib/util to 0.1.1
