@@ -126,8 +126,8 @@ export async function publish(args: Record<string, string>) {
         logError(`you must be on the release branch (${releaseBranch}) to publish`);
         return;
     }
-    const gitStatus = await runAsync(`git status --porcelain`);
-    const isClean = (gitStatus || '').trim().length > 0;
+    const gitStatus: Awaited<string> = await runAsync(`git status --porcelain`);
+    const isClean = (gitStatus || '').replaceAll('\r', '').replaceAll('\n', '').trim().length > 0;
     if (!isClean) {
         logError(`you have unstaged changes, make sure git is clean`);
         return;
