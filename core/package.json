@@ -39,7 +39,7 @@
         "vite": "^4.2.1"
     },
     "dependencies": {
-        "@ninjalib/build": "^0.1.8",
+        "@ninjalib/build": "^0.1.9",
         "@ninjalib/svelte": "^0.0.1",
         "concurrently": "^8.0.1",
         "express": "^4.18.2"
