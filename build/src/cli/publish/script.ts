@@ -193,7 +193,7 @@ export async function publish(args: Record<string, string>) {
     }
     logSuccess('updated changelog');
 
-    await runAsync(`npm version ${type} --git-tag-version true -m="${commitMessage}"`);
+    await runAsync(`npm version ${type} --git-tag-version true -m="${commitMessage}"`, { cwd: path.join(cwd, '../') });
     await runAsync('git push --follow-tags');
     logSuccess('updated version');
 
