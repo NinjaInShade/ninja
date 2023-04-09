@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.0] - 09/03/2023
+
 -   added cli accessible via `ninja-cli ...` with scripts:
     -   copy (copies lib to project/lib for easy testing in real applications)
     -   publish (publishes packages)
