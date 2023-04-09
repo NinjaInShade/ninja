@@ -30,5 +30,5 @@
     },
     "bin": {
         "ninja-cli": "./dist/cli/cli.js --loader=./cli/node/loader.js --experimental-specifier-resolution=node"
-    },
+    }
 }
