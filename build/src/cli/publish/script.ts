@@ -208,5 +208,5 @@ export const publishOptions = {
     // optional
     '(optional) type': 'The type of version upgrade <major|minor|patch>',
     '(optional) release-branch': 'The branch were releases are tagged and published at',
-    '(optional) message': 'The message used in the version commit (must use %s somewhere - replaced with version number in runtime)',
+    '(optional) message': 'The message used in the version commit (must use %%s somewhere - replaced with version number in runtime)',
 };
