@@ -65,10 +65,16 @@ export async function publish(args: Record<string, string>) {
 
     const pkgName = pkgJson.name;
     const pkgCurrVersion = pkgJson.version;
+    const commitMessage = args.message || 'Version %s';
 
     if (!pkgName.startsWith('@ninjalib')) {
         logLine('');
         logError('must be in a @ninjalib package to publish');
+        return;
+    }
+
+    if (!commitMessage.includes('%s')) {
+        logError('commit message must contain %s');
         return;
     }
 
@@ -103,19 +109,24 @@ export async function publish(args: Record<string, string>) {
 
     logLine('');
     logInfo(`updating package to new ${type} version (${newVersion})...`);
-    logInfo('checking git is clean...');
 
+    logInfo('installing dependencies...');
+    await runAsync('npm i');
+    logSuccess('dependencies installed');
+
+    logInfo('building library...');
+    await runAsync('npm run build');
+    logSuccess('built library');
+
+    logInfo('checking git is clean...');
     const releaseBranch = (args['release-branch'] || 'master').trim();
     const currBranch = (await runAsync('git rev-parse --abbrev-ref HEAD')).trim(); // git branch --show-current is shorter & more intuitive but requires git 2.22 (maybe fine?)
-
     if (currBranch !== releaseBranch) {
         logError(`you must be on the release branch (${releaseBranch}) to publish`);
         return;
     }
-
     const gitStatus = await runAsync(`git status --porcelain`);
-    const isClean = Boolean(gitStatus.length);
-
+    const isClean = (gitStatus || '').trim().length > 0;
     if (!isClean) {
         logError(`you have unstaged changes, make sure git is clean`);
         return;
@@ -135,7 +146,6 @@ export async function publish(args: Record<string, string>) {
         }
         return;
     }
-
     const unreleasedStr = '## [Unreleased]';
     const subheadings = changelog.matchAll(/##/gm);
 
@@ -158,7 +168,6 @@ export async function publish(args: Record<string, string>) {
         logError('cannot find ## [Unreleased] heading');
         return;
     }
-
     logSuccess('changelog is in correct format');
     logInfo('updating changelog...');
 
@@ -183,20 +192,7 @@ export async function publish(args: Record<string, string>) {
     }
     logSuccess('updated changelog');
 
-    logInfo('installing dependencies...');
-    await runAsync('npm i');
-    logSuccess('dependencies installed');
-
-    logInfo('building library...');
-    await runAsync('npm run build');
-    logSuccess('built library');
-
-    const message = args.message || 'Version %s';
-    if (!message.includes('%s')) {
-        logError('commit message must contain %s');
-        return;
-    }
-    await runAsync(`npm version ${type} --git-tag-version -m="${message}"`);
+    await runAsync(`npm version ${type} --git-tag-version -m="${commitMessage}"`);
     logSuccess('updated version');
 
     await runAsync(`npm publish --access="public"`);
