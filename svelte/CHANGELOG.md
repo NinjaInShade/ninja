@@ -5,6 +5,8 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-   Added playground
+-   Added \_Template for components
 -   Added `<NW.Fieldset />` component
 -   Added `<NW.TextArea />` component
 -   Added `<NW.Input />` component
