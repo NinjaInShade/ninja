@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   added optional --omit-publish arg for the publish script to allow updating version/changelog without publishing to npm
 
 ## [0.1.5] - 09/03/2023
 

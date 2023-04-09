@@ -1,6 +1,6 @@
 import path from 'node:path';
 import readline from 'node:readline/promises';
-import { colours, logLine, logInfo, logError, logSuccess, runAsync } from '../helpers.js';
+import { colours, logLine, logInfo, logError, logSuccess, runAsync, logWarn } from '../helpers.js';
 import type { PackageJson } from '../copy/script';
 import fs from 'node:fs/promises';
 import { stdin, stdout } from 'node:process';
@@ -205,8 +205,12 @@ export async function publish(args: Record<string, string>) {
     await runAsync('git push');
     logSuccess('updated version');
 
-    await runAsync(`npm publish --access="public"`);
-    logSuccess('published to npm');
+    if (args['--omit-publish']) {
+        logWarn('got --omit-publish, not publishing to npm');
+    } else {
+        await runAsync(`npm publish --access="public"`);
+        logSuccess('published to npm');
+    }
 }
 
 export const publishOptions = {
@@ -215,4 +219,5 @@ export const publishOptions = {
     '(optional) type': 'The type of version upgrade <major|minor|patch>',
     '(optional) release-branch': 'The branch were releases are tagged and published at',
     '(optional) message': 'The message used in the version commit (must use %%s somewhere - replaced with version number in runtime)',
+    '(optional) --omit-publish': `Do everything, but don't actually publish to npm at the end (useful for projects)`,
 };
