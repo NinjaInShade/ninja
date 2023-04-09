@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.7] - 09/03/2023
+
 -   changed how tagging in publish script works, it now adds library/project name as well to avoid duplicate tags in the monorepo
 
 ## [0.1.6] - 09/03/2023
