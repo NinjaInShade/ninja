@@ -74,6 +74,7 @@ export async function publish(args: Record<string, string>) {
     }
 
     if (!commitMessage.includes('%s')) {
+        logLine('');
         logError('commit message must contain %s');
         return;
     }
