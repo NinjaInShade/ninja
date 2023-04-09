@@ -127,8 +127,7 @@ export async function publish(args: Record<string, string>) {
         return;
     }
     const gitStatus: Awaited<string> = await runAsync(`git status --porcelain`);
-    const isClean = (gitStatus || '').replaceAll('\r', '').replaceAll('\n', '').trim().length > 0;
-    console.log('test', (gitStatus || '').replaceAll('\r', '').replaceAll('\n', '').trim());
+    const isClean = (gitStatus || '').replaceAll('\r', '').replaceAll('\n', '').trim().length === 0;
     if (!isClean) {
         logError(`you have unstaged changes, make sure git is clean`);
         return;
@@ -194,7 +193,7 @@ export async function publish(args: Record<string, string>) {
     }
     logSuccess('updated changelog');
 
-    await runAsync(`npm version ${type} --git-tag-version -m="${commitMessage}"`);
+    await runAsync(`npm version ${type} --git-tag-version true -m="${commitMessage}"`);
     logSuccess('updated version');
 
     await runAsync(`npm publish --access="public"`);
