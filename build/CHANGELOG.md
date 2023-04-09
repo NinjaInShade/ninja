@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   changed devDeps to be actual deps
 
 ## [0.1.7] - 09/03/2023
 
