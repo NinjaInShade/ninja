@@ -20,6 +20,8 @@
         "strict": false,
         "outDir": "../../../../dist",
         "rootDirs": ["../../../../src", "../../../../dist", "../../../../playground"],
+        // this seems to cause problems with ts-node & the custom loader.
+        // recommended to set this up as './' in the project
         "baseUrl": "../../../../",
         "paths": {
             "~/*": ["src/*"]
