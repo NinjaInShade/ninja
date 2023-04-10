@@ -40,7 +40,7 @@
     },
     "dependencies": {
         "@ninjalib/build": "^0.1.9",
-        "@ninjalib/svelte": "^0.0.4",
+        "@ninjalib/svelte": "^0.0.5",
         "concurrently": "^8.0.1",
         "express": "^4.18.2"
     }
