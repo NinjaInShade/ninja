@@ -20,6 +20,6 @@
     "dependencies": {
         "@ninjalib/build": "^0.1.9",
         "@ninjalib/sql": "^0.2.1",
-        "@ninjalib/svelte": "^0.0.4"
+        "@ninjalib/svelte": "^0.0.5"
     }
 }
