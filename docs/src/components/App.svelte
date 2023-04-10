@@ -9,7 +9,7 @@
     };
 </script>
 
-<NW.AppRoot {routes} layout={Layout} />
+<NW.AppRoot {routes} layout={Layout} projectType="app" />
 
 <style>
     html {

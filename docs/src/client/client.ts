@@ -3,7 +3,7 @@ import core from '@ninjalib/core';
 
 const app = new App({ target: document.getElementById('app') });
 
-const client = core.client({ serverUrl: 'ws://localhost:4200' });
+const client = core.client({ serverUrl: 'localhost:4200' });
 await client.connect();
 
 client.on('ping', (data) => {

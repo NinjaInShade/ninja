@@ -13,11 +13,13 @@
         "svelte": "^3.58.0",
         "svelte-check": "^3.1.4",
         "svelte-preprocess": "^5.0.3",
-        "typescript": "^5.0.4",
         "tslib": "^2.5.0",
+        "typescript": "^5.0.4",
         "vite": "^4.2.1"
     },
     "dependencies": {
-        "@ninja/sql": "file:../../sql"
+        "@ninjalib/build": "^0.1.9",
+        "@ninjalib/sql": "^0.2.1",
+        "@ninjalib/svelte": "^0.0.4"
     }
 }
