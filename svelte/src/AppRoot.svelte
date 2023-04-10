@@ -77,8 +77,14 @@
             }
             currentViewPath = processedViewPath;
             return [loadedView.default, viewProps];
-        } catch (err) {
-            throw new Error(`[load view]: view '${processedViewPath}' could not be imported. Ensure it exists.`);
+        } catch (err: any) {
+            const couldNotImportMsg = 'Failed to fetch dynamically imported module: ';
+            if (err.message.startsWith(couldNotImportMsg)) {
+                const importPath = err.message.substring(couldNotImportMsg.length);
+                throw new Error(`[load view]: view '${processedViewPath}' could not be imported. Ensure it exists. From: ${importPath}`);
+            } else {
+                throw new Error(`[load view]: view '${processedViewPath}' could not be imported. Ensure it's valid`);
+            }
         }
     };
 </script>
@@ -109,6 +115,12 @@
                 {/if}
             </div>
         {/if}
+    {:catch err}
+        <!-- TODO: check if 404 is provided, if not show a better styled UI with home button -->
+        {(console.error(err.message), '')}
+        <div class="root-center root-grow">
+            <h1>View not found</h1>
+        </div>
     {/await}
 {/if}
 
