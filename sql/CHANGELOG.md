@@ -6,6 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 ## [Unreleased]
 
 -   updated tsconfig location to be from installed @ninjalib/build
+-   updated build and util dependencies
 
 ## [0.2.0] - 09/03/2023
 
