@@ -1,12 +1,9 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logLine, logInfo, logError, runAsync } from '../helpers.js';
+import { logInfo, logError, runAsync } from '../helpers.js';
 import child_process from 'node:child_process';
 import { replaceTscAliasPaths } from 'tsc-alias';
 import fs from 'node:fs/promises';
-
-import fss from 'node:fs';
-import { isAbsolute } from 'node:path';
 
 async function runtime(args) {
     const entryPointFile = args.file;

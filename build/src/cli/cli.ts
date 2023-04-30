@@ -4,6 +4,7 @@ import { scriptSelectMenu, scriptHelpMenu } from './help.js';
 import { parseArgs, logLine, logError, logWarn } from './helpers.js';
 import { createProject, createProjectOptions } from './createProject/script.js';
 import { copy, copyOptions } from './copy/script.js';
+import { vite, viteOptions } from './vite/script.js';
 import { node, nodeOptions } from './node/script.js';
 import { test, testOptions } from './test/script.js';
 import { publish, publishOptions } from './publish/script.js';
@@ -29,6 +30,10 @@ export const options: Record<string, ScriptOptions> = {
     copy: {
         script: copy,
         helpOptions: copyOptions,
+    },
+    vite: {
+        script: vite,
+        helpOptions: viteOptions,
     },
     node: {
         script: node,
