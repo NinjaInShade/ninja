@@ -5,7 +5,9 @@
     "scripts": {
         "start": "concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"npm:start-server\" \"npm:start-client\"",
         "start-client": "vite",
-        "start-server": "ninja-cli node file=./src/server/server.ts"
+        "start-server": "ninja-cli node file=./src/server/server.ts",
+        "build": "vite build",
+        "preview": "vite preview"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^2.0.4",

@@ -4,20 +4,23 @@ import core from '@ninjalib/core';
 const app = new App({ target: document.getElementById('app') });
 
 const client = core.client({ serverUrl: 'localhost:4200' });
-await client.connect();
+try {
+    await client.connect();
+} catch (err) {
+    console.error('Client could not connect to socket:', err?.message);
+}
 
-client.on('ping', (data) => {
+client.on('ping', () => {
     console.log('[docs] got ping message! Ponging back...');
-    client.emit('pong', '');
+    client.emit('pong');
 });
 
-// TODO: emit second arg should be optional
 export async function checkHeartbeat() {
     const sent = new Date().getTime();
-    client.emit('ping', '');
+    client.emit('ping');
 
     return await new Promise<number>((resolve) => {
-        const dispose = client.on('pong', (data) => {
+        const dispose = client.on('pong', () => {
             const received = new Date().getTime();
             const timeTaken = new Date(received - sent).getMilliseconds();
             dispose();
