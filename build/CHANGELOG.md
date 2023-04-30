@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.10] - 30/03/2023
+
 -   added vite script for running dev server, building and previewing build
 -   add building support to node script using --build flag
 -   added playground to rootDirs for a easier out the box configuration
