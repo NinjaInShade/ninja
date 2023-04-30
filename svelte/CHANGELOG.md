@@ -5,7 +5,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   fix dynamic view imports
 
 ## [0.0.5] - 10/03/2023
 
