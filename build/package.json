@@ -21,14 +21,16 @@
     "author": "Leon Michalak",
     "license": "ISC",
     "dependencies": {
+        "@sveltejs/vite-plugin-svelte": "^2.1.1",
         "@types/node": "^18.14.5",
         "@types/semver": "^7.3.13",
         "nodemon": "^2.0.22",
+        "semver": "^7.3.8",
         "ts-node": "^10.9.1",
         "tsc-alias": "^1.8.2",
         "tsconfig-paths": "^3.14.2",
         "typescript": "^5.0.4",
-        "semver": "^7.3.8"
+        "vite": "^4.3.3"
     },
     "bin": {
         "ninja-cli": "./dist/cli/cli.js --loader=./cli/node/loader.js --experimental-specifier-resolution=node"
