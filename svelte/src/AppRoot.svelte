@@ -61,15 +61,16 @@
         processedViewPath = _determineView(viewPath);
 
         try {
+            // TODO: fix the projectType "hack"
             let loadedView;
             if (projectType === 'app') {
-                loadedView = await import(`../../../src/views/${processedViewPath}/client.svelte`);
+                loadedView = await import(`../../../../src/views/${processedViewPath}/client.svelte`);
             } else if (projectType === 'lib') {
-                loadedView = await import(`../../../playground/src/views/${processedViewPath}/client.svelte`);
+                loadedView = await import(`../../../../playground/src/views/${processedViewPath}/client.svelte`);
             } else if (projectType === 'this') {
                 loadedView = await import(`../playground/src/views/${processedViewPath}/client.svelte`);
             } else {
-                throw new Error(`Invalid project type, can be either 'app' or 'lib', got: '${projectType}'`);
+                throw new Error(`Invalid project type, can be either 'app', 'lib' or 'this', got: '${projectType}'`);
             }
 
             if (currentViewPath !== processedViewPath) {
@@ -79,7 +80,7 @@
             return [loadedView.default, viewProps];
         } catch (err: any) {
             const couldNotImportMsg = 'Failed to fetch dynamically imported module: ';
-            if (err.message.startsWith(couldNotImportMsg)) {
+            if (err.message?.startsWith(couldNotImportMsg)) {
                 const importPath = err.message.substring(couldNotImportMsg.length);
                 throw new Error(`[load view]: view '${processedViewPath}' could not be imported. Ensure it exists. From: ${importPath}`);
             } else {
@@ -117,7 +118,7 @@
         {/if}
     {:catch err}
         <!-- TODO: check if 404 is provided, if not show a better styled UI with home button -->
-        {(console.error(err.message), '')}
+        {(console.error(err), '')}
         <div class="root-center root-grow">
             <h1>View not found</h1>
         </div>
