@@ -3,25 +3,21 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "start": "concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"npm:start-server\" \"npm:start-client\"",
-        "start-client": "vite",
-        "start-server": "ninja-cli node file=./src/server/server.ts",
-        "build": "vite build",
-        "preview": "vite preview"
+        "start": "concurrently --kill-others --kill-others-on-fail -n server,client -c green,blue -t='HH:mm:ss' -p='[{name}:{time}]' \"ninja-cli node --dev file=./src/server/server.ts\" \"ninja-cli vite --dev\"",
+        "build": "ninja-cli vite --build & ninja-cli node --build outDir=./dist/node file=./src/server/server.ts",
+        "preview": "npm run build && concurrently -n server,client -c green,blue -t='HH:mm:ss' -p='[{name}:{time}]' \"ninja-cli node file=./dist/node/server.js\" \"ninja-cli vite --preview\""
     },
     "devDependencies": {
-        "@sveltejs/vite-plugin-svelte": "^2.0.4",
         "concurrently": "^8.0.1",
         "svelte": "^3.58.0",
         "svelte-check": "^3.1.4",
         "svelte-preprocess": "^5.0.3",
         "tslib": "^2.5.0",
-        "typescript": "^5.0.4",
-        "vite": "^4.2.1"
+        "typescript": "^5.0.4"
     },
     "dependencies": {
         "@ninjalib/build": "^0.1.9",
-        "@ninjalib/sql": "^0.2.1",
-        "@ninjalib/svelte": "^0.0.5"
+        "@ninjalib/core": "^0.1.0",
+        "@ninjalib/svelte": "^0.0.6"
     }
 }
