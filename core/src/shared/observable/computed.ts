@@ -18,7 +18,7 @@ function createComputed<T>(fn: () => T): Computed<T> {
         }
 
         dependencies.push(dep);
-        dep.subscribe(() => {
+        dep.onChange(() => {
             const newValue = evaluateFn();
             obs(newValue);
         });

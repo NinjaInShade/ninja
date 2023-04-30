@@ -25,7 +25,7 @@ describe('[observable] observable', () => {
         const obs = project.observable();
 
         // subscribe
-        obs.subscribe((value) => {
+        obs.onChange((value) => {
             assert.equal(value, 10);
             done();
         });
@@ -38,7 +38,7 @@ describe('[observable] observable', () => {
         const obs = project.observable();
 
         let timesNotified = 0;
-        obs.subscribe(() => {
+        obs.onChange(() => {
             timesNotified += 1;
         });
 
@@ -53,7 +53,7 @@ describe('[observable] observable', () => {
     it('should successfully unsubscribe', () => {
         const obs = project.observable();
 
-        const unsub = obs.subscribe(() => {});
+        const unsub = obs.onChange(() => {});
         assert.equal(obs.subscriptions.length, 1);
         unsub();
         assert.equal(obs.subscriptions.length, 0);
@@ -82,7 +82,7 @@ describe('[observable] computed', () => {
         const computedObs = project.computed(() => {
             return 25 + obs();
         });
-        computedObs.subscribe(() => {
+        computedObs.onChange(() => {
             assert.equal(computedObs(), 200);
             assert.equal(computedObs.dependencies.length, 1);
             done();
@@ -102,7 +102,7 @@ describe('[observable] computed', () => {
         });
 
         let timesRead = 0;
-        computedObs.subscribe(() => {
+        computedObs.onChange(() => {
             if (timesRead === 0) {
                 assert.equal(computedObs(), 200);
             } else {
@@ -130,7 +130,7 @@ describe('[observable] computed', () => {
             return computedObs() + 5;
         });
 
-        computedObs2.subscribe(() => {
+        computedObs2.onChange(() => {
             assert.equal(computedObs2(), 205);
             done();
         });
@@ -149,7 +149,7 @@ describe('[observable] computed', () => {
         });
 
         let timesNotified = 0;
-        computedObs.subscribe(() => {
+        computedObs.onChange(() => {
             timesNotified += 1;
         });
 
