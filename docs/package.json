@@ -16,7 +16,7 @@
         "typescript": "^5.0.4"
     },
     "dependencies": {
-        "@ninjalib/build": "^0.1.9",
+        "@ninjalib/build": "^0.1.10",
         "@ninjalib/core": "^0.1.0",
         "@ninjalib/svelte": "^0.0.6"
     }
