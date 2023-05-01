@@ -12,8 +12,7 @@
         "./configs/playground.tsconfig.json": "./configs/playground.tsconfig.json"
     },
     "bin": {
-        "ninja-cli": "./dist/cli/cli.js --loader=./cli/node/loader.js --experimental-specifier-resolution=node",
-        "ninja-cli2": "./dist/cli-index.js"
+        "ninja-cli": "./dist/cli/cli.js"
     },
     "types": "dist/index.d.ts",
     "scripts": {
