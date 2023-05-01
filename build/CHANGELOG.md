@@ -8,6 +8,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -
 
+## [0.1.12] - 01/04/2023
+
+-
+
 ## [0.1.11] - 01/04/2023
 
 -
