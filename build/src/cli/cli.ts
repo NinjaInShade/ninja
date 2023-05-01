@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { scriptSelectMenu, scriptHelpMenu } from './help.js';
 import { parseArgs, logLine, logError, logWarn } from './helpers.js';
 import { createProject, createProjectOptions } from './createProject/script.js';

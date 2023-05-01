@@ -11,6 +11,10 @@
         "./configs/tsconfig.json": "./configs/tsconfig.json",
         "./configs/playground.tsconfig.json": "./configs/playground.tsconfig.json"
     },
+    "bin": {
+        "ninja-cli": "./dist/cli/cli.js --loader=./cli/node/loader.js --experimental-specifier-resolution=node",
+        "ninja-cli2": "./dist/cli-index.js"
+    },
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "rmdir /s /q dist & tsc & tsc-alias & npm link",
@@ -31,8 +35,5 @@
         "tsconfig-paths": "^3.14.2",
         "typescript": "^5.0.4",
         "vite": "^4.3.3"
-    },
-    "bin": {
-        "ninja-cli": "./dist/cli/cli.js --loader=./cli/node/loader.js --experimental-specifier-resolution=node"
     }
 }
