@@ -12,10 +12,10 @@ export async function test(args: Record<string, string>) {
     const loader = path.join(__dirname, '../', 'node', 'loader.js');
 
     // typical run async util doesn't actually output logs to the console
-    // const stdout = await runAsync(`node --experimental-specifier-resolution=node --loader file://${loader} ${entryPoint}`);
+    // const subprocess = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, '--test-reporter=spec', '--test', './dist/test'], { stdio: 'inherit' });
 
     await runAsync('npm run build');
-    const subprocess = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, '--test-reporter=spec', '--test', './dist/test'], { stdio: 'inherit' });
+    const subprocess = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=tsx`, '--test-reporter=spec', '--test', './dist/test'], { stdio: 'inherit' });
 
     subprocess.on('error', (err) => {
         logError(`failed to start subprocess: ${err}`);

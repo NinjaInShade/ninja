@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   run vite with npx
 
 ## [0.1.13] - 02/04/2023
 

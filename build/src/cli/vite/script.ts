@@ -42,8 +42,7 @@ export async function vite(args: Record<string, string>) {
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
 
-    const vite = path.join(__dirname, '../../../node_modules/.bin/vite');
-    const subprocess = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true });
+    const subprocess = child_process.spawn('npx vite', viteArgs, { stdio: 'inherit', shell: true });
 
     subprocess.on('error', (err) => {
         logError(`failed to start subprocess: ${err}`);
