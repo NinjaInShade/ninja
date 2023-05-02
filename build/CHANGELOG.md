@@ -6,15 +6,15 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   switched to tsx for node runtime integration
 
 ## [0.1.12] - 01/04/2023
 
--
+-   trying to fix bin cli not installing locally
 
 ## [0.1.11] - 01/04/2023
 
--
+-   trying to fix bin cli not installing locally
 
 ## [0.1.10] - 30/03/2023
 

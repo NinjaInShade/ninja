@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S npx tsx
 import { scriptSelectMenu, scriptHelpMenu } from './help.js';
 import { parseArgs, logLine, logError, logWarn } from './helpers.js';
 import { createProject, createProjectOptions } from './createProject/script.js';

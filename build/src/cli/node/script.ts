@@ -1,5 +1,4 @@
-import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { logInfo, logError, runAsync } from '../helpers.js';
 import child_process from 'node:child_process';
 import { replaceTscAliasPaths } from 'tsc-alias';
@@ -9,19 +8,13 @@ async function runtime(args) {
     const entryPointFile = args.file;
 
     const cwd = process.cwd();
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-
-    const loader = path.join(__dirname, 'loader.js');
     const entryPoint = path.join(cwd, entryPointFile);
 
-    // TODO: the idea was to use ts-node-dev however this doesn't work with custom esm loader?? https://github.com/wclr/ts-node-dev/issues/314
     let subprocess: child_process.ChildProcess;
     if (args['--dev']) {
-        const nodemon = path.join(__dirname, '../../../node_modules/.bin/nodemon');
-        subprocess = child_process.spawn(nodemon, ['--exec', 'node', '--experimental-specifier-resolution=node', `--loader=file://${loader}`, entryPoint], { stdio: 'inherit', shell: true });
+        subprocess = child_process.spawn('npx tsx watch', ['--clear-screen=false', entryPoint], { stdio: 'inherit', shell: true });
     } else {
-        subprocess = child_process.spawn('node', ['--experimental-specifier-resolution=node', `--loader=file://${loader}`, entryPoint], { stdio: 'inherit', shell: true });
+        subprocess = child_process.spawn('npx tsx', [entryPoint], { stdio: 'inherit', shell: true });
     }
 
     subprocess.on('error', (err) => {
@@ -103,7 +96,7 @@ export const nodeOptions = {
     // required
     '(required) file': `The entry point for runtime/building (relative to cwd)`,
     // optional
-    '(optional) --dev': 'Enables auto reloading when files are changed with nodemon',
+    '(optional) --dev': 'Enables auto reloading when files are changed',
     '(optional) --build': 'Builds the project instead of running node (cwd must have base tsconfig at root)',
     '(optional) outDir': 'Where to build the project too (relative to cwd, required if --build passed)',
 };

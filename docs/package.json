@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "start": "concurrently --kill-others --kill-others-on-fail -n server,client -c green,blue -t='HH:mm:ss' -p='[{name}:{time}]' \"ninja-cli node --dev file=./src/server/server.ts\" \"ninja-cli vite --dev\"",
+        "start": "concurrently --kill-others --kill-others-on-fail -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"ninja-cli node --dev file=./src/server/server.ts\" \"ninja-cli vite --dev\"",
         "build": "ninja-cli vite --build & ninja-cli node --build outDir=./dist/node file=./src/server/server.ts",
         "preview": "npm run build && concurrently -n server,client -c green,blue -t='HH:mm:ss' -p='[{name}:{time}]' \"ninja-cli node file=./dist/node/server.js\" \"ninja-cli vite --preview\""
     },
