@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.13] - 02/04/2023
+
 -   switched to tsx for node runtime integration
 
 ## [0.1.12] - 01/04/2023
