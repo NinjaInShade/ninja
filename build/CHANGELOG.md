@@ -6,7 +6,11 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   node script "file" arg has default so is now optional
+-   node script "outDir" arg has default so is now optional
+-   node script "--dev" flag renamed to "--watch"
+-   node script "--build" now removes old build before creating new one
+-   vite script doesn't clear screen
 
 ## [0.1.14] - 02/04/2023
 

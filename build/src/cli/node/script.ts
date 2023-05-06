@@ -5,13 +5,12 @@ import { replaceTscAliasPaths } from 'tsc-alias';
 import fs from 'node:fs/promises';
 
 async function runtime(args) {
-    const entryPointFile = args.file;
-
     const cwd = process.cwd();
-    const entryPoint = path.join(cwd, entryPointFile);
+
+    const entryPoint = args.file ? path.join(cwd, args.file) : path.join(cwd, 'src/server/server.ts');
 
     let subprocess: child_process.ChildProcess;
-    if (args['--dev']) {
+    if (args['--watch']) {
         subprocess = child_process.spawn('npx tsx watch', ['--clear-screen=false', entryPoint], { stdio: 'inherit', shell: true });
     } else {
         subprocess = child_process.spawn('npx tsx', [entryPoint], { stdio: 'inherit', shell: true });
@@ -35,22 +34,25 @@ async function runtime(args) {
 }
 
 async function build(args) {
-    const entryPointFile = args.file;
-    const outDir = args.outDir;
+    const cwd = process.cwd();
+    const entryPoint = args.file ? path.join(cwd, args.file) : path.join(cwd, 'src/server/server.ts');
+    const outDir = args.outDir ? path.join(cwd, args.outDir) : path.join(cwd, 'dist/node');
 
-    if (!outDir) {
-        logError('outDir arg is required');
-        return;
+    try {
+        // if outDir exists, remove old build
+        await fs.access(outDir, fs.constants.F_OK);
+        await fs.rm(outDir, { recursive: true, force: true });
+    } catch (err) {
+        // outDir doesn't exist which is fine
     }
 
-    const cwd = process.cwd();
     const tempFilePath = path.join(cwd, 'node.tsconfig.json');
     const tempFile = {
         extends: './tsconfig.json',
         compilerOptions: {
             outDir: outDir,
         },
-        include: [entryPointFile],
+        include: [entryPoint],
     };
     await fs.writeFile(tempFilePath, JSON.stringify(tempFile));
 
@@ -69,7 +71,6 @@ async function build(args) {
         // - not very often is the project only going to have one folder to build from
         await replaceTscAliasPaths({ configFile: tempFilePath, resolveFullPaths: true });
     } catch (err) {
-        console.log(err);
         await fs.unlink(tempFilePath);
     }
     await fs.unlink(tempFilePath);
@@ -79,12 +80,6 @@ async function build(args) {
  * Runtime/builder for node with typescript, compatible with ESM and ts paths
  */
 export async function node(args: Record<string, string>) {
-    const entryPointFile = args.file;
-    if (!entryPointFile) {
-        logError('file arg is required');
-        return;
-    }
-
     if (args['--build']) {
         await build(args);
     } else {
@@ -93,10 +88,8 @@ export async function node(args: Record<string, string>) {
 }
 
 export const nodeOptions = {
-    // required
-    '(required) file': `The entry point for runtime/building (relative to cwd)`,
-    // optional
-    '(optional) --dev': 'Enables auto reloading when files are changed',
+    '(optional) file': `The entry point for runtime/building (relative to cwd, defaults to CWD/src/server/server.ts)`,
+    '(optional) outDir': 'Where to build the project too (relative to cwd, defaults to CWD/dist/node)',
+    '(optional) --watch': 'Enables auto reloading when files are changed',
     '(optional) --build': 'Builds the project instead of running node (cwd must have base tsconfig at root)',
-    '(optional) outDir': 'Where to build the project too (relative to cwd, required if --build passed)',
 };

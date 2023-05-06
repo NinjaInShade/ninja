@@ -1,8 +1,7 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logLine, logInfo, logError, runAsync } from '../helpers.js';
+import { logInfo, logError } from '../helpers.js';
 import child_process from 'node:child_process';
-import fs from 'node:fs/promises';
 
 /**
  * Runtime/builder for vite
@@ -14,17 +13,14 @@ export async function vite(args: Record<string, string>) {
     const previewMode = args['--preview'];
     const viteUserArgs = args['viteArgs'];
 
-    if (!devMode && !buildMode && !previewMode) {
-        logError('you must either run dev, build or preview, got none');
-        return;
-    }
+    const passedNoMode = !devMode && !buildMode && !previewMode;
 
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
 
     const viteArgs = [];
 
-    if (devMode) {
+    if (devMode || passedNoMode) {
         // what base options to pass to dev?
     } else if (buildMode) {
         // what base options to pass to build?
@@ -39,6 +35,7 @@ export async function vite(args: Record<string, string>) {
     }
 
     const configFile = path.join(__dirname, '../../../configs/vite.config.ts');
+    viteArgs.push('--clearScreen=false');
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
 
@@ -62,8 +59,6 @@ export async function vite(args: Record<string, string>) {
 }
 
 export const viteOptions = {
-    // required
-    // optional
     '(optional) --dev': 'Runs the dev server in cwd',
     '(optional) --build': 'Builds the project in cwd',
     '(optional) --preview': 'Previews the build in cwd',
