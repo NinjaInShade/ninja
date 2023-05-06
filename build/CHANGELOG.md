@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.15] - 06/04/2023
+
 -   node script "file" arg has default so is now optional
 -   node script "outDir" arg has default so is now optional
 -   node script "--dev" flag renamed to "--watch"
