@@ -2,9 +2,17 @@ import SocketManager from './SocketManager';
 
 type ClientOptions = {
     /**
-     * URL of the server (e.g. localhost:4405)
+     * server domain (e.g. localhost)
+     *
+     * @default localhost
      */
-    serverUrl?: string;
+    domain?: string;
+    /**
+     * server port (e.g. 4405)
+     *
+     * @default 5656
+     */
+    port?: number;
 };
 
 export class Client {
@@ -21,11 +29,14 @@ export class Client {
         }
         Client._instance = this;
 
-        const defaultOptions = {};
-
+        const defaultOptions = {
+            domain: 'localhost',
+            port: 5656,
+        };
         this.options = Object.assign({}, defaultOptions, options);
 
-        this.socket = new SocketManager(this.options.serverUrl);
+        const serverURL = this.options.domain + ':' + this.options.port;
+        this.socket = new SocketManager(serverURL);
     }
 
     /**

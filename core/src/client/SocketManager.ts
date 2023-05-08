@@ -23,17 +23,17 @@ export default class ClientSocketManager {
     private closeListeners: CloseListeners = [];
     private errorListeners: ErrorListeners = [];
 
-    public serverUrl: string | undefined;
+    public serverURL: string | undefined;
 
     constructor(serverUrl: string | undefined) {
-        this.serverUrl = serverUrl;
+        this.serverURL = serverUrl;
     }
 
     public connect() {
-        if (!this.serverUrl) {
+        if (!this.serverURL) {
             throw new Error('You must provide a serverUrl option to the client to connect to the server');
         }
-        this.server = new WebSocket('ws://' + this.serverUrl);
+        this.server = new WebSocket('ws://' + this.serverURL);
         this.setupListeners();
     }
 
