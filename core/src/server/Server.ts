@@ -5,6 +5,8 @@ import SocketManager from './SocketManager';
 type ServerOptions = {
     /**
      * Server port
+     *
+     * @default 5656
      */
     port?: number;
 };
@@ -14,7 +16,7 @@ export class Server {
 
     private options: ServerOptions;
     /**
-     * Two core aspects of the server:
+     * Core foundations of the server:
      * - HTTP manager (express manager right now essentially - ditch at some point)
      * - WebSocket manager
      */
@@ -28,22 +30,20 @@ export class Server {
 
     constructor(options: ServerOptions = {}) {
         if (Server._instance) {
-            console.warn('Client should only be initialised once in your project!');
+            console.warn('Server should only be initialised once in your project');
         }
         Server._instance = this;
 
         const defaultOptions = {
-            port: 1337,
+            port: 5656,
         };
-
         this.options = Object.assign({}, defaultOptions, options);
+
         this.httpManager = new HttpManager(this.options.port);
     }
 
     /**
-     * Starts the http server
-     *
-     * Also initialises the socket manager at this point
+     * Starts the http server & starts managing web sockets
      */
     public async startServer() {
         if (this.httpManager.server) {
