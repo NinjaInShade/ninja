@@ -15,12 +15,12 @@ export default class HttpManager {
     /**
      * Initialises the http server
      */
-    public startServer(listenCb?: () => void) {
+    public startServer(onListen?: () => void) {
         this._app = express();
         this._server = this._app.listen(this.port, () => {
-            console.log('[http] server is listening on port', this.port);
-            if (listenCb) {
-                listenCb();
+            console.log('[HttpManager] server is listening on port', this.port);
+            if (onListen) {
+                onListen();
             }
         });
     }
