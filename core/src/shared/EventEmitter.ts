@@ -9,7 +9,7 @@ type Disposer = () => void;
  *
  * Compatible on the browser & server
  */
-export default class EventEmitter {
+export class EventEmitter {
     // Map is more performant in adding/removing key/value pairs
     private _listeners: EventListeners = new Map();
     private _internalListeners: EventListeners = new Map();

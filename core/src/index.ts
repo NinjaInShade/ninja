@@ -1,6 +1,9 @@
-import * as project from './_project';
-export * from './_project';
-export { project as default };
+export * from '~/shared/index';
+export * from '~/server/index';
+export * from '~/client/index';
+
+export * from './index';
+export * as default from './index';
 
 // TODO: fix types for different environments:
 // see package.json exports, it exports different things for different environments

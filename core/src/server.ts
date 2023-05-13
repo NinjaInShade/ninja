@@ -1,3 +1,5 @@
-import * as server from './_server';
-export * from './_server';
-export { server as default };
+export * from '~/server/index';
+export * from '~/shared/index';
+
+export * from './server';
+export * as default from './server';
