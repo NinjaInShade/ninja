@@ -132,7 +132,21 @@ export async function publish(args: Record<string, string>) {
         return;
     }
     const gitStatus: Awaited<string> = await runAsync(`git status --porcelain`);
-    const isClean = (gitStatus || '').replaceAll('\r', '').replaceAll('\n', '').trim().length === 0;
+
+    let isClean = true;
+    for (const line of (gitStatus || '').replaceAll('\r', '').split('\n')) {
+        const parsedLine = line.trim().split(' ')[1];
+
+        if (!parsedLine) {
+            continue;
+        }
+
+        if (parsedLine.startsWith(libName)) {
+            isClean = false;
+            break;
+        }
+    }
+
     if (!isClean) {
         logError(`you have unstaged changes, make sure git is clean`);
         return;
@@ -208,12 +222,8 @@ export async function publish(args: Record<string, string>) {
     await runAsync('git push');
     logSuccess('updated version');
 
-    if (args['--omit-publish']) {
-        logWarn('got --omit-publish, not publishing to npm');
-    } else {
-        await runAsync(`npm publish --access="public"`);
-        logSuccess('published to npm');
-    }
+    await runAsync(`npm publish --access="public"`);
+    logSuccess('published to npm');
 }
 
 export const publishOptions = {
@@ -222,5 +232,4 @@ export const publishOptions = {
     '(optional) type': 'The type of version upgrade <major|minor|patch>',
     '(optional) release-branch': 'The branch were releases are tagged and published at',
     '(optional) message': 'The message used in the version commit (must use %%s somewhere - replaced with version number in runtime)',
-    '(optional) --omit-publish': `Do everything, but don't actually publish to npm at the end (useful for projects)`,
 };

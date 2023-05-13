@@ -34,7 +34,7 @@ export async function vite(args: Record<string, string>) {
         viteArgs.push(...viteUserArgs.split(','));
     }
 
-    const configFile = path.join(__dirname, '../../../configs/vite.config.ts');
+    const configFile = args.configFile ? path.join(cwd, args.configFile) : path.join(__dirname, '../../../configs/vite.config.ts');
     viteArgs.push('--clearScreen=false');
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
@@ -62,5 +62,6 @@ export const viteOptions = {
     '(optional) --dev': 'Runs the dev server in cwd',
     '(optional) --build': 'Builds the project in cwd',
     '(optional) --preview': 'Previews the build in cwd',
+    '(optional) configFile': 'Alternative config file (relative to cwd)',
     '(optional) --viteArgs': 'Args to pass to vite, delimited by commas',
 };

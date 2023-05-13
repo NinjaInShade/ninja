@@ -6,7 +6,9 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   publish script "--omit-publish" arg is not a thing anymore
+-   publish script can now publish if git is unclean in other libraries
+-   vite script added "configFile" arg for overriding config
 
 ## [0.1.15] - 06/04/2023
 
