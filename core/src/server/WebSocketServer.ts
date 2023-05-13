@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
 import type net from 'node:net';
+import { EventEmitter } from '~/node';
 
-type PayloadCb = (payload: string) => void;
+type OnPayload = (msg: { clientId: string; data: any }) => void;
+type OnConnection = (data: { clientId: string; socket: net.Socket }) => void;
 
 /**
  * WebSocket server implementation
@@ -17,7 +19,7 @@ type PayloadCb = (payload: string) => void;
  *
  * @author Leon Michalak <leonmichalak6@gmail.com>
  */
-export default class WebSocketServer {
+export default class WebSocketServer extends EventEmitter {
     public static SEVEN_BIT_PAYLOAD_LENGTH = 125;
     public static SIXTEEN_BIT_PAYLOAD_LENGTH = 126;
     public static SIXTY_FOUR_BIT_PAYLOAD_LENGTH = 127;
@@ -38,12 +40,12 @@ export default class WebSocketServer {
     };
 
     private server: http.Server;
-    private messageListeners: PayloadCb[] = [];
 
     /** Essentially all clients */
     public clients: Map<string, net.Socket> = new Map();
 
     constructor(server: http.Server) {
+        super();
         this.server = server;
 
         this.server.on('upgrade', (req: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
@@ -62,11 +64,6 @@ export default class WebSocketServer {
             return;
         }
 
-        function close() {
-            socket.destroy();
-            return;
-        }
-
         const headers = req.headers;
         const reqSentByBrowser = Boolean(headers.origin);
 
@@ -76,7 +73,6 @@ export default class WebSocketServer {
         }
 
         // upgrade request was successful, send back response to let client know
-
         const secWebsocketKey = headers['sec-websocket-key'];
         const generatedWebSocketKey = this.generateWebSocketKey(secWebsocketKey);
 
@@ -86,19 +82,68 @@ export default class WebSocketServer {
         socket.write('Sec-WebSocket-Accept: ' + generatedWebSocketKey + eol);
         socket.write(eol);
 
-        console.log('[http] server has upgraded to a websocket connection');
+        console.log('[wss] server has upgraded to a websocket connection');
 
-        // connection is open, can process events
+        // connection is open, can process events for this client
+        this.setupClient(socket);
+    }
 
-        // add client, sync to client
+    /**
+     * Registers a callback, which when a new connection comes in, will be executed with the client's socket
+     */
+    public onConnection(callback: OnConnection) {
+        return this.on('socket:connection', callback);
+    }
+
+    /**
+     * Registers a callback, which when data comes in, will be executed with the incoming payload
+     */
+    public onMessage(callback: OnPayload) {
+        return this.on('socket:msg', callback);
+    }
+
+    /**
+     * Send message over the wire
+     *
+     * @param data: the data that you wish to send
+     * @param clientId: the client to send the data too. If this isn't passed, the message is sent to all clients
+     */
+    public send(data?: any, clientId?: string) {
+        const frame = this.createFrame(data);
+        const clientIds: string[] = clientId ? [clientId] : [...this.clients.keys()];
+
+        for (const clientId of clientIds) {
+            const socket = this.clients.get(clientId);
+            if (!socket) {
+                console.log('[wss] tried to send a message to client that does not exist with ID:', clientId);
+                continue;
+            }
+            console.log('[wss] sending payload to client', clientId, ':', frame.toString('utf-8'));
+            socket.write(frame);
+        }
+    }
+
+    private setupClient(socket: net.Socket) {
+        // Create client ID & register it
         const clientId = this.generateClientId();
         this.clients.set(clientId, socket);
+        console.log('[wss] Created client:', clientId);
+
+        // could get closed before we send, make sure still connected
+        if (this.clients.has(clientId)) {
+            this.emit('socket:connection', { clientId, socket });
+        }
 
         const queue = this.createDataQueue(socket, (payload) => {
-            for (const listener of this.messageListeners) {
-                console.log('[socket] got payload:', payload);
-                listener(payload);
-            }
+            console.log('[wss] got payload:', payload);
+            let clientId;
+            this.clients.forEach((clientSocket, id) => {
+                if (clientSocket === socket) {
+                    clientId = id;
+                    return;
+                }
+            });
+            this.emit('socket:msg', { clientId, data: payload });
         });
 
         socket.on('data', (data) => {
@@ -109,29 +154,11 @@ export default class WebSocketServer {
         });
 
         socket.on('timeout', () => {
-            close();
+            socket.destroy();
         });
 
         socket.on('close', () => {
             this.clients.delete(clientId);
-        });
-    }
-
-    /**
-     * Registers a callback, which when data comes in, will be executed with the incoming payload
-     */
-    public onMessage(messageCb: PayloadCb) {
-        this.messageListeners.push(messageCb);
-    }
-
-    /**
-     * Send message over the wire to all clients
-     */
-    public send(data: any = undefined) {
-        this.clients.forEach((socket, clientId) => {
-            const frame = this.createFrame(data);
-            console.log('[socket] sending payload to client', clientId, ':', frame.toString('utf-8'));
-            socket.write(frame);
         });
     }
 
@@ -143,7 +170,7 @@ export default class WebSocketServer {
      *
      * @returns object with add method to provide the queue with new data
      */
-    private createDataQueue(socket: net.Socket, onFinish: PayloadCb) {
+    private createDataQueue(socket: net.Socket, onFinish: (payload: string) => void) {
         let queuedData: Buffer[] = [];
         let processedData: Buffer[] = [];
 
@@ -188,11 +215,11 @@ export default class WebSocketServer {
         const opcodeType = this.getOpCodeType(opcode);
         switch (opcodeType) {
             case 'invalid':
-                console.log(`[socket:read] got invalid opcode type, failing connection`);
+                console.log(`[wss:read] got invalid opcode type, failing connection`);
                 socket.destroy();
                 return;
             case 'close':
-                console.log(`[socket:read] got close opcode type, failing connection`);
+                console.log(`[wss:read] got close opcode type, failing connection`);
                 socket.destroy();
                 return;
             case 'text':
@@ -201,7 +228,7 @@ export default class WebSocketServer {
             case 'nonControlFrames':
                 break;
             default:
-                console.log(`[socket:read] got ${opcodeType} opcode type, this is not yet supported`);
+                console.log(`[wss:read] got ${opcodeType} opcode type, this is not yet supported`);
                 return;
         }
 
@@ -425,6 +452,8 @@ export default class WebSocketServer {
      * Disposes safely
      */
     public async dispose() {
+        this.removeAllListeners('socket:connection');
+        this.removeAllListeners('socket:msg');
         //
     }
 }

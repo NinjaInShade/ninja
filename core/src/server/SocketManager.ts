@@ -1,9 +1,8 @@
 import type http from 'node:http';
 import WebSocketServer from './WebSocketServer';
+import core from '~/node';
 
-type Listener = (data: any) => void;
-type MessageListeners = Record<string, Listener[]>;
-type MessageListenerDisposer = () => void;
+type Disposer = () => void;
 
 // TODO: Add type for accepted Serializable value
 // TODO: Error handling for JSON stringify/parse (create own encodeObject/decodeObject utils?)
@@ -17,54 +16,82 @@ type MessageListenerDisposer = () => void;
 export default class SocketManager {
     private httpServer: http.Server;
     private webSocketServer: WebSocketServer;
+    private emitter: core.EventEmitter;
 
-    private messageListeners: MessageListeners = {};
+    private messagesDispose: Disposer;
 
     constructor(server: http.Server) {
         this.httpServer = server;
         this.webSocketServer = new WebSocketServer(this.httpServer);
-        this.webSocketServer.onMessage((data) => {
-            const parsedData = JSON.parse(data);
+        this.emitter = core.emitter();
 
-            // inform listeners
-            const listeners = this.messageListeners[parsedData.eventName];
-            if (listeners) {
-                for (const handler of listeners) {
-                    delete parsedData.eventName;
-                    handler(parsedData.data);
-                }
-            }
+        this.messagesDispose = this.webSocketServer.onMessage((msg: { clientId: string; data: any }) => {
+            const data = JSON.parse(msg.data);
+            const clientId = msg.clientId;
+
+            const event = data.event;
+            delete data.event;
+
+            this.emitter.emit('socket:data', { clientId, event, data });
         });
     }
 
     /**
-     * Listens for socket event
+     * Listens for connections, let's you talk with individual clients
+     *
+     * Must be called after HTTP manager has been initialised
      */
-    public on(eventName: string, callback: (data?) => void): MessageListenerDisposer {
-        if (eventName in this.messageListeners) {
-            this.messageListeners[eventName].push(callback);
-        } else {
-            this.messageListeners[eventName] = [callback];
-        }
+    public onConnection(callback: (socket?: any) => void): Disposer {
+        const dispose = this.webSocketServer.onConnection(({ clientId, socket: rawSocket }) => {
+            let clientDisconnected = false;
 
-        return () => {
-            const filteredListeners = this.messageListeners[eventName].filter((cb) => cb !== callback);
-            this.messageListeners[eventName] = filteredListeners;
-        };
+            // create Socket - TODO: create a socket class
+            const socket = {
+                clientId,
+                emit: (event: string, data?: any) => {
+                    if (clientDisconnected) {
+                        return;
+                    }
+                    this.webSocketServer.send(JSON.stringify({ event, data }), clientId);
+                },
+                on: (event: string, callback: (data?: unknown) => void) => {
+                    return this.emitter.on('socket:data', (data: { clientId: string; event: string; data?: unknown }) => {
+                        if (data.event !== event || data.clientId !== clientId) return;
+                        callback(data.data);
+                    });
+                },
+            };
+
+            rawSocket.on('close', () => {
+                clientDisconnected = true;
+            });
+
+            // inform listener
+            callback(socket);
+        });
+
+        return dispose;
     }
 
     /**
-     * Emits a socket event to all clients
+     * Listens for socket messages
      */
-    public emit(eventName: string, data?: any) {
-        const fullData = {
-            eventName,
-            data,
-        };
-        this.webSocketServer.send(JSON.stringify(fullData));
+    public on(event: string, callback: (data?: unknown) => void): Disposer {
+        return this.emitter.on('socket:data', (data: { clientId: string; event: string; data?: unknown }) => {
+            if (data.event !== event) return;
+            callback(data.data);
+        });
+    }
+
+    /**
+     * Emits a socket message to all clients
+     */
+    public broadcast(event: string, data?: any) {
+        this.webSocketServer.send(JSON.stringify({ event, data }));
     }
 
     public async dispose() {
-        // this.close();
+        this.messagesDispose();
+        await this.webSocketServer.dispose();
     }
 }
