@@ -1,13 +1,6 @@
-import project from '~/index';
+import core from '~/browser';
 
-type OnCloseData = { code: number; reason: string; wasClean: boolean };
-
-type MessageListeners = Record<string, ((data: any) => void)[]>;
-type OpenListeners = (() => void)[];
-type CloseListeners = ((closeInfo?: OnCloseData) => void)[];
-type ErrorListeners = ((errorType?: string) => void)[];
-
-type MessageListenerDisposer = () => void;
+type Disposer = () => void;
 
 // TODO: Add type for accepted Serializable value
 // TODO: Error handling for JSON stringify/parse (create own encodeObject/decodeObject utils?)
@@ -17,21 +10,15 @@ type MessageListenerDisposer = () => void;
  */
 export default class ClientSocketManager {
     private server: WebSocket;
+    private emitter: core.EventEmitter;
 
-    private messageListeners: MessageListeners = {};
-    private openListeners: OpenListeners = [];
-    private closeListeners: CloseListeners = [];
-    private errorListeners: ErrorListeners = [];
-
-    public serverURL: string | undefined;
-
-    constructor(serverUrl: string | undefined) {
-        this.serverURL = serverUrl;
+    constructor(public serverURL: string | undefined) {
+        this.emitter = core.emitter();
     }
 
     public connect() {
         if (!this.serverURL) {
-            throw new Error('You must provide a serverUrl option to the client to connect to the server');
+            throw new Error('Server URL not given to SocketManager, so client cannot connect to the server');
         }
         this.server = new WebSocket('ws://' + this.serverURL);
         this.setupListeners();
@@ -39,101 +26,81 @@ export default class ClientSocketManager {
 
     private setupListeners() {
         this.server.addEventListener('open', () => {
-            console.log(`[socket] socket was opened`);
+            console.log(`[SocketManager] socket was opened`);
 
             // inform listeners
-            for (const handler of this.openListeners) {
-                handler();
-            }
+            this.emitter.emit('socket:open');
         });
 
-        this.server.addEventListener('message', (event) => {
-            const { data } = event;
-            const fullData = JSON.parse(data);
+        this.server.addEventListener('message', (ev) => {
+            const rawData = ev.data;
+            const data = JSON.parse(rawData);
+
+            const event = data.event;
+            delete data.event;
 
             // inform listeners
-            const listeners = this.messageListeners[fullData.eventName];
-            if (listeners) {
-                for (const handler of listeners) {
-                    delete fullData.eventName;
-                    handler(fullData.data);
-                }
-            }
+            this.emitter.emit('socket:data', { event, data });
         });
 
         this.server.addEventListener('close', (event) => {
             const { code, reason, wasClean } = event;
 
-            console.error(`[socket] socket was closed with code ${code}${reason ? ` and reason '${reason}'` : ''}`);
-
             if (!wasClean) {
-                console.warn('[socket] socket was not closed cleanly');
+                console.error(`[SocketManager] socket was not closed cleanly, with code ${code}`);
             }
 
             // inform listeners
-            for (const handler of this.closeListeners) {
-                handler({ code, reason, wasClean });
-            }
+            this.emitter.emit('socket:close', { code, reason, wasClean });
         });
 
         this.server.addEventListener('error', (event) => {
             // inform listeners
-            for (const handler of this.errorListeners) {
-                handler(event.type);
-            }
+            this.emitter.emit('socket:error', event.type);
         });
     }
 
     /**
-     * Listens for socket event
+     * Listens for socket messages
      */
-    public on(eventName: string, callback: (data?) => void): MessageListenerDisposer {
-        if (eventName in this.messageListeners) {
-            this.messageListeners[eventName].push(callback);
-        } else {
-            this.messageListeners[eventName] = [callback];
-        }
-
-        return () => {
-            const filteredListeners = this.messageListeners[eventName].filter((cb) => cb !== callback);
-            this.messageListeners[eventName] = filteredListeners;
-        };
+    public on(event: string, callback: (data?: unknown) => void): Disposer {
+        return this.emitter.on('socket:data', (data: { event: string; data?: unknown }) => {
+            if (data.event === event) {
+                callback(data.data);
+            }
+        });
     }
 
     /**
      * Emits a socket event
      */
-    public emit(eventName: string, data: any = undefined) {
+    public emit(event: string, data: any = undefined) {
         if (this.readyState !== 'OPEN') {
-            throw new Error('[socket] socket is not open, cannot emit data');
+            throw new Error('[SocketManager] socket is not open, cannot emit data');
         }
 
-        const fullData = {
-            eventName,
-            data,
-        };
-        this.server.send(JSON.stringify(fullData));
+        this.server.send(JSON.stringify({ event, data }));
     }
 
     /**
      * Adds a listener for the open event
      */
     public onConnect(callback: () => void) {
-        this.openListeners.push(callback);
+        this.emitter.on('socket:open', callback);
     }
 
     /**
      * Adds a listener for the close event
      */
-    public onClose(callback: (closeInfo?: OnCloseData) => void) {
-        this.closeListeners.push(callback);
+    public onClose(callback: (closeInfo?: { code: number; reason: string; wasClean: boolean }) => void) {
+        this.emitter.on('socket:close', callback);
     }
 
     /**
      * Adds a listener for the error event
      */
     public onError(callback: (errorType?: string) => void) {
-        this.errorListeners.push(callback);
+        this.emitter.on('socket:error', callback);
     }
 
     public get readyState() {
@@ -153,10 +120,11 @@ export default class ClientSocketManager {
 
     private close(code?: number, reason?: string) {
         if (code && !reason) {
-            throw new Error('[socket] you must specify a reason when closing if passing in custom code');
+            throw new Error('[SocketManager] you must specify a reason when closing if passing in custom code');
         }
         if (this.readyState === 'CLOSING') {
-            console.warn('[socket] close called more than once, server is already closing');
+            console.warn('[SocketManager] close called more than once');
+            return;
         }
         this.server.close(code, reason);
     }
