@@ -43,26 +43,30 @@ export class Client {
      * Connects to the server
      */
     public async connect() {
-        this.socket.connect();
-        return new Promise<void>((resolve, reject) => {
+        const connectPromise = new Promise<void>((resolve) => {
+            this.socket.connect();
+
             this.socket.onConnect(() => {
                 resolve();
             });
-            this.socket.onError((errType) => {
-                reject(errType);
-            });
         });
+
+        try {
+            await connectPromise;
+        } catch (err) {
+            console.warn('[SocketManager] could not connect to server');
+        }
     }
 
     /**
-     * Listens for socket event from the server
+     * Listens for socket messages from the server
      */
     public on(event: string, handler: (data?: any) => void) {
         return this.socket.on(event, handler);
     }
 
     /**
-     * Emits a socket event to the server
+     * Emits a socket message to the server
      */
     public emit(event: string, data?: any) {
         this.socket.emit(event, data);
@@ -98,6 +102,5 @@ export class Client {
 }
 
 export function client(opts?: ClientOptions) {
-    const client = new Client(opts);
-    return client;
+    return new Client(opts);
 }
