@@ -16,7 +16,7 @@
     },
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsx ./src/cli/cli.ts node --build file=./src outDir=./dist",
+        "build": "tsx ./src/cli/cli.ts node --build file=./src outDir=./dist & npm link",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },
