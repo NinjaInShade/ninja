@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.17] - 14/04/2023
+
 -   use node instead of -S npx tsx for CLI script as the former would not give back input prompt on the terminal
 -   use build script to build the project
 -   remove .js suffix in imports

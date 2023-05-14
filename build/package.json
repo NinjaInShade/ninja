@@ -1,6 +1,6 @@
 {
     "name": "@ninjalib/build",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "description": "Build package",
     "type": "module",
     "exports": {
