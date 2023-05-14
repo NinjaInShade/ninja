@@ -16,7 +16,7 @@
     },
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "rmdir /s /q dist & tsc & tsc-alias & npm link",
+        "build": "tsx ./src/cli/cli.ts node --build file=./src outDir=./dist",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },

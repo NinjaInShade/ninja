@@ -1,7 +1,7 @@
 import readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
-import { colours, logLine } from './helpers.js';
-import { options } from './cli.js';
+import { colours, logLine } from './helpers';
+import { options } from './cli';
 
 const DEFAULT_SCRIPT = 1;
 

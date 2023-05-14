@@ -1,6 +1,6 @@
 import path from 'node:path';
 import readline from 'node:readline/promises';
-import { colours, logLine, logInfo, logError, logSuccess, runAsync, logWarn } from '../helpers.js';
+import { colours, logLine, logInfo, logError, logSuccess, runAsync, logWarn } from '../helpers';
 import type { PackageJson } from '../copy/script';
 import fs from 'node:fs/promises';
 import { stdin, stdout } from 'node:process';

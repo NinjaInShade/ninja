@@ -1,7 +1,7 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import child_process from 'node:child_process';
-import { logLine, logInfo, logError, runAsync } from '../helpers.js';
+import { logLine, logInfo, logError, runAsync } from '../helpers';
 
 /**
  * Test runner

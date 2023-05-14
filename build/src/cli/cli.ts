@@ -1,12 +1,12 @@
-#!/usr/bin/env -S npx tsx
-import { scriptSelectMenu, scriptHelpMenu } from './help.js';
-import { parseArgs, logLine, logError, logWarn } from './helpers.js';
-import { createProject, createProjectOptions } from './createProject/script.js';
-import { copy, copyOptions } from './copy/script.js';
-import { vite, viteOptions } from './vite/script.js';
-import { node, nodeOptions } from './node/script.js';
-import { test, testOptions } from './test/script.js';
-import { publish, publishOptions } from './publish/script.js';
+#!/usr/bin/env node
+import { scriptSelectMenu, scriptHelpMenu } from './help';
+import { parseArgs, logLine, logError, logWarn } from './helpers';
+import { createProject, createProjectOptions } from './createProject/script';
+import { copy, copyOptions } from './copy/script';
+import { vite, viteOptions } from './vite/script';
+import { node, nodeOptions } from './node/script';
+import { test, testOptions } from './test/script';
+import { publish, publishOptions } from './publish/script';
 
 // TODO: add version-diff script
 // since we're in one repo, and libraries/projects get published and tagged as {libName}-{version}

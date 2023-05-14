@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { colours, logLine, logInfo, logError, logWarn, logSuccess, runAsync, copyFile, copyDirRecursive } from '../helpers.js';
+import { colours, logLine, logInfo, logError, logWarn, logSuccess, runAsync, copyFile, copyDirRecursive } from '../helpers';
 import readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 

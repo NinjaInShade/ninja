@@ -1,6 +1,6 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logInfo, logError } from '../helpers.js';
+import { logInfo, logError } from '../helpers';
 import child_process from 'node:child_process';
 
 /**

@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { logInfo, logError, runAsync } from '../helpers.js';
+import { logInfo, logError, runAsync } from '../helpers';
 import child_process from 'node:child_process';
 import { replaceTscAliasPaths } from 'tsc-alias';
 import fs from 'node:fs/promises';
