@@ -1,4 +1,4 @@
-# Plan
+# **Plan**
 
 The plan for @ninjalib socket communication (both client & server). APIs are the public APIs, not private.
 
@@ -13,7 +13,7 @@ Their APIs should match where possible and be simple to use.
     -   [Socket](#socket)
     -   [WebSocketServer](#websocketserver)
 
-## Client & Server (shared)
+## **Client & Server (shared)**
 
 All that is currently needed to be shared is the encoding/decoding of messages that will be sent/received through the socket.
 
@@ -21,7 +21,7 @@ The `encode()` function should take in an "toEncode" object that currently only 
 
 The `decode()` function takes in a string (a string that was encoded previously) and parses it into the original object that consists of "event" and "data".
 
-## Client
+## **Client**
 
 The server socket communication on the client should all be facilitated with:
 
@@ -44,13 +44,13 @@ Perhaps one day instead of using the in-built `WebSocket` object, a custom imple
 -   `readyState`: a getter for the state of the socket. Can either be 'CLOSED', 'CONNECTING', 'OPEN' or 'UNKNOWN'.
 -   `dispose()`: disposes the socket and all listeners.
 
-## Server
+## **Server**
 
 Here is the plan of the API and the responsibilities for both the `WebSocketServer` (low-level) & `SocketManager` (high-level)
 
 The server socket APIs are slightly different in places as we are responsible for dealing with multiple clients, whereas on the client we are just dealing with one client (the server essentially).
 
-### SocketManager
+### **SocketManager**
 
 The `SocketManager` is a high-level abstraction of the low level socket server. This is the API that should be as close as possible to the client socket API.
 
@@ -71,7 +71,7 @@ Another note: When socket is mentioned, it is referring to the abstracted `Socke
 -   `clients`: a getter of all currently connected clients/sockets. This is a map of `<ID, Socket>`
 -   `dispose()`: calls dispose on the web socket server underneath.
 
-### Socket
+### **Socket**
 
 This represents a client and is what is used to communicate with an individual client. It can be obtained via the callback from `on('connect', (socket) => void)`. The getter `clients` also returns a Map of `<ID, Socket>` so can be used to loop over and use this way.
 
@@ -91,7 +91,7 @@ It is constructed internally within the WebSocketServer.
 -   `connected`: whether the socket is connected.
 -   `dispose()`: closes socket cleanly and cleans up listeners
 
-### WebSocketServer
+### **WebSocketServer**
 
 The low-level web socket manager. It's responsible for listening for HTTP upgrades, performing a handshake, and creating the client.
 
