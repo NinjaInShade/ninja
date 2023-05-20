@@ -1,4 +1,4 @@
-import SocketManager from './SocketManager';
+import SocketManager, { type HandleOn } from './SocketManager';
 
 type ClientOptions = {
     /**
@@ -23,6 +23,9 @@ export class Client {
 
     public variables: Record<string, any> = {};
 
+    private reconnectInterval: ReturnType<typeof setInterval> | null = null;
+    private reconnectAttempts = 0;
+
     constructor(options: ClientOptions = {}) {
         if (Client._instance) {
             console.warn('Client should only be initialised once in your project');
@@ -37,33 +40,67 @@ export class Client {
 
         const serverURL = this.options.domain + ':' + this.options.port;
         this.socket = new SocketManager(serverURL);
+
+        this.socket.on('disconnect', () => {
+            if (this.reconnectInterval) {
+                return;
+            }
+
+            this.reconnectAttempts += 1;
+
+            const reconnect = () => {
+                if (this.socket.readyState === 'CONNECTING' || this.socket.readyState === 'OPEN') {
+                    return;
+                }
+                console.log('Socket disconnected, re-trying connection. Attempt number:', this.reconnectAttempts);
+                void this.connect()
+                    .then(() => {
+                        if (this.reconnectInterval) {
+                            clearInterval(this.reconnectInterval);
+                            this.reconnectInterval = null;
+                        }
+                        this.reconnectAttempts = 0;
+                    })
+                    .catch((err) => {
+                        console.warn('Got error whilst reconnecting:', err);
+                    });
+            };
+
+            // we want to try to reconnect immediately
+            reconnect();
+
+            this.reconnectInterval = setInterval(() => {
+                reconnect();
+            }, 2500);
+        });
     }
 
     /**
      * Connects to the server
+     *
+     * Enables websocket communication
      */
     public async connect() {
-        const connectPromise = new Promise<void>((resolve) => {
-            this.socket.connect();
-
-            this.socket.onConnect(() => {
-                resolve();
-            });
-        });
-
         try {
-            await connectPromise;
+            await this.socket.connect();
         } catch (err) {
-            console.warn('[SocketManager] could not connect to server');
+            console.warn('[SocketManager] could not connect to server', err?.message ?? err);
         }
     }
 
     /**
      * Listens for socket messages from the server
      */
-    public on(event: string, handler: (data?: any) => void) {
+    public on: HandleOn<false> = (event, handler) => {
         return this.socket.on(event, handler);
-    }
+    };
+
+    /**
+     * Adds a one-time Listener for socket messages from the server
+     */
+    public once: HandleOn<false> = (event, handler) => {
+        return this.socket.once(event, handler);
+    };
 
     /**
      * Emits a socket message to the server
@@ -97,6 +134,9 @@ export class Client {
      * Dispose client safely
      */
     public dispose() {
+        if (this.reconnectInterval) {
+            clearInterval(this.reconnectInterval);
+        }
         this.socket.dispose();
     }
 }

@@ -1,6 +1,20 @@
-import core from '~/browser';
+import { emitter, type EventEmitter, encode, decode, type AcceptableSocketData } from '~/browser';
 
 type Disposer = () => void;
+type EventName = 'connect' | 'disconnect' | 'error' | string;
+
+type ConnectHandler = () => void;
+type DisconnectHandler = (closeInfo: { code: number; reason: string; wasClean: boolean }) => void;
+type ErrorHandler = (type: string) => void;
+type DataHandler = (data?: AcceptableSocketData) => void;
+
+export type HandleOn<T> = {
+    (event: string, handler: DataHandler, once?: T extends true ? true : never): Disposer;
+    (event: 'connect', handler: ConnectHandler, once?: T extends true ? true : never): Disposer;
+    (event: 'disconnect', handler: DisconnectHandler, once?: T extends true ? true : never): Disposer;
+    (event: 'error', handler: ErrorHandler, once?: T extends true ? true : never): Disposer;
+    // (event: EventName, handler: ConnectHandler | DisconnectHandler | ErrorHandler | DataHandler,): Disposer
+};
 
 // TODO: Add type for accepted Serializable value
 // TODO: Error handling for JSON stringify/parse (create own encodeObject/decodeObject utils?)
@@ -9,102 +23,112 @@ type Disposer = () => void;
  * Manages the WebSocket object
  */
 export default class ClientSocketManager {
-    private server: WebSocket;
-    private emitter: core.EventEmitter;
+    private socket: WebSocket | null = null;
+    private emitter: EventEmitter;
+
+    private disposeSocketListeners: (() => void) | null = null;
 
     constructor(public serverURL: string | undefined) {
-        this.emitter = core.emitter();
+        this.emitter = emitter();
     }
 
-    public connect() {
+    public async connect() {
         if (!this.serverURL) {
             throw new Error('Server URL not given to SocketManager, so client cannot connect to the server');
         }
-        this.server = new WebSocket('ws://' + this.serverURL);
-        this.setupListeners();
+        if (this.socket) {
+            throw new Error('Cannot connect more than once');
+        }
+
+        try {
+            await new Promise<void>((resolve) => {
+                this.socket = new WebSocket('ws://' + this.serverURL);
+                this.setupSocketListeners(this.socket);
+                this.once('connect', () => {
+                    resolve();
+                });
+            });
+        } catch (err) {
+            this.socket = null;
+            throw err;
+        }
     }
 
-    private setupListeners() {
-        this.server.addEventListener('open', () => {
+    private setupSocketListeners(socket: WebSocket) {
+        const handleConnect = () => {
             console.log(`[SocketManager] socket was opened`);
+            this.emitter.emit('socket:connect');
+        };
 
-            // inform listeners
-            this.emitter.emit('socket:open');
-        });
-
-        this.server.addEventListener('message', (ev) => {
-            const rawData = ev.data;
-            const data = JSON.parse(rawData);
-
-            const event = data.event;
-            delete data.event;
-
-            // inform listeners
+        const handleMessage = (ev) => {
+            const { event, data } = decode(ev.data);
             this.emitter.emit('socket:data', { event, data });
-        });
+        };
 
-        this.server.addEventListener('close', (event) => {
+        const handleDisconnect = (event) => {
             const { code, reason, wasClean } = event;
 
             if (!wasClean) {
                 console.error(`[SocketManager] socket was not closed cleanly, with code ${code}`);
             }
 
-            // inform listeners
-            this.emitter.emit('socket:close', { code, reason, wasClean });
-        });
+            this.afterDisconnect();
+            this.emitter.emit('socket:disconnect', { code, reason, wasClean });
+        };
 
-        this.server.addEventListener('error', (event) => {
-            // inform listeners
+        const handleError = (event) => {
+            this.afterDisconnect();
             this.emitter.emit('socket:error', event.type);
-        });
+        };
+
+        socket.addEventListener('open', handleConnect);
+        socket.addEventListener('message', handleMessage);
+        socket.addEventListener('close', handleDisconnect);
+        socket.addEventListener('error', handleError);
+
+        this.disposeSocketListeners = () => {
+            socket.removeEventListener('open', handleConnect);
+            socket.removeEventListener('message', handleMessage);
+            socket.removeEventListener('close', handleDisconnect);
+            socket.removeEventListener('error', handleError);
+            this.disposeSocketListeners = null;
+        };
     }
 
     /**
      * Listens for socket messages
      */
-    public on(event: string, callback: (data?: unknown) => void): Disposer {
-        return this.emitter.on('socket:data', (data: { event: string; data?: unknown }) => {
-            if (data.event === event) {
-                callback(data.data);
-            }
-        });
-    }
+    public on: HandleOn<false> = (event, handler) => {
+        return this.handleOn(event, handler);
+    };
 
     /**
-     * Emits a socket event
+     * Adds a one-time Listener for socket messages
+     */
+    public once: HandleOn<false> = (event, handler) => {
+        return this.handleOn(event, handler, true);
+    };
+
+    /**
+     * Emits data to the server socket
      */
     public emit(event: string, data: any = undefined) {
-        if (this.readyState !== 'OPEN') {
-            throw new Error('[SocketManager] socket is not open, cannot emit data');
+        if (!this.socket) {
+            return;
         }
-
-        this.server.send(JSON.stringify({ event, data }));
-    }
-
-    /**
-     * Adds a listener for the open event
-     */
-    public onConnect(callback: () => void) {
-        this.emitter.on('socket:open', callback);
-    }
-
-    /**
-     * Adds a listener for the close event
-     */
-    public onClose(callback: (closeInfo?: { code: number; reason: string; wasClean: boolean }) => void) {
-        this.emitter.on('socket:close', callback);
-    }
-
-    /**
-     * Adds a listener for the error event
-     */
-    public onError(callback: (errorType?: string) => void) {
-        this.emitter.on('socket:error', callback);
+        if (['connect', 'disconnect', 'error'].includes(event)) {
+            throw new Error(`Event ${event} cannot be emitted as it is a reserved event name`);
+        }
+        const encodedPacket = encode({ event, data });
+        this.socket.send(encodedPacket);
     }
 
     public get readyState() {
-        switch (this.server.readyState) {
+        if (!this.socket) {
+            return 'CLOSED';
+        }
+
+        switch (this.socket.readyState) {
             case 0:
                 return 'CONNECTING';
             case 1:
@@ -118,7 +142,31 @@ export default class ClientSocketManager {
         }
     }
 
+    private handleOn: HandleOn<true> = (event, handler, once = false) => {
+        const method = once ? 'once' : 'on';
+
+        let _eventName: EventName;
+        let _handler: ConnectHandler | DisconnectHandler | ErrorHandler | DataHandler;
+
+        if (['connect', 'disconnect', 'error'].includes(event)) {
+            _eventName = `socket:${event}`;
+            _handler = handler;
+        } else {
+            _eventName = 'socket:data';
+            _handler = (data: { event: string; data?: AcceptableSocketData }) => {
+                if (data.event === event) {
+                    handler(data.data);
+                }
+            };
+        }
+
+        return this.emitter[method](_eventName, _handler);
+    };
+
     private close(code?: number, reason?: string) {
+        if (!this.socket) {
+            return;
+        }
         if (code && !reason) {
             throw new Error('[SocketManager] you must specify a reason when closing if passing in custom code');
         }
@@ -126,10 +174,27 @@ export default class ClientSocketManager {
             console.warn('[SocketManager] close called more than once');
             return;
         }
-        this.server.close(code, reason);
+        this.socket.close(code, reason);
+        this.afterDisconnect();
+    }
+
+    private afterDisconnect() {
+        this.socket = null;
+        if (this.disposeSocketListeners) {
+            this.disposeSocketListeners();
+        }
     }
 
     public dispose() {
-        this.close();
+        // close socket
+        if (this.socket) {
+            this.close();
+        }
+
+        // remove local listeners
+        this.emitter.removeAllListeners('socket:data');
+        this.emitter.removeAllListeners('socket:open');
+        this.emitter.removeAllListeners('socket:disconnect');
+        this.emitter.removeAllListeners('socket:error');
     }
 }
