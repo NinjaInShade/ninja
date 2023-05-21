@@ -1,6 +1,5 @@
-import express from 'express';
-import HttpManager from './HttpManager';
-import SocketManager from './SocketManager';
+import HttpManager, { type Express } from './HttpManager';
+import SocketManager, { type HandlerFn } from './socket/Manager';
 
 type ServerOptions = {
     /**
@@ -15,18 +14,19 @@ export class Server {
     static _instance: Server;
 
     private options: ServerOptions;
+
     /**
      * Core foundations of the server:
      * - HTTP manager (express manager right now essentially - ditch at some point)
      * - WebSocket manager
      */
     private httpManager: HttpManager;
-    private socketManager: SocketManager;
+    private socketManager: SocketManager | null = null;
 
     /**
      * public facing API for http things, which express provides
      */
-    public http: ReturnType<typeof express>;
+    public http: Express;
 
     constructor(options: ServerOptions = {}) {
         if (Server._instance) {
@@ -40,45 +40,50 @@ export class Server {
         this.options = Object.assign({}, defaultOptions, options);
 
         this.httpManager = new HttpManager(this.options.port);
+        this.http = this.httpManager.app;
     }
 
     /**
      * Starts the http server & starts managing web sockets
      */
-    public async startServer() {
-        if (this.httpManager.server) {
-            throw new Error('HTTP server cannot be started more than once');
+    public async start() {
+        await this.httpManager.startServer();
+
+        const httpServer = this.httpManager.server;
+        if (!httpServer) {
+            throw new Error('Expected HTTP server to be up and running');
         }
 
-        await new Promise<void>((resolve) => {
-            this.httpManager.startServer(() => {
-                resolve();
-            });
-        });
-
-        this.socketManager = new SocketManager(this.httpManager.server);
-        this.http = this.httpManager.app;
+        this.socketManager = new SocketManager(httpServer);
     }
 
     /**
-     * Listens for socket connections &
-     * gives back a socket to work with an individual client
+     * Listens for socket events
      */
-    public onConnection(handler: (socket?: any) => void) {
-        return this.socketManager.onConnection(handler);
-    }
-
-    /**
-     * Listens for global socket event (from any client)
-     */
-    public on(event: string, handler: (data?: any) => void) {
+    public on: HandlerFn = (event, handler) => {
+        if (!this.socketManager) {
+            throw new Error('Cannot call socket methods when server has not been started');
+        }
         return this.socketManager.on(event, handler);
-    }
+    };
+
+    /**
+     * Adds a one-time Listener for socket events
+     */
+    public once: HandlerFn<true> = (event, handler) => {
+        if (!this.socketManager) {
+            throw new Error('Cannot call socket methods when server has not been started');
+        }
+        return this.socketManager.once(event, handler);
+    };
 
     /**
      * Emits a global socket event (to all clients)
      */
     public broadcast(event: string, data?: any) {
+        if (!this.socketManager) {
+            throw new Error('Cannot call socket methods when server has not been started');
+        }
         this.socketManager.broadcast(event, data);
     }
 
@@ -86,13 +91,21 @@ export class Server {
      * Dispose server safely
      */
     public async dispose() {
+        const start = Date.now();
+        console.log('[server] disposing server');
+
         await this.httpManager.dispose();
-        await this.socketManager.dispose();
+        if (this.socketManager) {
+            this.socketManager.dispose();
+        }
+
+        const end = Date.now();
+        const timeTaken = `${end - start}ms`;
+        console.log('[server] disposed server safely in:', timeTaken);
     }
 }
 
-export async function server(opts?: ServerOptions) {
+export function server(opts?: ServerOptions) {
     const server = new Server(opts);
-    await server.startServer();
     return server;
 }

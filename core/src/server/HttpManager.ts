@@ -3,25 +3,27 @@ import http from 'node:http';
 
 // TODO: Remove express eventually
 
+export type Express = ReturnType<typeof express>;
+
 export default class HttpManager {
-    private _app: ReturnType<typeof express>;
-    private _server: http.Server;
+    private _app: Express;
+    private _server: http.Server | null = null;
     private port: number;
 
     constructor(port) {
         this.port = port;
+        this._app = express();
     }
 
     /**
      * Initialises the http server
      */
-    public startServer(onListen?: () => void) {
-        this._app = express();
-        this._server = this._app.listen(this.port, () => {
-            console.log('[HttpManager] server is listening on port', this.port);
-            if (onListen) {
-                onListen();
-            }
+    public async startServer() {
+        await new Promise<void>((resolve) => {
+            this._server = this._app.listen(this.port, () => {
+                console.log('[HttpManager] server is listening on port', this.port);
+                resolve();
+            });
         });
     }
 
@@ -44,6 +46,10 @@ export default class HttpManager {
      */
     public async dispose() {
         return new Promise<void>((resolve, reject) => {
+            if (!this._server) {
+                return;
+            }
+
             this._server.close((err) => {
                 if (err) {
                     reject(err);

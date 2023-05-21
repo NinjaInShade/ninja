@@ -63,7 +63,7 @@ Another note: When socket is mentioned, it is referring to the abstracted `Socke
 -   `new SocketManager()`: takes in `httpServer`, which is just a standard `http.Server`
 -   `on(ev, (data, socket) => void)`: listens for incoming socket messages (from any client) with the "ev" event, calling back the handler function with the incoming data and the clients socket. Returns a disposer for manual disposing if you wish to do so yourself.
     -   there are special events that can be listened to that aren't incoming socket data, but instead internal events
-    -   these are: 'connect'. The names hopefully are self-explanatory
+    -   The events are 'connection' and also all the events `Socket` provides.
     -   their handle functions (2nd param to `on()`) most likely differ from what is above. Check the typings for what is accepted.
 -   `once(ev, (data, socket) => void)`: the same as on() but adds a one-time listener instead that is disposed itself after the first time being fired. Still returns a disposer incase of wanting to dispose manually before this happens.
 -   `broadcast(ev, data)`: sends data to every client with the "ev" event. Note, this is not named `emit()` to avoid confusion, as this is going to every client.
@@ -73,7 +73,7 @@ Another note: When socket is mentioned, it is referring to the abstracted `Socke
 
 ### **Socket**
 
-This represents a client and is what is used to communicate with an individual client. It can be obtained via the callback from `on('connect', (socket) => void)`. The getter `clients` also returns a Map of `<ID, Socket>` so can be used to loop over and use this way.
+This represents a client and is what is used to communicate with an individual client. It can be obtained via the callback from `on('connection', (socket) => void)` on `SocketManager`. The getter `clients` also returns a Map of `<ID, Socket>` so can be used to loop over and use this way.
 
 Note: sometimes a socket is referred to as a client, they are the same thing in this context.
 
@@ -83,10 +83,10 @@ It is constructed internally within the WebSocketServer.
 
 -   `new Socket()`: takes in `wsServer`, an instance of `WebSocketServer`, `rawSocket`, the raw `net.Socket` object and a `clientId` that can uniquely identify itself.
 -   `on(ev, (data) => void)`: same as `SocketManager` `on()`, but only listens for incoming messages from this client.
-    -   the only special event is 'disconnect' also.
+    -   the special events available are 'disconnect', 'error', 'rawData'. Raw data is the data before it has been decoded, checked if event matches & if socket is still connected.
 -   `once(ev, (data) => void)`: same as `on()` but is only a one-time listener (again, very similar to `SocketManager` `once()`).
 -   `emit(ev, data)`: sends data to the server with the "ev" event.
-    -   the 'disconnect' event is reserved and cannot be used. It is emitted internally, automatically and can't be used.
+    -   some special event names are forbidden to use (see above: `on()`). These are emitting internally automatically and can't be used.
 -   `id`: the ID of the client.
 -   `connected`: whether the socket is connected.
 -   `dispose()`: closes socket cleanly and cleans up listeners
@@ -94,6 +94,8 @@ It is constructed internally within the WebSocketServer.
 ### **WebSocketServer**
 
 The low-level web socket manager. It's responsible for listening for HTTP upgrades, performing a handshake, and creating the client.
+
+Note: currently it can't be used as a client, only acting a server implementation which handles incoming requests and communications.
 
 This should mainly consist of a lot of internal bits, and a minimal public API - offloading as much as possible to the Socket object so data receiving/sending only happens in one spot.
 
