@@ -1,4 +1,4 @@
-type AcceptableSocketData = string | number | boolean | null | Date | { [property: string]: AcceptableSocketData } | AcceptableSocketData[];
+export type AcceptableSocketData = string | number | boolean | null | Date | { [property: string]: AcceptableSocketData } | AcceptableSocketData[];
 
 type ObjectToEncode = {
     event: string;
