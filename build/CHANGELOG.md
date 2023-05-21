@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.1.18] - 21/04/2023
+
 -   add rules to shared TSConfig
 -   project TSConfig extends from shared config now
 
