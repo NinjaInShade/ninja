@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.2.0] - 21/04/2023
+
 -   server must be started with `await server.start()`: core doesn't automatically do this anymore when calling `core.server()`
 -   added `on()`, `once()`, `emit()` on socket obtained from `server.on('connection')`
 -   added `server.on('connection' (socket) => {})`
