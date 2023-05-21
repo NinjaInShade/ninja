@@ -1,23 +1,21 @@
 import { emitter, type EventEmitter, encode, decode, type AcceptableSocketData } from '~/browser';
 
 type Disposer = () => void;
-type EventName = 'connect' | 'disconnect' | 'error' | string;
-
-type ConnectHandler = () => void;
-type DisconnectHandler = (closeInfo: { code: number; reason: string; wasClean: boolean }) => void;
-type ErrorHandler = (type: string) => void;
 type DataHandler = (data?: AcceptableSocketData) => void;
 
-export type HandleOn<T> = {
-    (event: string, handler: DataHandler, once?: T extends true ? true : never): Disposer;
-    (event: 'connect', handler: ConnectHandler, once?: T extends true ? true : never): Disposer;
-    (event: 'disconnect', handler: DisconnectHandler, once?: T extends true ? true : never): Disposer;
-    (event: 'error', handler: ErrorHandler, once?: T extends true ? true : never): Disposer;
-    // (event: EventName, handler: ConnectHandler | DisconnectHandler | ErrorHandler | DataHandler,): Disposer
+type EventsMap = {
+    connect: () => void;
+    disconnect: (closeInfo: { code: number; reason: string; wasClean: boolean }) => void;
+    error: (type: string) => void;
 };
 
-// TODO: Add type for accepted Serializable value
-// TODO: Error handling for JSON stringify/parse (create own encodeObject/decodeObject utils?)
+export type HandlerFn<Once = false> = {
+    <T extends keyof EventsMap>(event: T, handler: EventsMap[T], once?: Once extends true ? true : never): Disposer;
+    (event: string, handler: DataHandler, once?: Once extends true ? true : never): Disposer;
+    <T extends keyof EventsMap>(event: T | string, handler: EventsMap[T] | DataHandler, once?: Once extends true ? true : never): Disposer;
+};
+
+const SPECIAL_EVENTS: (keyof EventsMap)[] = ['connect', 'disconnect', 'error'];
 
 /**
  * Manages the WebSocket object
@@ -98,22 +96,22 @@ export default class ClientSocketManager {
     /**
      * Listens for socket messages
      */
-    public on: HandleOn<false> = (event, handler) => {
-        return this.handleOn(event, handler);
+    public on: HandlerFn = (event, handler) => {
+        return this.createOnHandler(event, handler);
     };
 
     /**
      * Adds a one-time Listener for socket messages
      */
-    public once: HandleOn<false> = (event, handler) => {
-        return this.handleOn(event, handler, true);
+    public once: HandlerFn<false> = (event, handler) => {
+        return this.createOnHandler(event, handler, true);
     };
 
     /**
      * Emits data to the server socket
      */
     public emit(event: string, data: any = undefined) {
-        if (!this.socket) {
+        if (!this.socket || this.readyState === 'CONNECTING') {
             return;
         }
         if (['connect', 'disconnect', 'error'].includes(event)) {
@@ -142,13 +140,13 @@ export default class ClientSocketManager {
         }
     }
 
-    private handleOn: HandleOn<true> = (event, handler, once = false) => {
+    private createOnHandler: HandlerFn<true> = (event, handler, once) => {
         const method = once ? 'once' : 'on';
 
-        let _eventName: EventName;
-        let _handler: ConnectHandler | DisconnectHandler | ErrorHandler | DataHandler;
+        let _eventName: string;
+        let _handler: typeof handler;
 
-        if (['connect', 'disconnect', 'error'].includes(event)) {
+        if (SPECIAL_EVENTS.includes(event)) {
             _eventName = `socket:${event}`;
             _handler = handler;
         } else {
@@ -160,7 +158,8 @@ export default class ClientSocketManager {
             };
         }
 
-        return this.emitter[method](_eventName, _handler);
+        const disposer = this.emitter[method](_eventName, _handler);
+        return disposer;
     };
 
     private close(code?: number, reason?: string) {

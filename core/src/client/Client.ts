@@ -1,4 +1,5 @@
-import SocketManager, { type HandleOn } from './SocketManager';
+import SocketManager, { type HandlerFn } from './SocketManager';
+import type { AcceptableSocketData } from '~/browser';
 
 type ClientOptions = {
     /**
@@ -91,21 +92,21 @@ export class Client {
     /**
      * Listens for socket messages from the server
      */
-    public on: HandleOn<false> = (event, handler) => {
+    public on: HandlerFn = (event, handler) => {
         return this.socket.on(event, handler);
     };
 
     /**
      * Adds a one-time Listener for socket messages from the server
      */
-    public once: HandleOn<false> = (event, handler) => {
+    public once: HandlerFn<false> = (event, handler) => {
         return this.socket.once(event, handler);
     };
 
     /**
      * Emits a socket message to the server
      */
-    public emit(event: string, data?: any) {
+    public emit(event: string, data?: AcceptableSocketData) {
         this.socket.emit(event, data);
     }
 
