@@ -7,10 +7,9 @@ export async function checkHeartbeat() {
     client.emit('ping');
 
     return await new Promise<number>((resolve) => {
-        const dispose = client.on('pong', () => {
+        client.once('pong', () => {
             const received = new Date().getTime();
             const timeTaken = new Date(received - sent).getMilliseconds();
-            dispose();
             return resolve(timeTaken);
         });
     });

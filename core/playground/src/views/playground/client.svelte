@@ -1,8 +1,12 @@
 <script lang="ts">
     import NW from '@ninjalib/svelte';
     import Socket from './Socket.svelte';
+    import Tag from './Tag.svelte';
 
-    const tabs = [['WebSocket', Socket]];
+    const tabs = [
+        ['WebSocket', Socket],
+        ['Tag', Tag],
+    ];
 </script>
 
 <main class="main container">
