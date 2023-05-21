@@ -10,8 +10,8 @@
                 "types": "./dist/browser.d.ts"
             },
             "node": {
-                "default": "./dist/server.js",
-                "types": "./dist/server.d.ts"
+                "default": "./dist/node.js",
+                "types": "./dist/node.d.ts"
             },
             "default": "./dist/index.js",
             "types": "./dist/index.d.ts"
@@ -19,7 +19,7 @@
     },
     "types": "./dist/index.d.ts",
     "scripts": {
-        "start": "concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"ninja-cli node file=./playground/server/server.ts\" \"vite serve playground\"",
+        "start": "cd playground & concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"ninja-cli node --watch\" \"ninja-cli vite configFile=./vite.config.ts\"",
         "build": "rmdir /s /q dist & tsc & tsc-alias",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
@@ -30,7 +30,7 @@
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^2.0.4",
         "@types/express": "^4.17.17",
-        "@types/node": "^18.15.3",
+        "@types/node": "^20.1.0",
         "svelte": "^3.58.0",
         "svelte-preprocess": "^5.0.3",
         "tsc-alias": "^1.8.2",
@@ -39,8 +39,8 @@
         "vite": "^4.2.1"
     },
     "dependencies": {
-        "@ninjalib/build": "^0.1.9",
-        "@ninjalib/svelte": "^0.0.5",
+        "@ninjalib/build": "^0.1.18",
+        "@ninjalib/svelte": "^0.0.6",
         "concurrently": "^8.0.1",
         "express": "^4.18.2"
     }
