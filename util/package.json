@@ -45,6 +45,7 @@
         "typescript": "^5.0.4"
     },
     "dependencies": {
-        "@ninjalib/build": "^0.1.9"
+        "@ninjalib/build": "^0.1.18",
+        "tsx": "^3.12.7"
     }
 }
