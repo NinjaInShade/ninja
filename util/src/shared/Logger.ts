@@ -371,38 +371,3 @@ export class Logger {
 export function logger(namespace: string, opts?: LoggerOptions) {
     return new Logger(namespace, opts);
 }
-
-Logger.showDate = true;
-Logger.showFilename = true;
-
-const log = logger('util:log');
-const log2 = logger('core:views');
-const log3 = logger('core:wss');
-const log4 = logger('core:http');
-const log5 = logger('vite:info');
-const log6 = logger('sql:query');
-const log7 = logger('util:averylongnamespace');
-
-const user = {
-    name: 'steve',
-    username: 'soldier_steve',
-    password: '4dm1m9adasd841mg',
-    online: true,
-    permissions: [1, 5, 7, 2, 4],
-};
-const err = new Error('User does not have permissions!');
-
-log.debug('Debug msg.\n', 'We need to fix this thing!');
-log3.error('One', 'Two', 'Three', 'Expect a space inbetween these');
-
-log3.warn(new Error('Blah, something wnet wrong!'), '\n', new Error('Extra stack cuz why not...'), '\n', { a: 'test', b: 'foo', c: 'bar' });
-log2.warn(new Error('Blah, something wnet wrong!'));
-
-log3.warn(new Array(500).fill('x').join(''), process.stdout.columns);
-
-log5.debug('X is 5, was 623!', { foo: '1', bar: 2, foobar: false });
-log6.info('Is modal active: true!', [1, 'A', true]);
-log4.debug('Debug log!', log);
-log7.debug('Object construct:', Object);
-
-log.error(err);
