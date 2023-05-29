@@ -1,2 +1,2 @@
-export * from './isBrowser';
-export * from './isNode';
+export * from './utils';
+export * from './Logger';
