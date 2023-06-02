@@ -40,6 +40,12 @@ type LoggerOptions = {
      * @default Logger.showDate - which defaults to false
      */
     showDate?: boolean;
+    /**
+     * Colour to display the namespace of the logger (ANSII colour code)
+     *
+     * @default Logger.namespaceColour - which defaults to utils.colours.muted.purple
+     */
+    namespaceColour?: string;
 };
 
 const LOG_LEVELS = {
@@ -106,6 +112,7 @@ export class Logger {
     public static showFilename = false;
     public static showTimestamp = !isBrowser();
     public static showDate = false;
+    public static namespaceColour = colours.muted.purple;
 
     private disableLogging = false;
     private enabledLogLevels: Set<AbbrLogLevel> = new Set();
@@ -115,6 +122,7 @@ export class Logger {
             showFilename: Logger.showFilename,
             showTimestamp: Logger.showTimestamp,
             showDate: Logger.showDate,
+            namespaceColour: Logger.namespaceColour,
         };
 
         if (!namespace) {
@@ -293,7 +301,7 @@ export class Logger {
      * Generates meta info msg (time, namespace etc...)
      */
     private generateMeta(meta: { emoji: string; colour: string; type: AbbrLogLevel }) {
-        const { showDate, showTimestamp, showFilename } = this.options;
+        const { showDate, showTimestamp, showFilename, namespaceColour } = this.options;
         const { emoji, colour, type } = meta;
 
         const showBeginningMeta = showDate || showTimestamp || showFilename;
@@ -322,7 +330,7 @@ export class Logger {
         msg += colours[colour] + colours.bold + type.toUpperCase();
 
         // namespace
-        msg += ' ' + colours.muted.purple + this.padString(this.namespace, 20) + ' ';
+        msg += ' ' + (namespaceColour ?? colours.muted.purple) + this.padString(this.namespace, 20) + ' ';
 
         // separator
         msg += colours.grey + '>>' + colours.reset;
@@ -369,33 +377,41 @@ export class Logger {
     private formatErrStack(stack: string) {
         const lines = stack.split('\n');
 
-        for (let i = 1; i < lines.length; i++) {
-            // stack indents by 4
-            const line = lines[i].substring(4);
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            if (line.startsWith('    at')) {
+                // stack indents by 4
+                line = line.substring(4);
 
-            let [at, fn, loc] = line.split(' ');
+                const split = line.split(' ');
+                let at = split.at(0);
+                let fn = split.slice(1, -1).join(' ');
+                let loc = split.at(-1);
 
-            if (!isBrowser()) {
-                const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
-                const _loc = loc.toLowerCase().replaceAll('\\', '/');
-                const split = _loc.split(cwd);
+                if (!isBrowser()) {
+                    const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
+                    const _loc = loc?.toLowerCase().replaceAll('\\', '/') as string;
+                    const split = _loc.split(cwd);
 
-                if (split.length === 1) {
-                    loc = split[0];
-                } else {
-                    if (split[1].startsWith('/')) {
-                        split[1] = '.' + split[1];
+                    if (split.length === 1) {
+                        loc = split[0];
+                    } else {
+                        if (split[1].startsWith('/')) {
+                            split[1] = '.' + split[1];
+                        }
+                        loc = split.join('');
                     }
-                    loc = split.join('');
                 }
+
+                at = colours.lightGrey + at;
+
+                lines[i] = lines[i].substring(0, 4) + at + ' ' + fn + ' ' + loc;
+            } else {
+                lines[i] = colours.red + lines[i];
             }
-
-            at = colours.grey + at;
-
-            lines[i] = lines[i].substring(0, 4) + at + ' ' + fn + ' ' + loc + colours.reset;
         }
 
-        lines[0] = colours.red + lines[0] + colours.reset;
+        lines[lines.length - 1] = lines[lines.length - 1] + colours.reset;
         return lines.join('\n');
     }
 }
@@ -429,10 +445,10 @@ export function logger(namespace: string, opts?: LoggerOptions) {
 // log.debug('Debug msg.\n', 'We need to fix this thing!');
 // log3.error('One', 'Two', 'Three', 'Expect a space inbetween these');
 
-// log3.warn(new Error('Blah, something wnet wrong!'), '\n', new Error('Extra stack cuz why not...'), '\n', { a: 'test', b: 'foo', c: 'bar' });
+// log3.warn(new Error('Blah, something wnet wrong!'), '\n\n', new Error('Extra stack cuz why not...'), '\n', { a: 'test', b: 'foo', c: 'bar' });
 // log2.warn(new Error('Blah, something wnet wrong!'));
 
-// // log3.warn(new Array(500).fill('x').join(''), process.stdout.columns);
+// log3.warn(new Array(500).fill('x').join(''), process.stdout.columns);
 
 // log5.debug('X is 5, was 623!', { foo: '1', bar: 2, foobar: false });
 // log6.info('Is modal active: true!', [1, 'A', true]);

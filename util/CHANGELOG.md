@@ -5,7 +5,8 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   add customisation of namespace colour for logger
+-   improve error stack formatting for logger
 
 ## [0.2.3] - 02/05/2023
 
