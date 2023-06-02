@@ -1,6 +1,23 @@
-import { isBrowser, colours } from './utils';
+import { isBrowser, colours as _colours } from './utils';
 
-// useful for icons: https://emojipedia.org/search
+const colours = _colours;
+if (isBrowser()) {
+    for (const key of Object.keys(colours)) {
+        if (typeof colours[key] === 'object') {
+            for (const _key of Object.keys(colours[key])) {
+                colours[key][_key] = '';
+            }
+        } else {
+            colours[key] = '';
+        }
+    }
+}
+
+function parseEnvVarList(txt: string) {
+    return txt.replaceAll(' ', '').replaceAll('"', '').replaceAll("'", '').split(',');
+}
+
+// useful for icons: https://emojipedia.org/search / https://gist.github.com/nicolasdao/8f0220d050f585be1b56cc615ef6c12e
 // TODO: make the chunk generator handle ASCI colour codes (as if you have a lot the lines can get chunked incorrectly currently)
 
 type LoggerOptions = {
@@ -25,7 +42,7 @@ type LoggerOptions = {
     showDate?: boolean;
 };
 
-const logTypes = {
+const LOG_LEVELS = {
     info: 'info',
     good: 'good',
     warn: 'warn',
@@ -33,26 +50,49 @@ const logTypes = {
     debug: 'dbug',
 } as const;
 
-type LogType = keyof typeof logTypes;
-type AbbrLogType = (typeof logTypes)[LogType];
-
-type Meta = {
-    showDate: LoggerOptions['showDate'];
-    showTimestamp: LoggerOptions['showTimestamp'];
-    showFilename: LoggerOptions['showFilename'];
-    icon: string;
-    colour: string;
-    type: AbbrLogType;
+const LOG_LEVELS_META: LogLevelMeta = {
+    info: {
+        emoji: '⚓',
+        colour: 'blue',
+    },
+    good: {
+        emoji: '✅',
+        colour: 'green',
+    },
+    warn: {
+        emoji: '🔔',
+        emojiWidth: 2,
+        colour: 'yellow',
+    },
+    error: {
+        emoji: '⛔',
+        colour: 'red',
+    },
+    debug: {
+        emoji: '⚡',
+        colour: 'orange',
+    },
 };
+
+type LogLevel = keyof typeof LOG_LEVELS;
+type AbbrLogLevel = (typeof LOG_LEVELS)[LogLevel];
+type LogLevelMeta = Record<
+    LogLevel,
+    {
+        emojiWidth?: number;
+        emoji: string;
+        colour: string;
+    }
+>;
 
 /**
  * Browser & Server compatible logger with cool features:
  * - useful meta info
- * - different log types (INFO, GOOD, WARN, ERROR, DEBUG) w/ corresponding emojis
+ * - different log levels (INFO, GOOD, WARN, ERROR, DEBUG) w/ corresponding emojis
  * - namespacing/scoping
  * - terminal padding
  * - error formatting
- * - enabling only one or a subset of log types (LOG_TYPES env var)
+ * - enabling only one or a subset of log levels (LOG_LEVELS env var)
  * - enabling only one or a subset of namespaces (LOG_NAMESPACES env var)
  */
 export class Logger {
@@ -68,7 +108,7 @@ export class Logger {
     public static showDate = false;
 
     private disableLogging = false;
-    private enabledTypes: AbbrLogType[] = [];
+    private enabledLogLevels: Set<AbbrLogLevel> = new Set();
 
     constructor(namespace, options: LoggerOptions = {}) {
         const defaultOptions = {
@@ -84,25 +124,26 @@ export class Logger {
         this.namespace = namespace;
         this.options = Object.assign({}, defaultOptions, options);
 
-        const logTypesVar = this.getEnvVar('LOG_TYPES');
+        const logLevelsVar = this.getEnvVar('LOG_LEVELS');
         const logNamespacesVar = this.getEnvVar('LOG_NAMESPACES');
 
-        if (logTypesVar) {
-            const logTypesParsed = logTypesVar.toString().replaceAll(' ', '').replaceAll('"', '').replaceAll("'", '').split(',');
-            for (const type of logTypesParsed) {
-                if (Object.keys(logTypes).includes(type)) {
-                    this.enabledTypes.push(logTypes[type]);
-                } else if (Object.values(logTypes).includes(type)) {
-                    this.enabledTypes.push(type);
+        if (logLevelsVar) {
+            const logLevelsParsed = parseEnvVarList(logLevelsVar) as AbbrLogLevel[];
+            for (const type of logLevelsParsed) {
+                const keys = Object.keys(LOG_LEVELS);
+                const values = Object.values(LOG_LEVELS);
+
+                if (keys.includes(type)) {
+                    this.enabledLogLevels.add(LOG_LEVELS[type]);
+                } else if (values.includes(type)) {
+                    this.enabledLogLevels.add(type);
                 }
             }
         }
 
         if (logNamespacesVar) {
-            const namespacesParsed = logNamespacesVar.toString().replaceAll(' ', '').replaceAll('"', '').replaceAll("'", '').split(',');
-            if (!namespacesParsed.includes(namespace)) {
-                this.disableLogging = true;
-            }
+            const namespacesParsed = parseEnvVarList(logNamespacesVar) as AbbrLogLevel[];
+            this.disableLogging = !namespacesParsed.includes(namespace);
         }
     }
 
@@ -110,28 +151,28 @@ export class Logger {
      * Logs an INFO message
      */
     public info(...messages: any[]) {
-        this._log('info', '⚓', 1, 'blue', ...messages);
+        this._log('info', ...messages);
     }
 
     /**
      * Logs a GOOD message
      */
     public good(...messages: any[]) {
-        this._log('good', '✅', 1, 'green', ...messages);
+        this._log('good', ...messages);
     }
 
     /**
      * Logs a WARN message
      */
     public warn(...messages: any[]) {
-        this._log('warn', '🔔', 2, 'yellow', ...messages);
+        this._log('warn', ...messages);
     }
 
     /**
      * Logs a FAIL message
      */
     public error(...messages: any[]) {
-        this._log('fail', '⛔', 1, 'red', ...messages);
+        this._log('error', ...messages);
     }
 
     /**
@@ -141,18 +182,23 @@ export class Logger {
      * - Won't show up if in production at all, regardless of LOG_DEBUG
      */
     public debug(...messages: any[]) {
-        this._log('dbug', '⚡', 1, 'orange', ...messages);
+        this._log('debug', ...messages);
     }
 
     /**
      * Logs a message to console
      *
-     * Format - [date timestamp] [filename] [icon] [type]: msg
+     * @param logLevel: the log level
+     * @param messages: the messages to log
+     *
+     * @format - [date timestamp] [filename] [icon] [level]: msg
      */
-    private _log(type: AbbrLogType, icon: string, iconWidth: number, colour: string, ...messages: any[]) {
-        const { showDate, showTimestamp, showFilename } = this.options;
+    private _log(logLevel: LogLevel, ...messages: any[]) {
+        const { emoji, colour, emojiWidth } = LOG_LEVELS_META[logLevel];
+        const type = LOG_LEVELS[logLevel];
 
-        if ((this.enabledTypes.length && !this.enabledTypes.includes(type)) || this.disableLogging) {
+        const dontLog = (this.enabledLogLevels.size && !this.enabledLogLevels.has(type)) || this.disableLogging;
+        if (dontLog) {
             return;
         }
 
@@ -169,11 +215,10 @@ export class Logger {
             }
         });
 
-        const meta = this.generateMeta({ showDate, showTimestamp, showFilename, icon, colour, type });
-        // required as some emojis aren't 1 char length
-        const emojiOffset = iconWidth === 1 ? 0 : iconWidth - 1;
+        const meta = this.generateMeta({ emoji, colour, type });
+        const emojiOffset = (emojiWidth ?? 1) - 1;
         // +1 because of extra space the console will add automatically
-        const metaLength = this.getPureText(meta).length + 1 - emojiOffset;
+        const metaLength = this.getRawString(meta).length + 1 - emojiOffset;
         const msgs = this.generateMessages(messages, metaLength);
 
         const logFn = this.getLogFn(type);
@@ -186,13 +231,13 @@ export class Logger {
      * If on server, will pad terminal so messages align nicely
      */
     private generateMessages(messages: any[], metaLength: number) {
-        if (isBrowser()) {
+        if (isBrowser() || process.stdout.columns === undefined) {
             return messages;
         }
 
         // this is the available characters after the Loggers meta info
         const availableSpace = process.stdout.columns - metaLength;
-        const leftPad = new Array(metaLength).fill(' ').join('');
+        const leftPad = ' '.repeat(metaLength);
 
         /**
          * A chunk is essentially one line in the terminal
@@ -204,7 +249,8 @@ export class Logger {
             const _availableSpace = availableSpace - 1;
             const msgChunks: any[] = [];
 
-            for (let i = 0; i < msg.length + _availableSpace; ) {
+            let i = 0;
+            for (i; i < msg.length + _availableSpace; ) {
                 const addLeftPad = padStart || i !== 0;
                 let chunk = msg.substring(i, i + _availableSpace);
 
@@ -213,13 +259,13 @@ export class Logger {
                 }
 
                 const nlIndex = this.findFirstNlIndex(chunk);
-                if (nlIndex) {
+                if (nlIndex !== null) {
                     chunk = chunk.substring(0, nlIndex + 1);
                 }
 
                 chunk = `${addLeftPad ? leftPad : ''}${chunk}`;
                 msgChunks.push(chunk);
-                i += nlIndex ? nlIndex + 1 : _availableSpace;
+                i += nlIndex !== null ? nlIndex + 1 : _availableSpace - 1;
             }
 
             return msgChunks;
@@ -230,11 +276,6 @@ export class Logger {
         for (let i = 0; i < messages.length; i++) {
             let msg = messages[i];
             const prevMsg = messages[i - 1];
-
-            // convert these to strings so they can be padded
-            if (typeof msg === 'number' || typeof msg === 'bigint' || typeof msg === 'undefined' || typeof msg === 'boolean') {
-                msg = `${msg}`;
-            }
 
             if (typeof msg === 'string') {
                 const padStart = typeof prevMsg === 'string' && prevMsg.at(-1) === '\n';
@@ -251,34 +292,37 @@ export class Logger {
     /**
      * Generates meta info msg (time, namespace etc...)
      */
-    private generateMeta(meta: Meta) {
-        const { showDate, showTimestamp, showFilename, icon, colour, type } = meta;
+    private generateMeta(meta: { emoji: string; colour: string; type: AbbrLogLevel }) {
+        const { showDate, showTimestamp, showFilename } = this.options;
+        const { emoji, colour, type } = meta;
 
+        const showBeginningMeta = showDate || showTimestamp || showFilename;
         let msg = '';
 
-        msg += colours.grey + '<';
         if (showDate) {
             const date = new Date().toLocaleDateString('en-GB');
-            msg += colours.grey + date;
+            msg += date;
         }
         if (showTimestamp) {
             const time = new Date().toLocaleTimeString();
             msg += showDate ? ' ' : '';
-            msg += colours.grey + time;
+            msg += time;
         }
         if (showFilename) {
             const file = isBrowser() ? `${document.currentScript}` : import.meta.url.split('/').at(-1) ?? './';
             msg += showTimestamp ? ' ' : '';
-            msg += colours.grey + this.padMsg(file, 9);
+            msg += this.padString(file, 9);
         }
-        msg += colours.grey + '>';
+        if (showBeginningMeta) {
+            msg = colours.grey + '<' + msg + colours.grey + '>' + ' ';
+        }
 
         // log type icon + text
-        msg += ' ' + colours.grey + icon + ' ';
+        msg += emoji + ' ';
         msg += colours[colour] + colours.bold + type.toUpperCase();
 
         // namespace
-        msg += ' ' + colours.muted.purple + this.padMsg(this.namespace, 15) + ' ';
+        msg += ' ' + colours.muted.purple + this.padString(this.namespace, 20) + ' ';
 
         // separator
         msg += colours.grey + '>>' + colours.reset;
@@ -286,16 +330,14 @@ export class Logger {
         return msg;
     }
 
-    private getLogFn(type: AbbrLogType) {
-        let logFn: string = type;
-        if (type === 'fail') {
-            logFn = 'error';
-        } else if (type === 'dbug') {
-            logFn = 'debug';
-        } else {
-            logFn = 'log';
-        }
-        return logFn;
+    private getLogFn(type: AbbrLogLevel) {
+        return {
+            info: 'info',
+            good: 'log',
+            warn: 'warn',
+            fail: 'error',
+            dbug: 'debug',
+        }[type];
     }
 
     private findFirstNlIndex(msg: string) {
@@ -309,21 +351,14 @@ export class Logger {
     }
 
     private getEnvVar(variable: string) {
-        variable = variable.toUpperCase();
-        let foundVar;
-        if (isBrowser()) {
-            foundVar = import.meta?.env[variable];
-        } else {
-            foundVar = process.env[variable];
-        }
-        return foundVar ?? null;
+        return (isBrowser() ? import.meta?.env?.[variable] : process.env[variable]) ?? null;
     }
 
-    private getPureText(txt: string) {
+    private getRawString(txt: string) {
         return txt.replaceAll(/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/gi, '');
     }
 
-    private padMsg(msg: string, length: number) {
+    private padString(msg: string, length: number) {
         let paddedMsg = msg.padEnd(length, ' ');
         if (msg.length > length) {
             paddedMsg = paddedMsg.substring(0, length - 3) + '...';
@@ -340,25 +375,27 @@ export class Logger {
 
             let [at, fn, loc] = line.split(' ');
 
-            const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
-            const _loc = loc.toLowerCase().replaceAll('\\', '/');
-            const split = _loc.split(cwd);
+            if (!isBrowser()) {
+                const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
+                const _loc = loc.toLowerCase().replaceAll('\\', '/');
+                const split = _loc.split(cwd);
 
-            if (split.length === 1) {
-                loc = split[0];
-            } else {
-                if (split[1].startsWith('/')) {
-                    split[1] = '.' + split[1];
+                if (split.length === 1) {
+                    loc = split[0];
+                } else {
+                    if (split[1].startsWith('/')) {
+                        split[1] = '.' + split[1];
+                    }
+                    loc = split.join('');
                 }
-                loc = split.join('');
             }
 
             at = colours.grey + at;
 
             lines[i] = lines[i].substring(0, 4) + at + ' ' + fn + ' ' + loc + colours.reset;
         }
-        lines[0] = colours.red + lines[0] + colours.reset;
 
+        lines[0] = colours.red + lines[0] + colours.reset;
         return lines.join('\n');
     }
 }
@@ -371,3 +408,38 @@ export class Logger {
 export function logger(namespace: string, opts?: LoggerOptions) {
     return new Logger(namespace, opts);
 }
+
+const log = logger('util:log');
+const log2 = logger('core:views');
+const log3 = logger('core:wss');
+const log4 = logger('core:http');
+const log5 = logger('vite:info');
+const log6 = logger('sql:query');
+const log7 = logger('util:averylongnamespace');
+
+const user = {
+    name: 'steve',
+    username: 'soldier_steve',
+    password: '4dm1m9adasd841mg',
+    online: true,
+    permissions: [1, 5, 7, 2, 4],
+};
+const err = new Error('User does not have permissions!');
+
+log.debug('Debug msg.\n', 'We need to fix this thing!');
+log3.error('One', 'Two', 'Three', 'Expect a space inbetween these');
+
+log3.warn(new Error('Blah, something wnet wrong!'), '\n', new Error('Extra stack cuz why not...'), '\n', { a: 'test', b: 'foo', c: 'bar' });
+log2.warn(new Error('Blah, something wnet wrong!'));
+
+// log3.warn(new Array(500).fill('x').join(''), process.stdout.columns);
+
+log5.debug('X is 5, was 623!', { foo: '1', bar: 2, foobar: false });
+log6.info('Is modal active: true!', [1, 'A', true]);
+log4.debug('Debug log!', log);
+log7.debug('Object construct:', Object);
+log5.debug('Logging some types ' + 52, `and lets see... how about this ${undefined} and ${false} and ${BigInt(252)}`);
+log2.info('Lets log some info', 252, '\nand some more', BigInt(25), 'and some more...', undefined, 'and we have a boolean', true);
+log.debug('Just testing something\n', 'hello there, I should be on a newline?');
+
+log.error(err, user);
