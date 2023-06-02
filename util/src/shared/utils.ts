@@ -12,7 +12,7 @@ export const colours = {
     // colours
     black: '\x1b[30m',
     white: '\x1b[37m',
-    grey: '\x1b[90m', // gray
+    grey: '\x1b[38;2;85;85;85m', // gray
 
     red: '\x1b[38;2;217;39;26m',
     orange: '\x1b[38;2;217;144;26m',
