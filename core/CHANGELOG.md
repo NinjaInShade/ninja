@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.2.1] - 02/05/2023
+
 -   use new Logger from util everywhere for logging
 
 ## [0.2.0] - 21/04/2023
