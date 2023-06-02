@@ -1,5 +1,8 @@
 import express from 'express';
 import http from 'node:http';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:http');
 
 // TODO: Remove express eventually
 
@@ -21,7 +24,7 @@ export default class HttpManager {
     public async startServer() {
         await new Promise<void>((resolve) => {
             this._server = this._app.listen(this.port, () => {
-                console.log('[HttpManager] server is listening on port', this.port);
+                log.info('Server is listening on port', this.port);
                 resolve();
             });
         });

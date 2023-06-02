@@ -4,6 +4,9 @@ import type net from 'node:net';
 import { EventEmitter, decode } from '~/node';
 import { Socket, type ID } from './Socket';
 import { checkHeaders, generateWebSocketKey } from './utils';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:wsServer');
 
 /**
  * WebSocket server implementation
@@ -50,7 +53,7 @@ export default class WebSocketServer extends EventEmitter {
         const headers = req.headers;
         const reqSentByBrowser = Boolean(headers.origin);
         if (!reqSentByBrowser) {
-            console.warn('[wss] HTTP upgrade was not sent by a browser client');
+            log.warn('HTTP upgrade was not sent by a browser client');
         }
 
         if (!checkHeaders(req)) {
@@ -69,7 +72,7 @@ export default class WebSocketServer extends EventEmitter {
         socket.write('Sec-WebSocket-Accept: ' + generatedWebSocketKey + eol);
         socket.write(eol);
 
-        console.log('[wss] server has upgraded to a websocket connection');
+        log.info('Successfully upgraded to a websocket connection');
 
         // setup client
         this.setupClient(socket);

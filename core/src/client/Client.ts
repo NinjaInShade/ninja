@@ -1,5 +1,8 @@
 import SocketManager, { type HandlerFn } from './SocketManager';
 import type { AcceptableSocketData } from '~/browser';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:client');
 
 type ClientOptions = {
     /**
@@ -29,7 +32,7 @@ export class Client {
 
     constructor(options: ClientOptions = {}) {
         if (Client._instance) {
-            console.warn('Client should only be initialised once in your project');
+            log.warn('Client should only be initialised once in your project');
         }
         Client._instance = this;
 
@@ -53,7 +56,7 @@ export class Client {
                 if (this.socket.readyState === 'CONNECTING' || this.socket.readyState === 'OPEN') {
                     return;
                 }
-                console.log('Socket disconnected, re-trying connection. Attempt number:', this.reconnectAttempts);
+                log.info('Socket disconnected, re-trying connection. Attempt number:', this.reconnectAttempts);
                 void this.connect()
                     .then(() => {
                         if (this.reconnectInterval) {
@@ -63,7 +66,7 @@ export class Client {
                         this.reconnectAttempts = 0;
                     })
                     .catch((err) => {
-                        console.warn('Got error whilst reconnecting:', err);
+                        log.warn('Got error whilst reconnecting:', err);
                     });
             };
 
@@ -85,7 +88,7 @@ export class Client {
         try {
             await this.socket.connect();
         } catch (err) {
-            console.warn('[SocketManager] could not connect to server', err?.message ?? err);
+            log.warn('Could not connect to server', err?.message ?? err);
         }
     }
 

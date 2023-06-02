@@ -1,4 +1,7 @@
 import { emitter, type EventEmitter, encode, decode, type AcceptableSocketData } from '~/browser';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:socketManager');
 
 type Disposer = () => void;
 type DataHandler = (data?: AcceptableSocketData) => void;
@@ -54,7 +57,7 @@ export default class ClientSocketManager {
 
     private setupSocketListeners(socket: WebSocket) {
         const handleConnect = () => {
-            console.log(`[SocketManager] socket was opened`);
+            log.info(`Socket was opened`);
             this.emitter.emit('socket:connect');
         };
 
@@ -67,7 +70,7 @@ export default class ClientSocketManager {
             const { code, reason, wasClean } = event;
 
             if (!wasClean) {
-                console.error(`[SocketManager] socket was not closed cleanly, with code ${code}`);
+                log.error(`Socket was not closed cleanly, with code ${code}`);
             }
 
             this.afterDisconnect();
@@ -170,7 +173,7 @@ export default class ClientSocketManager {
             throw new Error('[SocketManager] you must specify a reason when closing if passing in custom code');
         }
         if (this.readyState === 'CLOSING') {
-            console.warn('[SocketManager] close called more than once');
+            log.warn('Close called more than once');
             return;
         }
         this.socket.close(code, reason);

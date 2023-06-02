@@ -1,9 +1,10 @@
 import wsServer from './WsServer';
 import crypto from 'node:crypto';
-import type net from 'node:net';
 import type http from 'node:http';
 import type { Socket } from './Socket';
-import core, { decode, type AcceptableSocketData } from '~/node';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:socketUtils');
 
 /**
  * Reads the data frame coming in from the wire
@@ -27,7 +28,7 @@ export function readFrame(data: Buffer, socket: Socket): { payload: Buffer; isFi
     switch (opcodeType) {
         case 'invalid':
         case 'close':
-            console.log(`[wss:read] got ${opcodeType} opcode, closing connection`);
+            log.debug(`[readFrame] got ${opcodeType} opcode, closing connection`);
             socket.dispose();
             return null;
         case 'text':

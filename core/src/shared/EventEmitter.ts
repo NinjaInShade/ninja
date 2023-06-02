@@ -1,3 +1,7 @@
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:eventemitter');
+
 export type EmitData = any;
 export type Listener = (...args: EmitData[]) => void;
 
@@ -20,7 +24,7 @@ export class EventEmitter {
             const max = this._maxListeners;
             const count = this.totalListenersCount;
             if (max !== 0 && max !== Infinity && count > max) {
-                console.warn(`EventEmitter exceeded max listeners of ${max}, currently at ${count} listeners`);
+                log.warn(`EventEmitter exceeded max listeners of ${max}, currently at ${count} listeners`);
             }
         };
 

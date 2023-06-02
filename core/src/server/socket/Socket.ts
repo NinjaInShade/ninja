@@ -3,6 +3,9 @@ import type net from 'node:net';
 import type WebSocketServer from './WsServer';
 import { createFrame, createDataQueue } from './utils';
 import { encode, decode, type AcceptableSocketData } from '~/node';
+import util from '@ninjalib/util';
+
+const log = util.logger('nw:socket');
 
 export type ID = string;
 
@@ -41,7 +44,7 @@ export class Socket {
         this.rawSocket = rawSocket;
         this.id = clientId;
 
-        console.log('[Socket] Created client:', this.id);
+        log.debug('Created client:', this.id);
 
         const queue = createDataQueue(this, (payload: string) => {
             this.emitter.emit('socket:data', payload);
@@ -97,7 +100,7 @@ export class Socket {
         if (SPECIAL_EVENTS.includes(event)) {
             throw new Error(`Event ${event} cannot be emitted as it is a reserved event name`);
         }
-        console.log('[wss] sending payload to client', this.id, ':', data);
+        log.debug('Sending payload to client', this.id, ':', data);
         const encodedPacket = encode({ event, data });
         const frame = createFrame(encodedPacket);
         this.rawSocket.write(frame);

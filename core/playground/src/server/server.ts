@@ -1,13 +1,14 @@
 import core from '~/node';
+import util from '@ninjalib/util';
 
-console.log('[docs] Starting server...');
+const log = util.logger('core:playground');
 
 const server = core.server();
 await server.start();
 
 server.on('connection', (socket) => {
     socket.on('ping', () => {
-        console.log('[docs] got ping message! Ponging back...');
+        log.info('got ping message! Ponging back...');
         server.broadcast('pong');
     });
 });

@@ -1,5 +1,8 @@
 import HttpManager, { type Express } from './HttpManager';
 import SocketManager, { type HandlerFn } from './socket/Manager';
+import { logger } from '@ninjalib/util';
+
+const log = logger('nw:server');
 
 type ServerOptions = {
     /**
@@ -30,7 +33,7 @@ export class Server {
 
     constructor(options: ServerOptions = {}) {
         if (Server._instance) {
-            console.warn('Server should only be initialised once in your project');
+            log.warn('Server should only be initialised once in your project');
         }
         Server._instance = this;
 
@@ -47,6 +50,7 @@ export class Server {
      * Starts the http server & starts managing web sockets
      */
     public async start() {
+        log.info('Starting server...');
         await this.httpManager.startServer();
 
         const httpServer = this.httpManager.server;
@@ -92,7 +96,7 @@ export class Server {
      */
     public async dispose() {
         const start = Date.now();
-        console.log('[server] disposing server');
+        log.info('Disposing server...');
 
         await this.httpManager.dispose();
         if (this.socketManager) {
@@ -101,7 +105,7 @@ export class Server {
 
         const end = Date.now();
         const timeTaken = `${end - start}ms`;
-        console.log('[server] disposed server safely in:', timeTaken);
+        log.good('Disposed server safely in:', timeTaken);
     }
 }
 
