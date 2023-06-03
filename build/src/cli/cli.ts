@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { scriptSelectMenu, scriptHelpMenu } from './help';
-import { parseArgs, logLine, logError, logWarn } from './helpers';
+import { logLine, logError, logWarn } from './utils';
+import { parseArgs } from '@ninjalib/util';
 import { createProject, createProjectOptions } from './createProject/script';
 import { copy, copyOptions } from './copy/script';
 import { vite, viteOptions } from './vite/script';
@@ -77,7 +78,7 @@ const main = async () => {
         return;
     }
 
-    const parsedArgs = parseArgs(args);
+    const parsedArgs = parseArgs(process.argv);
 
     // Script-specific help menu
     if (Object.keys(parsedArgs)?.[0] === '--help') {
