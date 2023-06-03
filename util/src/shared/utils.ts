@@ -32,9 +32,13 @@ export const colours = {
 };
 
 export const isBrowser = () => {
-    return typeof window !== 'undefined';
+    return typeof globalThis.window !== 'undefined';
 };
 
 export const isNode = () => {
-    return typeof process === 'object';
+    return typeof globalThis.process === 'object';
+};
+
+export const isProd = (): boolean => {
+    return isBrowser() ? import.meta.env?.PROD ?? false : process.env.NODE_ENV?.trim() === 'production';
 };

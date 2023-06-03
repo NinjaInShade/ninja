@@ -1,4 +1,4 @@
-import { isBrowser, colours as _colours } from './utils';
+import { isBrowser, colours as _colours, isProd } from './utils';
 
 const colours = _colours;
 if (isBrowser()) {
@@ -190,7 +190,10 @@ export class Logger {
      * - Won't show up if in production at all, regardless of LOG_DEBUG
      */
     public debug(...messages: any[]) {
-        this._log('debug', ...messages);
+        const logDebug = this.getEnvVar('LOG_DEBUG') !== null && !isProd();
+        if (logDebug) {
+            this._log('debug', ...messages);
+        }
     }
 
     /**

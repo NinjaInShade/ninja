@@ -86,19 +86,22 @@ export async function copyDirRecursive(source: string, target: string, options: 
         const srcPath = path.join(source, file.name);
         const targetPath = path.join(target, file.name);
 
+        const srcFile = path.basename(srcPath);
+        const targetFile = path.basename(targetPath);
+
         if (stat.isDirectory()) {
-            log.debug(`[copyDirRecursive] Copying directory ${srcPath} to ${targetPath}`);
+            log.debug(`[copyDirRecursive] Copying directory ${srcFile} to ${targetFile}`);
             await copyDirRecursive(srcPath, targetPath, opts);
         } else if (stat.isSymbolicLink()) {
             if (skipSymlinks) {
-                log.debug(`[copyDirRecursive] Skipping copying symlink ${srcPath} to ${targetPath}`);
+                log.debug(`[copyDirRecursive] Skipping copying symlink ${srcFile} to ${targetFile}`);
                 continue;
             }
-            log.debug(`[copyDirRecursive] Copying symbolic link ${srcPath} to ${targetPath}`);
+            log.debug(`[copyDirRecursive] Copying symbolic link ${srcFile} to ${targetFile}`);
             const link = await fs.readlink(srcPath);
             await fs.symlink(link, targetPath);
         } else {
-            log.debug(`[copyDirRecursive] Copying file ${srcPath} to ${targetPath}`);
+            log.debug(`[copyDirRecursive] Copying file ${srcFile} to ${targetFile}`);
             await copyFile(srcPath, targetPath, opts.force);
         }
     }
