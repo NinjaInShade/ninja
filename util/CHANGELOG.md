@@ -7,6 +7,13 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -   add customisation of namespace colour for logger
 -   improve error stack formatting for logger
+-   flatten export structure
+-   build project using our build package
+-   added `fs.pathExists()`
+-   added `fs.copyFile()`
+-   added `fs.copyDirRecursive()`
+-   added `shell.runAsync()`
+-   added `shell.parseArgs()`
 
 ## [0.2.3] - 02/05/2023
 
