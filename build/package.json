@@ -24,6 +24,7 @@
     "author": "Leon Michalak",
     "license": "ISC",
     "dependencies": {
+        "@ninjalib/util": "^0.3.1",
         "@sveltejs/vite-plugin-svelte": "^2.1.1",
         "@types/node": "^18.14.5",
         "@types/semver": "^7.3.13",
