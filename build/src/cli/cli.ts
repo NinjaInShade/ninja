@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { scriptSelectMenu, scriptHelpMenu } from './help';
-import { logLine, logError, logWarn } from './utils';
+import { logLine, logError, logWarn, scriptSelectMenu, scriptHelpMenu } from './utils';
 import { parseArgs } from '@ninjalib/util';
 import { createProject, createProjectOptions } from './createProject/script';
 import { copy, copyOptions } from './copy/script';
@@ -66,8 +65,11 @@ const main = async () => {
 
     // Show all scripts for selection
     if (!option) {
-        const selected = await scriptSelectMenu();
-        option = optionKeys[selected - 1] || selected.toString();
+        const selection = await scriptSelectMenu();
+        if (!selection) {
+            return;
+        }
+        option = selection;
     }
 
     // Invalid script

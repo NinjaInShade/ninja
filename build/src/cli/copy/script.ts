@@ -1,10 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { logLine } from '../utils';
+import { selectMenu, readTmp, writeTmp } from '../utils';
 import { logger, colours, runAsync, pathExists, copyFile, copyDirRecursive } from '@ninjalib/util';
-import readline from 'node:readline/promises';
-import { stdin, stdout } from 'node:process';
-import os from 'node:os';
 
 const log = logger('build:copy');
 
@@ -57,35 +54,6 @@ async function getTargetOptions(srcDir: string): Promise<string[]> {
     return options;
 }
 
-async function showTargetSelectMenu(targetOptions: string[], DEFAULT_TARGET: string | number, srcName: string) {
-    logLine('\n' + colours.bold + colours.blue + '[COPY] Select which project/lib to copy to:');
-    logLine(colours.grey + 'Copies source package & dependencies to the target' + '\n');
-    for (let i = 0; i < targetOptions.length; i++) {
-        const option = targetOptions[i];
-        logLine(colours.blue + colours.bold + `${i + 1})` + colours.reset + colours.grey + ' ' + `${`@ninjalib/${option}` === srcName ? colours.strikethrough : ''}` + option + colours.reset);
-    }
-    const rl = readline.createInterface(stdin, stdout);
-    let selectedTarget: string | number | undefined;
-    while (selectedTarget === undefined) {
-        const answer = await rl.question(`\nLocation to copy to (${DEFAULT_TARGET}) >> `);
-        if (!answer.length) {
-            selectedTarget = DEFAULT_TARGET;
-            break;
-        }
-
-        // if number, user selected by list index
-        // if string, user typed target name directly
-        const answerCoerced = Number(answer);
-        if (!Number.isNaN(answerCoerced)) {
-            selectedTarget = answerCoerced;
-        } else {
-            selectedTarget = answer;
-        }
-    }
-    rl.close();
-    return selectedTarget;
-}
-
 type CopyArgs = {
     sourceDir?: string;
     targetDir?: string;
@@ -98,7 +66,6 @@ type CopyArgs = {
  * useful for testing libs in real projects without publishing
  */
 export async function copy(args: CopyArgs) {
-    const copyTmpFile = path.join(os.tmpdir(), 'ninjalib-copy');
     const cwd = process.cwd();
     const force = args['--force'];
 
@@ -118,11 +85,10 @@ export async function copy(args: CopyArgs) {
 
     if (!args.targetDir) {
         const targetOptions = await getTargetOptions(srcDir);
-        const tmpExists = await pathExists(copyTmpFile);
-        if (!tmpExists) {
-            await fs.writeFile(copyTmpFile, '', 'utf-8');
+        const tmpContents = await readTmp('ninjalib-copy');
+        if (tmpContents.length) {
+            log.debug(`Remembered target ${tmpContents} from temp`);
         }
-        const tmpContents = await fs.readFile(copyTmpFile, 'utf-8');
         const defaultOption = tmpContents.length ? tmpContents : targetOptions[0];
 
         if (!targetOptions.length) {
@@ -130,16 +96,25 @@ export async function copy(args: CopyArgs) {
             return;
         }
 
-        const selected = await showTargetSelectMenu(targetOptions, defaultOption, srcPkgJson.name);
-        const found = targetOptions.find((opt) => opt === selected) ?? targetOptions[Number(selected) - 1];
+        const selected = await selectMenu({
+            title: '[COPY] Select which project/lib to copy to:',
+            subtitle: 'Copies source package & dependencies to the target',
+            options: targetOptions,
+            question: 'Location to copy to',
+            optionFormatter: (opt) => {
+                if (`@ninjalib/${opt}` === srcPkgJson.name) {
+                    return colours.strikethrough + opt;
+                }
 
-        if (!found) {
-            log.error(`Target ${selected} is not a valid option`);
+                return opt;
+            },
+            defaultOption,
+            log,
+        });
+        if (!selected) {
             return;
         }
-
-        logLine('');
-        selectedTarget = found;
+        selectedTarget = selected;
     }
 
     // get target package.json
@@ -148,7 +123,8 @@ export async function copy(args: CopyArgs) {
     const targetPkgJson = await readPackageJson(targetPkgJsonPath, 'target');
     if (!targetPkgJson) return;
 
-    await fs.writeFile(copyTmpFile, args.targetDir ?? selectedTarget, 'utf-8');
+    log.debug(`Saving target ${args.targetDir ?? selectedTarget} to temp so it can be remembered`);
+    await writeTmp('ninjalib-copy', args.targetDir ?? selectedTarget);
 
     if (srcPkgJson.name === targetPkgJson.name) {
         log.error(`Cannot copy ${srcPkgJson.name} to itself`);
