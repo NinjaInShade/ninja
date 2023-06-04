@@ -1,7 +1,9 @@
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logInfo, logError } from '../helpers';
+import { logger } from '@ninjalib/util';
 import child_process from 'node:child_process';
+
+const log = logger('build:vite');
 
 /**
  * Runtime/builder for vite
@@ -11,14 +13,14 @@ export async function vite(args: Record<string, string>) {
     const devMode = args['--dev'];
     const buildMode = args['--build'];
     const previewMode = args['--preview'];
-    const viteUserArgs = args['viteArgs'];
+    const extraViteArgs = args['viteArgs'];
 
     const passedNoMode = !devMode && !buildMode && !previewMode;
 
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
 
-    const viteArgs = [];
+    const viteArgs: string[] = [];
 
     if (devMode || passedNoMode) {
         // what base options to pass to dev?
@@ -30,8 +32,8 @@ export async function vite(args: Record<string, string>) {
         viteArgs.push('preview');
     }
 
-    if (viteUserArgs) {
-        viteArgs.push(...viteUserArgs.split(','));
+    if (extraViteArgs) {
+        viteArgs.push(...extraViteArgs.split(','));
     }
 
     const configFile = args.configFile ? path.join(cwd, args.configFile) : path.join(__dirname, '../../../configs/vite.config.ts');
@@ -42,26 +44,26 @@ export async function vite(args: Record<string, string>) {
     const subprocess = child_process.spawn('npx vite', viteArgs, { stdio: 'inherit', shell: true });
 
     subprocess.on('error', (err) => {
-        logError(`failed to start subprocess: ${err}`);
+        log.error(`Failed to start subprocess: ${err}`);
     });
 
     subprocess.stdout?.on('data', (data) => {
-        logInfo(`stdout: ${data}`);
+        log.info(`Stdout: ${data}`);
     });
 
     subprocess.stderr?.on('data', (data) => {
-        logError(`stderr: ${data}`);
+        log.error(`Stderr: ${data}`);
     });
 
     subprocess.on('close', (code) => {
-        logInfo(`child process exited with code ${code}`);
+        log.info(`Child process exited with code ${code}`);
     });
 }
 
 export const viteOptions = {
-    '(optional) --dev': 'Runs the dev server in cwd',
-    '(optional) --build': 'Builds the project in cwd',
-    '(optional) --preview': 'Previews the build in cwd',
-    '(optional) configFile': 'Alternative config file (relative to cwd)',
-    '(optional) --viteArgs': 'Args to pass to vite, delimited by commas',
+    '(optional) --dev': 'Runs the dev server',
+    '(optional) --build': 'Builds the project',
+    '(optional) --preview': 'Previews the build',
+    '(optional) configFile': 'Alternative config file (relative to CWD)',
+    '(optional) viteArgs': 'Args to pass to vite, delimited by commas',
 };
