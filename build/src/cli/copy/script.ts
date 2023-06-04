@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { selectMenu, readTmp, writeTmp } from '../utils';
-import { logger, colours, runAsync, pathExists, copyFile, copyDirRecursive } from '@ninjalib/util';
+import { logger, colours, runAsync, copyFile, copyDirRecursive } from '@ninjalib/util';
 
 const log = logger('build:copy');
 
