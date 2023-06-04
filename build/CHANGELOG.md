@@ -6,7 +6,11 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   renamed `file` to `entry` option for node script
+-   removed `--no-install` option from copy script
+-   copy script now remembers previously selected target
+-   use utils from @ninjalib/util
+-   use new logger
 
 ## [0.1.18] - 21/04/2023
 
