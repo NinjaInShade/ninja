@@ -8,7 +8,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -
 
-## [0.2.0] - 04/06/2023
+## [0.2.1] - 04/06/2023
 
 -   renamed `file` to `entry` option for node script
 -   removed `--no-install` option from copy script
