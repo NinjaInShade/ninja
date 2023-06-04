@@ -48,7 +48,7 @@ export async function publish(args: PublishOptions) {
     const pkgNamePrefix = '@ninjalib/';
     const pkgCurrVersion = pkgJson.version;
     const libName = pkgName.substring(pkgNamePrefix.length);
-    const commitMessage = args.message ?? `(${libName}) version %s`;
+    const commitMessage = args.message ?? `(${libName}) version %v`;
 
     if (!pkgName.startsWith('@ninjalib')) {
         log.error('Must be in a @ninjalib package to publish');
@@ -229,5 +229,5 @@ export async function publish(args: PublishOptions) {
 export const publishOptions = {
     '(optional) type': 'The type of version upgrade <major|minor|patch>',
     '(optional) release-branch': 'The branch were releases are tagged and published at',
-    '(optional) message': 'The message used in the version commit (must use %s somewhere - replaced with version number in runtime)',
+    '(optional) message': 'The message used in the version commit (must use %v somewhere - replaced with version number in runtime)',
 };
