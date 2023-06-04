@@ -5,18 +5,18 @@
     "type": "module",
     "exports": {
         ".": {
-            "default": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "default": "./dist/node/index.js",
+            "types": "./dist/node/index.d.ts"
         },
         "./configs/tsconfig.json": "./configs/tsconfig.json",
         "./configs/playground.tsconfig.json": "./configs/playground.tsconfig.json"
     },
+    "types": "dist/node/index.d.ts",
     "bin": {
-        "ninja-cli": "./dist/cli/cli.js"
+        "ninja-cli": "./dist/node/cli/cli.js"
     },
-    "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsx ./src/cli/cli.ts node --build file=./src outDir=./dist & npm link",
+        "build": "tsx ./src/cli/cli.ts node --build entry=./src & npm link",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },
