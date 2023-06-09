@@ -117,6 +117,14 @@ export class Logger {
     private disableLogging = false;
     private enabledLogLevels: Set<AbbrLogLevel> = new Set();
 
+    /**
+     * The name of the current process e.g. vite.
+     * Will prefix the start of the log with this.
+     * Set through the `LOG_PROCESS_NAME` env var, and should be 4 or less characters long
+     * @default null
+     */
+    public processName: string | null;
+
     constructor(namespace, options: LoggerOptions = {}) {
         const defaultOptions = {
             showFilename: Logger.showFilename,
@@ -125,11 +133,15 @@ export class Logger {
             namespaceColour: Logger.namespaceColour,
         };
 
+        const processName = getEnvVar('LOG_PROCESS_NAME')?.trim() ?? null;
+        this.processName = processName ? processName : null;
+
         if (!namespace) {
             throw new Error('You must provide a namespace to the logger');
         }
 
         this.namespace = namespace;
+
         this.options = Object.assign({}, defaultOptions, options);
 
         const logLevelsVar = getEnvVar('LOG_LEVELS');
@@ -310,6 +322,12 @@ export class Logger {
         const showBeginningMeta = showDate || showTimestamp || showFilename;
         let msg = '';
 
+        // Process name
+        msg += colours.cyan + '[' + this.padString(this.processName ?? '????', 4) + ']' + ' ';
+
+        if (showBeginningMeta) {
+            msg += colours.grey + '<';
+        }
         if (showDate) {
             const date = new Date().toLocaleDateString('en-GB');
             msg += date;
@@ -325,7 +343,7 @@ export class Logger {
             msg += this.padString(file, 9);
         }
         if (showBeginningMeta) {
-            msg = colours.grey + '<' + msg + colours.grey + '>' + ' ';
+            msg += colours.grey + '>' + ' ';
         }
 
         // log type icon + text
@@ -366,6 +384,7 @@ export class Logger {
     }
 
     private padString(msg: string, length: number) {
+        msg = msg.trim();
         let paddedMsg = msg.padEnd(length, ' ');
         if (msg.length > length) {
             paddedMsg = paddedMsg.substring(0, length - 3) + '...';
