@@ -239,10 +239,10 @@ export class Logger {
     /**
      * Process and return what user wants to log
      *
-     * If on server, will pad terminal so messages align nicely
+     * If on server, will pad terminal so messages align nicely (but not in prod)
      */
     private generateMessages(messages: any[], metaLength: number) {
-        if (isBrowser() || process.stdout.columns === undefined) {
+        if (isBrowser() || process.stdout.columns === undefined || isProd()) {
             return messages;
         }
 
