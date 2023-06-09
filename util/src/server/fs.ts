@@ -33,7 +33,7 @@ export async function copyFile(source: string, target: string, force = false) {
         throw new Error(`[copyFile] Source file '${sourceFile}' doesn't exist`);
     }
     if (!srcExists && force) {
-        log.warn(`[copyFile] Failed to copy '${sourceFile}' as it doesn't exist, but got force so gracefully stopping`);
+        log.warn(`[copyFile] Failed to copy '${sourceFile}' as it doesn't exist`);
         return;
     }
 
@@ -66,7 +66,7 @@ export async function copyDirRecursive(source: string, target: string, options: 
         throw new Error(`[copyDirRecursive] Source dir '${sourceDir}' doesn't exist`);
     }
     if (!srcExists && force) {
-        log.warn(`[copyDirRecursive] Failed to copy '${sourceDir}' as it doesn't exist, but got force so gracefully stopping`);
+        log.warn(`[copyDirRecursive] Failed to copy '${sourceDir}' as it doesn't exist`);
         return;
     }
 
@@ -76,7 +76,7 @@ export async function copyDirRecursive(source: string, target: string, options: 
         throw new Error(`[copyDirRecursive] Target dir '${targetDir}' doesn't exist`);
     }
     if (!targetExists && force) {
-        log.warn(`[copyDirRecursive] Target dir '${targetDir}' doesn't exist, but got force so creating it`);
+        log.warn(`[copyDirRecursive] Target dir '${targetDir}' doesn't exist`);
         await fs.mkdir(target, { recursive: true });
     }
 
