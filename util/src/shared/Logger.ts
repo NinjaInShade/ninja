@@ -1,4 +1,4 @@
-import { isBrowser, colours as _colours, isProd } from './utils';
+import { isBrowser, colours as _colours, isProd, getEnvVar } from './utils';
 
 const colours = _colours;
 if (isBrowser()) {
@@ -132,8 +132,8 @@ export class Logger {
         this.namespace = namespace;
         this.options = Object.assign({}, defaultOptions, options);
 
-        const logLevelsVar = this.getEnvVar('LOG_LEVELS');
-        const logNamespacesVar = this.getEnvVar('LOG_NAMESPACES');
+        const logLevelsVar = getEnvVar('LOG_LEVELS');
+        const logNamespacesVar = getEnvVar('LOG_NAMESPACES');
 
         if (logLevelsVar) {
             const logLevelsParsed = parseEnvVarList(logLevelsVar) as AbbrLogLevel[];
@@ -190,7 +190,7 @@ export class Logger {
      * - Won't show up if in production at all, regardless of LOG_DEBUG
      */
     public debug(...messages: any[]) {
-        const logDebug = this.getEnvVar('LOG_DEBUG') !== null && !isProd();
+        const logDebug = getEnvVar('LOG_DEBUG') !== null && !isProd();
         if (logDebug) {
             this._log('debug', ...messages);
         }
@@ -359,10 +359,6 @@ export class Logger {
             }
         }
         return null;
-    }
-
-    private getEnvVar(variable: string) {
-        return (isBrowser() ? import.meta?.env?.[variable] : process.env[variable]) ?? null;
     }
 
     private getRawString(txt: string) {
