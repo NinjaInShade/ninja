@@ -11,28 +11,28 @@ async function runtime(args) {
 
     const entryPoint = args.entry ? path.join(cwd, args.entry) : path.join(cwd, 'src/server/server.ts');
 
-    let subprocess: child_process.ChildProcess;
-    if (args['--watch']) {
-        subprocess = child_process.spawn('npx tsx watch', ['--clear-screen=false', entryPoint], { stdio: 'inherit', shell: true });
-    } else {
-        subprocess = child_process.spawn('npx tsx', [entryPoint], { stdio: 'inherit', shell: true });
+    const tsx = path.join(cwd, 'node_modules', '.bin', 'tsx');
+    log.debug('Running tsx from', tsx);
+
+    // stdio needs to be inherit for Logger terminal padding
+    const env = { ...process.env, LOG_PROCESS_NAME: 'node' };
+    const subprocess = child_process.spawn(tsx, [...(args['--watch'] ? ['watch', '--clear-screen=false'] : []), entryPoint], { stdio: 'inherit', shell: true, env });
+
+    process.on('exit', (code) => {
+        log.debug('Node script exited with code', code);
+    });
+
+    function sigHandler(signal: NodeJS.Signals) {
+        log.debug('Got', signal, 'signal, passing down to the node process');
+
+        const successful = subprocess.kill(signal);
+        if (!successful) {
+            log.debug('Node process did not die successfully');
+        }
     }
 
-    subprocess.on('error', (err) => {
-        log.error(`Failed to start subprocess: ${err}`);
-    });
-
-    subprocess.stdout?.on('data', (data) => {
-        log.info(`Stdout: ${data}`);
-    });
-
-    subprocess.stderr?.on('data', (data) => {
-        log.error(`Stderr: ${data}`);
-    });
-
-    subprocess.on('close', (code) => {
-        log.info(`Child process exited with code ${code}`);
-    });
+    process.on('SIGINT', () => sigHandler('SIGINT'));
+    process.on('SIGTERM', () => sigHandler('SIGTERM'));
 }
 
 async function build(args) {
