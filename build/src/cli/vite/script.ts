@@ -1,5 +1,4 @@
-import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { logger } from '@ninjalib/util';
 import child_process from 'node:child_process';
 
@@ -17,9 +16,6 @@ export async function vite(args: Record<string, string>) {
 
     const passedNoMode = !devMode && !buildMode && !previewMode;
 
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-
     const viteArgs: string[] = [];
 
     if (devMode || passedNoMode) {
@@ -36,28 +32,36 @@ export async function vite(args: Record<string, string>) {
         viteArgs.push(...extraViteArgs.split(','));
     }
 
-    const configFile = args.configFile ? path.join(cwd, args.configFile) : path.join(__dirname, '../../../configs/vite.config.ts');
+    const configFile = args.configFile ? path.join(cwd, args.configFile) : path.join(cwd, 'node_modules', '@ninjalib', 'build', 'configs', 'vite.config.ts');
     viteArgs.push('--clearScreen=false');
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
 
-    const subprocess = child_process.spawn('npx vite', viteArgs, { stdio: 'inherit', shell: true });
+    const vite = path.join(cwd, 'node_modules', '.bin', 'vite');
+    log.debug('Running vite from', vite);
 
-    subprocess.on('error', (err) => {
-        log.error(`Failed to start subprocess: ${err}`);
+    // stdio needs to be inherit for Logger terminal padding
+    const env = { ...process.env, LOG_PROCESS_NAME: 'vite' };
+    process.stderr.isTTY = true;
+    const subprocess = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true, env });
+
+    subprocess.stdout?.pipe(process.stdout);
+
+    process.on('exit', (code) => {
+        log.debug('Vite script exited with code', code);
     });
 
-    subprocess.stdout?.on('data', (data) => {
-        log.info(`Stdout: ${data}`);
-    });
+    function sigHandler(signal: NodeJS.Signals) {
+        log.debug('Got', signal, 'signal, passing down to the vite process');
 
-    subprocess.stderr?.on('data', (data) => {
-        log.error(`Stderr: ${data}`);
-    });
+        const successful = subprocess.kill(signal);
+        if (!successful) {
+            log.debug('Vite process did not die successfully');
+        }
+    }
 
-    subprocess.on('close', (code) => {
-        log.info(`Child process exited with code ${code}`);
-    });
+    process.on('SIGINT', () => sigHandler('SIGINT'));
+    process.on('SIGTERM', () => sigHandler('SIGTERM'));
 }
 
 export const viteOptions = {
