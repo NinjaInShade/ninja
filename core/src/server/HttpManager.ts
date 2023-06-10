@@ -49,7 +49,7 @@ export default class HttpManager {
      */
     public async dispose() {
         return new Promise<void>((resolve, reject) => {
-            if (!this._server) {
+            if (!this._server || !this._server.listening) {
                 return;
             }
 

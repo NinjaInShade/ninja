@@ -44,6 +44,20 @@ export class Server {
 
         this.httpManager = new HttpManager(this.options.port);
         this.http = this.httpManager.app;
+
+        const sigHandler = async (signal: NodeJS.Signals) => {
+            log.info('Disposing because got', signal);
+            await this.dispose().catch((err) => {
+                throw err;
+            });
+        };
+
+        process.once('SIGINT', async () => {
+            await sigHandler('SIGINT');
+        });
+        process.once('SIGTERM', async () => {
+            await sigHandler('SIGTERM');
+        });
     }
 
     /**
