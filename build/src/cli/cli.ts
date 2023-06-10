@@ -7,6 +7,7 @@ import { vite, viteOptions } from './vite/script';
 import { node, nodeOptions } from './node/script';
 import { test, testOptions } from './test/script';
 import { publish, publishOptions } from './publish/script';
+import { start, startOptions } from './start/script';
 
 // TODO: add version-diff script
 // since we're in one repo, and libraries/projects get published and tagged as {libName}-{version}
@@ -33,6 +34,10 @@ export const options: Record<string, ScriptOptions> = {
     vite: {
         script: vite,
         helpOptions: viteOptions,
+    },
+    start: {
+        script: start,
+        helpOptions: startOptions,
     },
     node: {
         script: node,
