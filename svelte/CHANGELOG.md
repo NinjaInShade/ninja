@@ -5,7 +5,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   added NW.Select
 
 ## [0.0.6] - 30/03/2023
 
