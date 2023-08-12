@@ -59,7 +59,6 @@
         color: var(--grey-300);
         font-size: var(--fs);
         line-height: var(--fs-lh);
-        width: fit-content;
         flex: 1 0 0px;
         gap: 4px;
     }
