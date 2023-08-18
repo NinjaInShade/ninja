@@ -70,27 +70,29 @@
         }
     });
 
-    const calculateHeight = async (value: string | null) => {
-        if (!value) return;
-        txAreaInstance.value = value;
-        if (onChange) {
-            await onChange(value);
-        }
+    const calculateHeight = async (newValue: string | null) => {
+        if (!newValue || !txAreaInstance) return;
+        txAreaInstance.value = newValue;
+        value = newValue;
 
         if (!autoResize) return;
-
         const { scrollHeight } = txAreaInstance;
 
-        // Prevents height shrinking (if you actually delete text and you get less rows, scrollHeight just minuses -2 every type event until its at the texts height so doesnt resize properly)
+        // Prevents height shrinking (if you actually delete text and you get less rows, scrollHeight just minuses -2 every type event until its at the texts height so doesn't resize properly)
         // A workaround to this would be to calculate height based on rows and a texts' height, but adds complexity. Note: go this route if it is really annoying.
         if (scrollHeight > maxTxAreaInstanceHeight) {
             maxTxAreaInstanceHeight = scrollHeight;
             containerInstance.style.height = `${scrollHeight}px`;
         }
+
+        if (onChange) {
+            await onChange(newValue);
+        }
     };
 
     $: {
         value;
+        txAreaInstance;
         calculateHeight(value);
     }
 </script>
