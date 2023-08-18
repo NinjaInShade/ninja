@@ -300,6 +300,7 @@
         display: none;
         position: absolute;
         border-radius: var(--border-radius);
+        border: 1px solid var(--grey-700);
         left: 0;
     }
 
@@ -318,6 +319,10 @@
         color: var(--grey-100);
         width: 100%;
         gap: 4px;
+    }
+
+    .select-menu-item:not(:last-child) {
+        border-bottom: 1px solid var(--grey-700);
     }
 
     .select-S .select-menu {
