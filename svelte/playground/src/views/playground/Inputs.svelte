@@ -88,35 +88,35 @@
     <!-- TextArea -->
     <div class="column tx-column">
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username" {size}>
+            <NW.Fieldset label="Username" htmlName="Username" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={username} {size} />
             </NW.Fieldset>
             <p class="lead">Default</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username" {size}>
+            <NW.Fieldset label="Username" htmlName="Username" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={username} placeholder="Enter your username" {size} />
             </NW.Fieldset>
             <p class="lead">Placeholder</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username" {size}>
+            <NW.Fieldset label="Username" htmlName="Username" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={username} placeholder="Enter your username" disabled {size} />
             </NW.Fieldset>
             <p class="lead">Disabled</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email" {size}>
+            <NW.Fieldset label="Email" htmlName="Email" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={email} placeholder="Enter your email" loading {size} />
             </NW.Fieldset>
             <p class="lead">Loading</p>
         </div>
 
         <div class="row">
-            <NW.Fieldset label="Email" htmlName="Email" {size}>
+            <NW.Fieldset label="Email" htmlName="Email" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={email} onChange={testInputChange} error="Not a valid email!" placeholder="Enter your email" {size} />
             </NW.Fieldset>
             <p class="lead">Error</p>
@@ -125,7 +125,7 @@
 
     <div class="column">
         <div class="row">
-            <NW.Fieldset label="Username" htmlName="Username" {size}>
+            <NW.Fieldset label="Username" htmlName="Username" {size} style="flex: 1 0 0px">
                 <NW.TextArea bind:value={username} autoResize {size} />
             </NW.Fieldset>
             <p class="lead">Auto resize</p>
@@ -180,42 +180,42 @@
     <!-- Select TODO: investigate why we need the extra styles on col/row, but not for NW.Input/NW.TextArea... -->
     <div class="column" style="width: 100%">
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear />
             </NW.Fieldset>
             <p class="lead">Default</p>
         </div>
 
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear placeholder="Select..." />
             </NW.Fieldset>
             <p class="lead">Placeholder</p>
         </div>
 
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear placeholder="Select..." disabled />
             </NW.Fieldset>
             <p class="lead">Disabled</p>
         </div>
 
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear placeholder="Select..." loading />
             </NW.Fieldset>
             <p class="lead">Loading</p>
         </div>
 
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear placeholder="Select..." error="This is an invalid selection" />
             </NW.Fieldset>
             <p class="lead">Error</p>
         </div>
 
         <div class="row" style="flex: 1 0 0px">
-            <NW.Fieldset label="Category" , htmlName="category" {size}>
+            <NW.Fieldset label="Category" htmlName="category" {size}>
                 <NW.Select data={categoryData} bind:value={category} {size} allowClear placeholder="Select..." multiSelect />
             </NW.Fieldset>
             <p class="lead">Multi-select</p>

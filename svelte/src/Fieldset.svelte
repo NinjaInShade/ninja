@@ -42,7 +42,7 @@
     setContext('htmlName', htmlName);
 </script>
 
-<fieldset class="fieldset fieldset-{size} {_class || ''}" style="--label-dir: {labelDir} {style || ''}" class:row={labelDir === 'row' || labelDir === 'row-reverse'} {title}>
+<fieldset class="fieldset fieldset-{size} {_class || ''}" style="--label-dir: {labelDir}; {style || ''}" class:row={labelDir === 'row' || labelDir === 'row-reverse'} {title}>
     <label class:visually-hidden={hideLabel} for={htmlName}>{label}</label>
     <slot {htmlName} />
 </fieldset>
@@ -59,7 +59,6 @@
         color: var(--grey-300);
         font-size: var(--fs);
         line-height: var(--fs-lh);
-        flex: 1 0 0px;
         gap: 4px;
     }
 
