@@ -174,18 +174,14 @@
 
     /* Icon */
 
-    .input-S .input.icon {
+    .input-S .input.icon:not(.icon-start) {
         padding-right: 30px;
     }
-    .input-M .input.icon {
+    .input-M .input.icon:not(.icon-start) {
         padding-right: 40px;
     }
-    .input-L .input.icon {
+    .input-L .input.icon:not(.icon-start) {
         padding-right: 42px;
-    }
-
-    .input.icon-start {
-        padding-right: 0;
     }
 
     .input-S .input.icon-start {
