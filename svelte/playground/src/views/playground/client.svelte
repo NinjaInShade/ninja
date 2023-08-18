@@ -3,6 +3,7 @@
     import Inputs from './Inputs.svelte';
     import Misc from './Misc.svelte';
     import Typography from './Typography.svelte';
+    import Table from './Table.svelte';
     import NW from '~/index';
 
     const tabs = [
@@ -10,6 +11,7 @@
         ['Inputs', Inputs],
         ['Misc', Misc],
         ['Typography', Typography],
+        ['Table', Table],
     ];
 </script>
 
