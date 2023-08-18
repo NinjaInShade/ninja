@@ -16,6 +16,11 @@ export default class HttpManager {
     constructor(port) {
         this.port = port;
         this._app = express();
+
+        this._app.use((req, res, next) => {
+            res.header('Access-Control-Allow-Origin', '*');
+            next();
+        });
     }
 
     /**
