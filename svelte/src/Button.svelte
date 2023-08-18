@@ -18,6 +18,7 @@
     @param textColor? {string}: Sets the color of the text
     @param iconColor? {string}: Sets the color of the icon
     @param ghost? {boolean}: Sets the ghost style (note: icon/text color props only affect the hover colors in this mode)
+    @param text? {string}: Text to display in the button.
 
     @example
         <NW.Button icon="trash-can" theme="primary-200" {loading} onClick={deleteTicket}>Delete</NW.Button>
@@ -53,6 +54,12 @@
     export let iconColor: string = 'var(--white)';
     /** Sets the ghost style (note: icon/text color props only affect the hover colors in this mode) */
     export let ghost: boolean | undefined = undefined;
+    /**
+     * Text to display in the button.
+     * Useful for where you are rendering
+     * NW.Button with svelte:component and can't use the slot
+     */
+    export let text: string | undefined = undefined;
 
     const parsedTheme = `var(--${theme})`;
     const parsedThemeHover = `var(--${theme}-hover)`;
@@ -113,7 +120,11 @@
     {#if icon}
         <NW.Icon name={icon} --color={iconColorParsed} --size={size === 'S' ? '12px' : '16px'} />
     {/if}
-    <slot />
+    {#if text}
+        {text}
+    {:else}
+        <slot />
+    {/if}
     {#if _loading}
         <div class="spinner-container">
             <NW.Spinner --color={spinnerColor} />
