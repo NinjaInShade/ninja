@@ -352,4 +352,19 @@
         text-align: center;
         color: var(--grey-500);
     }
+
+    .table-container::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: var(--grey-800);
+    }
+
+    .table-container::-webkit-scrollbar {
+        background-color: var(--grey-800);
+        width: 12px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: var(--grey-700);
+    }
 </style>
