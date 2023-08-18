@@ -40,6 +40,8 @@
     export let selectedKeys: number[] | undefined = undefined;
     /** Defines whether the table is selectable */
     export let selectable: boolean = false;
+    /** Defines whether the table is sortable */
+    export let sortable: boolean = true;
     /** Function that fires of upon selection of a row */
     export let onSelect: ((row: Row, e: MouseEvent) => Promise<void> | void) | undefined = undefined;
 
@@ -54,7 +56,7 @@
     let tableData: Row[];
     $: {
         const originalData = [...data];
-        if (!sortKey) {
+        if (!sortKey || !sortable) {
             tableData = originalData;
         } else {
             tableData = sortData(originalData, sortKey, sortDir);
@@ -100,6 +102,10 @@
     }
 
     const setSort = (key: string) => {
+        if (!sortable) {
+            return;
+        }
+
         if (sortKey !== key) {
             sortKey = key;
             sortDir = 'desc';
@@ -201,9 +207,9 @@
                 {#each columns as col}
                     {@const style = getCellStyle(col)}
                     <th {style} class="th-cell">
-                        <button on:click={() => setSort(col.key)}>
+                        <button style="cursor: {sortable ? 'pointer' : 'unset'}" on:click={() => setSort(col.key)}>
                             {col.label ?? col.key}
-                            {#if sortKey && sortKey === col.key}
+                            {#if sortable && sortKey && sortKey === col.key}
                                 <NW.Icon name="arrow-up-wide-short" class="table-header-sort-icon" style={sortDir === 'asc' ? 'transform: rotateX(180deg)' : ''} --size="14px" --color="var(--grey-500)" />
                             {/if}
                         </button>
@@ -321,7 +327,6 @@
         display: inline-flex;
         justify-content: flex-start;
         align-items: center;
-        cursor: pointer;
         font-size: var(--fs);
         line-height: var(--fs);
         color: var(--white);
