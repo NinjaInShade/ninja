@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.3.0] - 20/08/2023
+
 -   add `ninja-cli start` with wtfnode dump support via `WTF=ms` env
 
 ## [0.2.1] - 04/06/2023
