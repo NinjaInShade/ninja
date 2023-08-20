@@ -9,17 +9,16 @@ const log = logger('build:node');
 export async function runtime(args) {
     const cwd = process.cwd();
     const entryPoint = args.entry ? path.join(cwd, args.entry) : path.join(cwd, 'src/server/server.ts');
-    const tsx = path.join(cwd, 'node_modules', '.bin', 'tsx');
 
     const tsxArgs: string[] = [];
     if (args['--watch']) {
         tsxArgs.push('watch', '--clear-screen=false');
     }
     tsxArgs.push(entryPoint);
-    log.debug('Running tsx from', tsx, 'with args', tsxArgs);
+    log.debug('Running tsx with args', tsxArgs);
 
     // stdio needs to be inherit for Logger terminal padding
-    const subProc = child_process.spawn(tsx, tsxArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'node' } });
+    const subProc = child_process.spawn('npx tsx', tsxArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'node' } });
 
     subProc.on('exit', (code, signal) => {
         log.debug(`Node process exited with code '${code}' and signal '${signal}'`);
@@ -47,11 +46,10 @@ async function build(args) {
         include: [entryPoint],
     };
     await fs.writeFile(tempFilePath, JSON.stringify(tempFile));
-    const tsc = path.join(cwd, 'node_modules', '.bin', 'tsc');
 
     try {
         try {
-            await runAsync(`${tsc} --project ${tempFilePath}`);
+            await runAsync(`npx tsc --project ${tempFilePath}`);
         } catch (err) {
             // pass - most of the time this is just tsc complaining,
             // the command doesn't actually "fail"

@@ -37,8 +37,7 @@ export async function vite(args: Record<string, string>) {
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
 
-    const vite = path.join(cwd, 'node_modules', '.bin', 'vite');
-    log.debug('Running vite from', vite, 'with args', viteArgs);
+    log.debug('Running vite with args', viteArgs);
 
     // FUTURE: stdio needs to be inherit for Logger terminal padding
     // const subProc = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
@@ -46,7 +45,7 @@ export async function vite(args: Record<string, string>) {
     // FIXME: https://github.com/vitejs/vite/issues/11434
     // If we run in stdio: 'inherit' because of the above issue (or something similar) Ctrl-C won't kill all processes (in the case of the start script, where it also runs the node process)
     // However this piping breaks terminal logger padding if ever we pipe vite logs so they get outputted using our own logger
-    const subProc = child_process.spawn(vite, viteArgs, { shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
+    const subProc = child_process.spawn('npx vite', viteArgs, { shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
     subProc.stdin.pipe(process.stdin);
     subProc.stdout.pipe(process.stdout);
 

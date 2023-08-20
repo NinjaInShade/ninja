@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   changed node/vite scripts to use `npx ...`
 
 ## [0.3.0] - 20/08/2023
 
