@@ -20,6 +20,8 @@ export default class HttpManager {
         this.port = port;
         this._app = express();
 
+        this._app.use(express.json());
+
         this._app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             next();
