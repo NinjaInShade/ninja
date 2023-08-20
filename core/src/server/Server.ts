@@ -17,6 +17,7 @@ export class Server {
     static _instance: Server;
 
     private options: ServerOptions;
+    private _onShutdown: (() => Promise<void> | void)[] = [];
 
     /**
      * Core foundations of the server:
@@ -48,6 +49,7 @@ export class Server {
         const sigHandler = async (signal: NodeJS.Signals) => {
             log.info('Disposing because got', signal);
             await this.dispose().catch((err) => {
+                log.error(`Error during dispose: ${err.message}`);
                 throw err;
             });
         };
@@ -106,6 +108,18 @@ export class Server {
     }
 
     /**
+     * Register a callback to be ran after disposing.
+     * Useful for project-specific cleanup.
+     * @returns a disposer
+     */
+    public onShutdown(cb: () => Promise<void> | void) {
+        this._onShutdown.push(cb);
+        return () => {
+            this._onShutdown.splice(this._onShutdown.indexOf(cb), 1);
+        };
+    }
+
+    /**
      * Dispose server safely
      */
     public async dispose() {
@@ -117,9 +131,14 @@ export class Server {
             this.socketManager.dispose();
         }
 
+        // Run after all internal disposing
+        for (const disposer of this._onShutdown) {
+            await disposer();
+        }
+
         const end = Date.now();
         const timeTaken = `${end - start}ms`;
-        log.good('Disposed server safely in:', timeTaken);
+        log.good('🎉 Disposed server safely in:', timeTaken);
     }
 }
 
