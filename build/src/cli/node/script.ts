@@ -10,13 +10,13 @@ export async function runtime(args) {
     const cwd = process.cwd();
     const entryPoint = args.entry ? path.join(cwd, args.entry) : path.join(cwd, 'src/server/server.ts');
     const tsx = path.join(cwd, 'node_modules', '.bin', 'tsx');
-    log.debug('Running tsx from', tsx);
 
     const tsxArgs: string[] = [];
     if (args['--watch']) {
         tsxArgs.push('watch', '--clear-screen=false');
     }
     tsxArgs.push(entryPoint);
+    log.debug('Running tsx from', tsx, 'with args', tsxArgs);
 
     // stdio needs to be inherit for Logger terminal padding
     const subProc = child_process.spawn(tsx, tsxArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'node' } });

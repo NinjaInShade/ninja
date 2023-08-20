@@ -38,7 +38,7 @@ export async function vite(args: Record<string, string>) {
     viteArgs.push(cwd);
 
     const vite = path.join(cwd, 'node_modules', '.bin', 'vite');
-    log.debug('Running vite from', vite);
+    log.debug('Running vite from', vite, 'with args', viteArgs);
 
     // FUTURE: stdio needs to be inherit for Logger terminal padding
     // const subProc = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
