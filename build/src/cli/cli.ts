@@ -97,4 +97,4 @@ const main = async () => {
     await validOption.script(parsedArgs);
 };
 
-main();
+await main();
