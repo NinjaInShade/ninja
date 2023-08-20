@@ -1,3 +1,4 @@
+import wtf from 'wtfnode';
 import { logger, parseArgs } from '@ninjalib/util';
 import { vite as startVite } from '../vite/script';
 import { runtime as startNode } from '../node/script';
@@ -37,10 +38,17 @@ export async function start(options: StartOptions) {
 
     const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
     for (const sig of signals) {
-        process.on(sig, () => {
+        process.on(sig, async () => {
             log.debug(`Caught '${sig}', passing down to processes`);
             nodeProc.kill(sig);
             viteProc.kill(sig);
+
+            // TODO: Document properly
+            const ENABLE_WTF = process.env.WTF;
+            if (ENABLE_WTF) {
+                await sleep(+ENABLE_WTF);
+                wtf.dump();
+            }
         });
     }
 
