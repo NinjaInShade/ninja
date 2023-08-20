@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import { logger } from '@ninjalib/util';
+import { type Socket } from 'node:net';
 
 const log = logger('nw:http');
 
@@ -12,6 +13,8 @@ export default class HttpManager {
     private _app: Express;
     private _server: http.Server | null = null;
     private port: number;
+
+    private openConnections = new Set<Socket>();
 
     constructor(port) {
         this.port = port;
@@ -28,9 +31,17 @@ export default class HttpManager {
      */
     public async startServer() {
         await new Promise<void>((resolve) => {
-            this._server = this._app.listen(this.port, () => {
+            const httpServer = this._app.listen(this.port, () => {
                 log.info('Server is listening on port', this.port);
                 resolve();
+            });
+            this._server = httpServer;
+
+            httpServer.on('connection', (socket) => {
+                this.openConnections.add(socket);
+                httpServer.once('close', () => {
+                    this.openConnections.delete(socket);
+                });
             });
         });
     }
@@ -54,11 +65,20 @@ export default class HttpManager {
      */
     public async dispose() {
         return new Promise<void>((resolve, reject) => {
-            if (!this._server || !this._server.listening) {
+            const httpServer = this._server;
+
+            if (!httpServer || !httpServer.listening) {
+                resolve();
                 return;
             }
 
-            this._server.close((err) => {
+            // handles Keep-Alive connections
+            for (const socket of this.openConnections) {
+                socket.destroy();
+                this.openConnections.delete(socket);
+            }
+
+            httpServer.close((err) => {
                 if (err) {
                     reject(err);
                 }
