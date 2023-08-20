@@ -16,7 +16,7 @@
         "ninja-cli": "./dist/node/cli/cli.js"
     },
     "scripts": {
-        "build": "tsx ./src/cli/cli.ts node --build entry=./src & npm link",
+        "build": "tsx ./src/cli/cli.ts node --build entry=./src && chmod 777 ./dist/node/cli/cli.js && npm link",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },
