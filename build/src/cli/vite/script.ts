@@ -40,28 +40,21 @@ export async function vite(args: Record<string, string>) {
     const vite = path.join(cwd, 'node_modules', '.bin', 'vite');
     log.debug('Running vite from', vite);
 
-    // stdio needs to be inherit for Logger terminal padding
-    const env = { ...process.env, LOG_PROCESS_NAME: 'vite' };
-    process.stderr.isTTY = true;
-    const subprocess = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true, env });
+    // FUTURE: stdio needs to be inherit for Logger terminal padding
+    // const subProc = child_process.spawn(vite, viteArgs, { stdio: 'inherit', shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
 
-    subprocess.stdout?.pipe(process.stdout);
+    // FIXME: https://github.com/vitejs/vite/issues/11434
+    // If we run in stdio: 'inherit' because of the above issue (or something similar) Ctrl-C won't kill all processes (in the case of the start script, where it also runs the node process)
+    // However this piping breaks terminal logger padding if ever we pipe vite logs so they get outputted using our own logger
+    const subProc = child_process.spawn(vite, viteArgs, { shell: true, env: { ...process.env, LOG_PROCESS_NAME: 'vite' } });
+    subProc.stdin.pipe(process.stdin);
+    subProc.stdout.pipe(process.stdout);
 
-    process.on('exit', (code) => {
-        log.debug('Vite script exited with code', code);
+    subProc.on('exit', (code, signal) => {
+        log.debug(`Vite process exited with code '${code}' and signal '${signal}'`);
     });
 
-    function sigHandler(signal: NodeJS.Signals) {
-        log.debug('Got', signal, 'signal, passing down to the vite process');
-
-        const successful = subprocess.kill(signal);
-        if (!successful) {
-            log.debug('Vite process did not die successfully');
-        }
-    }
-
-    process.on('SIGINT', () => sigHandler('SIGINT'));
-    process.on('SIGTERM', () => sigHandler('SIGTERM'));
+    return subProc;
 }
 
 export const viteOptions = {
