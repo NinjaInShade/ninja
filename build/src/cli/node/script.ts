@@ -47,10 +47,11 @@ async function build(args) {
         include: [entryPoint],
     };
     await fs.writeFile(tempFilePath, JSON.stringify(tempFile));
+    const tsc = path.join(cwd, 'node_modules', '.bin', 'tsc');
 
     try {
         try {
-            await runAsync(`tsc --project ${tempFilePath}`);
+            await runAsync(`${tsc} --project ${tempFilePath}`);
         } catch (err) {
             // pass - most of the time this is just tsc complaining,
             // the command doesn't actually "fail"
