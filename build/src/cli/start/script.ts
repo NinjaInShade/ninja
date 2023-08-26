@@ -29,7 +29,8 @@ export async function start(options: StartOptions) {
         return userArgs ? ['', '', '', ...userArgs.split(',').filter((arg) => arg.length)] : [];
     }
 
-    const nodeArgs = parseArgs(createArgs(options.nodeArgs));
+    const defaultNodeArgs = { '--watch': true };
+    const nodeArgs = Object.assign({}, defaultNodeArgs, parseArgs(createArgs(options.nodeArgs)));
     const nodeProc = await startNode(nodeArgs);
     await sleep(250);
 
