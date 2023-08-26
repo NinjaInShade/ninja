@@ -19,7 +19,7 @@
     },
     "types": "./dist/node/index.d.ts",
     "scripts": {
-        "start": "cd playground & concurrently -n server,client -c green,blue -t=\"HH:mm:ss\" -p=\"[{name}:{time}]\" \"ninja-cli node --watch\" \"ninja-cli vite configFile=./vite.config.ts\"",
+        "start": "cd playground && ninja-cli start viteArgs='configFile=./vite.config.ts'",
         "build": "ninja-cli node --build entry=./src",
         "test": "ninja-cli test",
         "node": "ninja-cli node"
@@ -39,10 +39,9 @@
         "vite": "^4.2.1"
     },
     "dependencies": {
-        "@ninjalib/build": "^0.2.1",
+        "@ninjalib/build": "^0.3.1",
         "@ninjalib/svelte": "^0.0.6",
-        "@ninjalib/util": "^0.3.1",
-        "concurrently": "^8.0.1",
+        "@ninjalib/util": "^0.4.1",
         "express": "^4.18.2"
     }
 }
