@@ -5,7 +5,8 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   logger: add ability to customise colour theme
+-   added exports: `terminal` (misc ANSI codes), `colours` (existing ANSI colour codes), `colourThemes` (hard-coded colour themes, right now only have windowsTerminal & linuxKonsoleDehydration)
 
 ## [0.4.0] - 10/06/2023
 
