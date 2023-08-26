@@ -1,21 +1,5 @@
-import { isBrowser, colours as _colours, isProd, getEnvVar } from './utils';
-
-const colours = _colours;
-if (isBrowser()) {
-    for (const key of Object.keys(colours)) {
-        if (typeof colours[key] === 'object') {
-            for (const _key of Object.keys(colours[key])) {
-                colours[key][_key] = '';
-            }
-        } else {
-            colours[key] = '';
-        }
-    }
-}
-
-function parseEnvVarList(txt: string) {
-    return txt.replaceAll(' ', '').replaceAll('"', '').replaceAll("'", '').split(',');
-}
+import { isBrowser, isProd, getEnvVar } from './utils';
+import { colourThemes, type ColourTheme } from './colours';
 
 // useful for icons: https://emojipedia.org/search / https://gist.github.com/nicolasdao/8f0220d050f585be1b56cc615ef6c12e
 // TODO: make the chunk generator handle ASCI colour codes (as if you have a lot the lines can get chunked incorrectly currently)
@@ -31,7 +15,7 @@ type LoggerOptions = {
     /**
      * Whether to display the timestamp
      *
-     * @default Logger.showTimestamp - which defaults to true, unless in a browser environment when then it is true
+     * @default Logger.showTimestamp - which defaults to true if in node environment, false in browser environment
      */
     showTimestamp?: boolean;
     /**
@@ -41,12 +25,37 @@ type LoggerOptions = {
      */
     showDate?: boolean;
     /**
-     * Colour to display the namespace of the logger (ANSII colour code)
+     * Colour to display the namespace of the logger (ANSI colour code)
      *
-     * @default Logger.namespaceColour - which defaults to utils.colours.muted.purple
+     * @default Logger.namespaceColour - which defaults to utils.Logger.colourTheme.purple
      */
     namespaceColour?: string;
+    /**
+     * The name of the current process e.g. vite (should be 4 or less characters long).
+     * Will prefix the start of the log with this.
+     *
+     * The recommended use of this (if you can) is pass "LOG_PROCESS_NAME" env var into your process,
+     * and this will be set automatically for all loggers under the process.
+     * @default null
+     */
+    processName?: string;
+    /**
+     * The desired colour theme to use (disabled on browser). See default usage:
+     * - <processName>: theme.cyan
+     * - <date, timestamp, filename>: theme.grey
+     * - <namespace>: theme.purple
+     * - <INFO log level>: theme.blue
+     * - <GOOD log level>: theme.green
+     * - <WARN log level>: theme.yellow
+     * - <FAIL log level>: theme.red
+     * - <DBUG log level>: theme.orange
+     * @default Logger.colourTheme - which defaults to util.colourThemes.linuxKonsoleDehydration
+     */
+    colourTheme?: ColourTheme;
 };
+
+type LogLevel = keyof typeof LOG_LEVELS;
+type AbbrLogLevel = (typeof LOG_LEVELS)[LogLevel];
 
 const LOG_LEVELS = {
     info: 'info',
@@ -56,7 +65,7 @@ const LOG_LEVELS = {
     debug: 'dbug',
 } as const;
 
-const LOG_LEVELS_META: LogLevelMeta = {
+const LOG_LEVELS_META = {
     info: {
         emoji: '⚓',
         colour: 'blue',
@@ -80,17 +89,6 @@ const LOG_LEVELS_META: LogLevelMeta = {
     },
 };
 
-type LogLevel = keyof typeof LOG_LEVELS;
-type AbbrLogLevel = (typeof LOG_LEVELS)[LogLevel];
-type LogLevelMeta = Record<
-    LogLevel,
-    {
-        emojiWidth?: number;
-        emoji: string;
-        colour: string;
-    }
->;
-
 /**
  * Browser & Server compatible logger with cool features:
  * - useful meta info
@@ -107,42 +105,37 @@ export class Logger {
      */
     public namespace: string;
 
-    public options: LoggerOptions;
+    public options: Required<LoggerOptions>;
 
+    public static colourTheme = colourThemes.linuxKonsoleDehydration;
     public static showFilename = false;
     public static showTimestamp = !isBrowser();
     public static showDate = false;
-    public static namespaceColour = colours.muted.purple;
+    public static namespaceColour = Logger.colourTheme.purple;
 
     private disableLogging = false;
     private enabledLogLevels: Set<AbbrLogLevel> = new Set();
 
-    /**
-     * The name of the current process e.g. vite.
-     * Will prefix the start of the log with this.
-     * Set through the `LOG_PROCESS_NAME` env var, and should be 4 or less characters long
-     * @default null
-     */
-    public processName: string | null;
-
     constructor(namespace, options: LoggerOptions = {}) {
+        if (!namespace) {
+            throw new Error('You must provide a namespace to the logger');
+        }
+
         const defaultOptions = {
             showFilename: Logger.showFilename,
             showTimestamp: Logger.showTimestamp,
             showDate: Logger.showDate,
             namespaceColour: Logger.namespaceColour,
+            colourTheme: Logger.colourTheme,
+            processName: getEnvVar('LOG_PROCESS_NAME')?.trim() ?? null,
         };
 
-        const processName = getEnvVar('LOG_PROCESS_NAME')?.trim() ?? null;
-        this.processName = processName ? processName : null;
-
-        if (!namespace) {
-            throw new Error('You must provide a namespace to the logger');
-        }
-
         this.namespace = namespace;
-
         this.options = Object.assign({}, defaultOptions, options);
+
+        if (options.colourTheme) {
+            this.options.namespaceColour = options.colourTheme.purple;
+        }
 
         const logLevelsVar = getEnvVar('LOG_LEVELS');
         const logNamespacesVar = getEnvVar('LOG_NAMESPACES');
@@ -150,8 +143,7 @@ export class Logger {
         if (logLevelsVar) {
             const logLevelsParsed = parseEnvVarList(logLevelsVar) as AbbrLogLevel[];
             for (const type of logLevelsParsed) {
-                const keys = Object.keys(LOG_LEVELS);
-                const values = Object.values(LOG_LEVELS);
+                const [keys, values] = Object.entries(LOG_LEVELS);
 
                 if (keys.includes(type)) {
                     this.enabledLogLevels.add(LOG_LEVELS[type]);
@@ -162,8 +154,14 @@ export class Logger {
         }
 
         if (logNamespacesVar) {
-            const namespacesParsed = parseEnvVarList(logNamespacesVar) as AbbrLogLevel[];
+            const namespacesParsed = parseEnvVarList(logNamespacesVar);
             this.disableLogging = !namespacesParsed.includes(namespace);
+        }
+
+        if (isBrowser()) {
+            for (const key of Object.keys(this.options.colourTheme)) {
+                this.options.colourTheme[key] = '';
+            }
         }
     }
 
@@ -220,8 +218,7 @@ export class Logger {
         const { emoji, colour, emojiWidth } = LOG_LEVELS_META[logLevel];
         const type = LOG_LEVELS[logLevel];
 
-        const dontLog = (this.enabledLogLevels.size && !this.enabledLogLevels.has(type)) || this.disableLogging;
-        if (dontLog) {
+        if ((this.enabledLogLevels.size && !this.enabledLogLevels.has(type)) || this.disableLogging) {
             return;
         }
 
@@ -229,9 +226,8 @@ export class Logger {
             if (msg instanceof Error) {
                 const stack = msg.stack;
                 if (stack) {
-                    return this.formatErrStack(stack);
+                    return formatErrStack(stack, this.options.colourTheme);
                 }
-
                 return msg.message;
             } else {
                 return msg;
@@ -241,11 +237,11 @@ export class Logger {
         const meta = this.generateMeta({ emoji, colour, type });
         const emojiOffset = (emojiWidth ?? 1) - 1;
         // +1 because of extra space the console will add automatically
-        const metaLength = this.getRawString(meta).length + 1 - emojiOffset;
+        const metaLength = getRawString(meta).length + 1 - emojiOffset;
         const msgs = this.generateMessages(messages, metaLength);
 
-        const logFn = this.getLogFn(type);
-        console[logFn](meta, ...msgs, colours.reset);
+        const logFn = getLogFn(type);
+        console[logFn](meta, ...msgs, this.options.colourTheme.reset);
     }
 
     /**
@@ -281,7 +277,7 @@ export class Logger {
                     break;
                 }
 
-                const nlIndex = this.findFirstNlIndex(chunk);
+                const nlIndex = findFirstNlIndex(chunk);
                 if (nlIndex !== null) {
                     chunk = chunk.substring(0, nlIndex + 1);
                 }
@@ -316,17 +312,17 @@ export class Logger {
      * Generates meta info msg (time, namespace etc...)
      */
     private generateMeta(meta: { emoji: string; colour: string; type: AbbrLogLevel }) {
-        const { showDate, showTimestamp, showFilename, namespaceColour } = this.options;
+        const { showDate, showTimestamp, showFilename, namespaceColour, colourTheme } = this.options;
         const { emoji, colour, type } = meta;
 
         const showBeginningMeta = showDate || showTimestamp || showFilename;
         let msg = '';
 
         // Process name
-        msg += colours.cyan + '[' + this.padString(this.processName ?? '????', 4) + ']' + ' ';
+        msg += colourTheme.cyan + '[' + padString(this.options.processName ?? '????', 4) + ']' + ' ';
 
         if (showBeginningMeta) {
-            msg += colours.grey + '<';
+            msg += colourTheme.grey + '<';
         }
         if (showDate) {
             const date = new Date().toLocaleDateString('en-GB');
@@ -340,97 +336,23 @@ export class Logger {
         if (showFilename) {
             const file = isBrowser() ? `${document.currentScript}` : import.meta.url.split('/').at(-1) ?? './';
             msg += showTimestamp ? ' ' : '';
-            msg += this.padString(file, 9);
+            msg += padString(file, 9);
         }
         if (showBeginningMeta) {
-            msg += colours.grey + '>' + ' ';
+            msg += colourTheme.grey + '>' + ' ';
         }
 
         // log type icon + text
         msg += emoji + ' ';
-        msg += colours[colour] + colours.bold + type.toUpperCase();
+        msg += colourTheme[colour] + colourTheme.bold + type.toUpperCase() + colourTheme.reset;
 
         // namespace
-        msg += ' ' + (namespaceColour ?? colours.muted.purple) + this.padString(this.namespace, 20) + ' ';
+        msg += ' ' + namespaceColour + padString(this.namespace, 20) + ' ';
 
         // separator
-        msg += colours.grey + '>>' + colours.reset;
+        msg += colourTheme.grey + '>>' + colourTheme.reset;
 
         return msg;
-    }
-
-    private getLogFn(type: AbbrLogLevel) {
-        return {
-            info: 'info',
-            good: 'log',
-            warn: 'warn',
-            fail: 'error',
-            dbug: 'debug',
-        }[type];
-    }
-
-    private findFirstNlIndex(msg: string) {
-        for (let i = 0; i < msg.length; i++) {
-            const char = msg[i];
-            if (char === '\n') {
-                return i;
-            }
-        }
-        return null;
-    }
-
-    private getRawString(txt: string) {
-        return txt.replaceAll(/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/gi, '');
-    }
-
-    private padString(msg: string, length: number) {
-        msg = msg.trim();
-        let paddedMsg = msg.padEnd(length, ' ');
-        if (msg.length > length) {
-            paddedMsg = paddedMsg.substring(0, length - 3) + '...';
-        }
-        return paddedMsg;
-    }
-
-    private formatErrStack(stack: string) {
-        const lines = stack.split('\n');
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            if (line.startsWith('    at')) {
-                // stack indents by 4
-                line = line.substring(4);
-
-                const split = line.split(' ');
-                let at = split.at(0);
-                let fn = split.slice(1, -1).join(' ');
-                let loc = split.at(-1);
-
-                if (!isBrowser()) {
-                    const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
-                    const _loc = loc?.toLowerCase().replaceAll('\\', '/') as string;
-                    const split = _loc.split(cwd);
-
-                    if (split.length === 1) {
-                        loc = split[0];
-                    } else {
-                        if (split[1].startsWith('/')) {
-                            split[1] = '.' + split[1];
-                        }
-                        loc = split.join('');
-                    }
-                }
-
-                at = colours.lightGrey + at;
-
-                lines[i] = lines[i].substring(0, 4) + at + ' ' + fn + ' ' + loc;
-            } else {
-                lines[i] = colours.red + lines[i];
-            }
-        }
-
-        lines[lines.length - 1] = lines[lines.length - 1] + colours.reset;
-        return lines.join('\n');
     }
 }
 
@@ -443,9 +365,90 @@ export function logger(namespace: string, opts?: LoggerOptions) {
     return new Logger(namespace, opts);
 }
 
+function parseEnvVarList(txt: string) {
+    return txt.replaceAll(' ', '').replaceAll('"', '').replaceAll("'", '').split(',');
+}
+
+function getLogFn(type: AbbrLogLevel) {
+    return {
+        info: 'info',
+        good: 'log',
+        warn: 'warn',
+        fail: 'error',
+        dbug: 'debug',
+    }[type];
+}
+
+function findFirstNlIndex(msg: string) {
+    for (let i = 0; i < msg.length; i++) {
+        const char = msg[i];
+        if (char === '\n') {
+            return i;
+        }
+    }
+    return null;
+}
+
+function getRawString(txt: string) {
+    return txt.replaceAll(/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/gi, '');
+}
+
+function padString(msg: string, length: number) {
+    msg = msg.trim();
+    let paddedMsg = msg.padEnd(length, ' ');
+    if (msg.length > length) {
+        paddedMsg = paddedMsg.substring(0, length - 3) + '...';
+    }
+    return paddedMsg;
+}
+
+function formatErrStack(stack: string, colourTheme: ColourTheme) {
+    const lines = stack.split('\n');
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (line.startsWith('    at')) {
+            // stack indents by 4
+            line = line.substring(4);
+
+            const split = line.split(' ');
+            let at = split.at(0);
+            let fn = split.slice(1, -1).join(' ');
+            let loc = split.at(-1);
+
+            if (!isBrowser()) {
+                const cwd = process.cwd().toLowerCase().replaceAll('\\', '/');
+                const _loc = loc?.toLowerCase().replaceAll('\\', '/') as string;
+                const split = _loc.split(cwd);
+
+                if (split.length === 1) {
+                    loc = split[0];
+                } else {
+                    if (split[1].startsWith('/')) {
+                        split[1] = '.' + split[1];
+                    }
+                    loc = split.join('');
+                }
+            }
+
+            at = colourTheme.lightGrey + at;
+
+            lines[i] = lines[i].substring(0, 4) + at + ' ' + fn + ' ' + loc;
+        } else {
+            lines[i] = colourTheme.red + lines[i];
+        }
+    }
+
+    lines[lines.length - 1] = lines[lines.length - 1] + colourTheme.reset;
+    return lines.join('\n');
+}
+
+// For local testing
+// Can run this file with `ninja-cli node entry="THIS_FILE"`
+
 // const log = logger('util:log');
 // const log2 = logger('core:views');
-// const log3 = logger('core:wss');
+// const log3 = logger('core:wss', { colourTheme: colourThemes.windowsTerminal });
 // const log4 = logger('core:http');
 // const log5 = logger('vite:info');
 // const log6 = logger('sql:query');
