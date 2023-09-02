@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Small script to retrieve commits between 2 versions of a package in the ninja repo
+
 # Check if fromVersion is provided
 if [ $# -lt 2 ]; then
   echo "Usage: $0 <project> <fromVersion> [<toVersion>]"
