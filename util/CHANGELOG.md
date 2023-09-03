@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.5.0] - 03/09/2023
+
 -   renamed `shell.parseArgs` to `shell.parseArgv`, params changed, return changed and made more versatile
 
 ## [0.4.1] - 26/08/2023
