@@ -61,3 +61,56 @@ export const parseArgs = (rawArgs: string[]): Record<string, string | boolean> =
 
     return parsedArgs;
 };
+
+export type ArgV = { opts: Record<string, string>; args: string[] };
+
+/**
+ * Simple CLI argv parser
+ *
+ * Parses arguments/options from `process.argv`.
+ *
+ * Chaining options with one leading hyphen is not supported at the moment (e.g. `script -abcd` a, b, c, d being separate options)
+ *
+ * Option values defined after single hyphen option is not supported at the moment (e.g. `script -p some_port` some_port will be parsed as a standard argument).
+ * Use double hyphen syntax to specify an option value: `script --port=some_port`
+ *
+ * @param argv?: alternative argv instead of using `process.argv`
+ */
+export function parseArgv(argv?: string): ArgV {
+    const [execPath, filePath, ...other] = process.argv;
+
+    if (argv !== undefined && typeof argv !== 'string') {
+        throw new Error('Expected argv to be a string');
+    }
+
+    const _argv = argv ? argv.split(' ') : other;
+
+    const opts: Record<string, string> = {};
+    const args: string[] = [];
+
+    for (const item of _argv) {
+        // ['ninja-cli', 'test', '-d', '--verbose', '--prefix=[testing]', './src/test/test.js']
+        if (item.startsWith('--')) {
+            if (item.includes('=')) {
+                const [opt, ...rest] = item.split('=');
+                let value = rest.join('=');
+                // strip surrounding single or double quotes
+                if ((value.at(0) === `'` && value.at(-1) === `'`) || (value.at(0) === `"` && value.at(-1) === `"`)) {
+                    value = value.substring(1, value.length - 1);
+                }
+                opts[opt.substring(2)] = value;
+            } else {
+                opts[item.substring(2)] = item;
+            }
+        } else if (item.startsWith('-')) {
+            opts[item.substring(1)] = item;
+        } else {
+            args.push(item);
+        }
+    }
+
+    return {
+        opts,
+        args,
+    };
+}
