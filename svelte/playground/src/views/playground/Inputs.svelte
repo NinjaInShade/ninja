@@ -1,6 +1,5 @@
 <script lang="ts">
     import NW from '~/index';
-    import TestModal from './TestModal.svelte';
 
     let username: string | null = null;
     let email: string | null = null;
@@ -33,20 +32,6 @@
 </div>
 
 <div class="flex">
-    <div style="display: flex; gap: 8px;">
-        <NW.Input bind:value={username} {size} />
-        <NW.Button
-            theme="black"
-            textColor="var(--white)"
-            onClick={async () => {
-                console.log('Before open!');
-                const valueReturned = await NW.nav.openModal(TestModal, {}, { asPromise: true });
-                console.log('After open! Returned with', valueReturned);
-            }}
-            {size}>Open modal</NW.Button
-        >
-    </div>
-
     <!-- Input -->
     <div class="column">
         <div class="row">
@@ -79,7 +64,14 @@
 
         <div class="row">
             <NW.Fieldset label="Email" htmlName="Email" {size}>
-                <NW.Input bind:value={email} error="Enter a valid email!" placeholder="Enter your email" icon="magnifying-glass" onChange={testInputChange} {size} />
+                <NW.Input
+                    bind:value={email}
+                    error="Enter a valid email!"
+                    placeholder="Enter your email"
+                    icon="magnifying-glass"
+                    onChange={testInputChange}
+                    {size}
+                />
             </NW.Fieldset>
             <p class="lead">Error</p>
         </div>

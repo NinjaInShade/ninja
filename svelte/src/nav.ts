@@ -1,7 +1,7 @@
 // Nav API
-import type { ViewPath, NewViewCallback, ViewProps, Routes, Resolve, Options } from './AppRoot.svelte';
+import type { NewViewCallback, ViewProps, Routes, ModalOptions } from './AppRoot.svelte';
+import { loadView } from './view';
 import { modals } from './AppRoot.svelte';
-import type { SvelteComponent } from 'svelte';
 import { get } from 'svelte/store';
 
 const { history } = window;
@@ -27,7 +27,7 @@ const create = async (routes: Routes, newViewCallback: NewViewCallback): Promise
  *
  * @returns: view string or null if not found
  */
-const matchRoute = (routes: Routes): ViewPath => {
+const matchRoute = (routes: Routes): string | null => {
     const currentURL = window.location.pathname;
 
     // find view for route
@@ -68,7 +68,7 @@ const go = (route: string, props: ViewProps = null): void => {
     }
 
     if (route === window.location.pathname) return;
-    history.pushState(props, '', `${route}`);
+    history.pushState(props, '', route);
     alertCallback();
 };
 
@@ -111,58 +111,67 @@ const isInAnchorTag = (element: HTMLElement): HTMLElement | null => {
     return isInAnchorTag(element.parentElement);
 };
 
-// TODO: make openModal work with viewPaths
-// modal component will be used per modal, instead of `<AppRoot />`
+/**
+ * Opens a modal with the wanted props and modal options.
+ * Passed a `close` prop that can be used to close the modal with an optional value.
+ */
+export const openModal = (modal: string, props: ViewProps = {}, options: ModalOptions = {}): void | Promise<any> => {
+    const defaultOptions: ModalOptions = {
+        asPromise: false,
+    };
+    const opts = Object.assign({}, defaultOptions, options);
 
-// const openModal = (viewPath: string, props: ViewProps) => {
-//   if (!viewPath) {
-//     throw new Error(`You must provide a view path e.g. 'admin/editUser'`);
-//   }
+    if (!opts.asPromise) {
+        props.close = () => closeModal(1, null);
+        const modalDef = {
+            view: loadView(modal, props),
+            options: opts,
+        };
 
-//   if (viewPath.startsWith('/')) {
-//     throw new Error(`View path must not start with '/'`);
-//   }
-// };
+        modals.update((m) => [...m, modalDef]);
+        return;
+    } else {
+        return new Promise((resolve) => {
+            props.close = (value: any) => closeModal(1, value);
+            const modalDef = {
+                view: loadView(modal, props),
+                options: opts,
+                resolve,
+            };
+            modals.update((m) => [...m, modalDef]);
+        });
+    }
+};
 
-export const closeModal = (amount = 1, returnVal: any = null) => {
+export const closeModal = (amount = 1, value: any = null) => {
     const m = get(modals);
 
     for (let i = 0; i < amount; i++) {
-        const opts = m[m.length - 1][3];
+        const modal = m.at(-1);
+        const opts = modal.options;
 
         if (opts.asPromise) {
-            const [resolve, reject] = m[m.length - 1][2];
-
-            if (!Boolean(returnVal)) {
-                reject?.(returnVal);
-            } else {
-                resolve?.(returnVal);
-            }
+            modal.resolve(value);
         }
 
         modals.update((m) => m.slice(0, -1));
     }
 };
-create;
 
-/**
- * Opens a modal with the wanted props and modal options. The component you open will receive a close function you can.
- */
-export const openModal = (modal: typeof SvelteComponent, props?: Options, options?: Options): void | Promise<any> => {
-    const defaultOptions: Options = {
-        asPromise: false,
-    };
-
-    const opts = Object.assign({}, defaultOptions, options || {});
-
-    if (!opts.asPromise) {
-        modals.update((m) => [...m, [modal, { ...props, close: (returnVal: any) => closeModal(1, returnVal) }, [], opts]]);
-        return;
+export const setQuery = (key: string, value: string | undefined) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (value === undefined) {
+        searchParams.delete(key);
     } else {
-        return new Promise((resolve, reject) => {
-            modals.update((m) => [...m, [modal, { ...props, close: (returnVal: any) => closeModal(1, returnVal) }, [resolve, reject], opts]]);
-        });
+        searchParams.set(key, value);
     }
+    const newURL = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.pushState(history.state, '', newURL);
 };
 
-export default { create, back, go, closeModal, openModal };
+export const getQuery = (key: string): string | undefined => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get(key);
+};
+
+export default { create, back, go, closeModal, openModal, setQuery, getQuery };

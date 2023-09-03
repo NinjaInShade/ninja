@@ -4,6 +4,7 @@
     import Misc from './Misc.svelte';
     import Typography from './Typography.svelte';
     import Table from './Table.svelte';
+    import Modals from './Modals.svelte';
     import NW from '~/index';
 
     const tabs = [
@@ -12,6 +13,7 @@
         ['Misc', Misc],
         ['Typography', Typography],
         ['Table', Table],
+        ['Modals', Modals],
     ];
 </script>
 
