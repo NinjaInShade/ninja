@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { logLine, logError, logWarn, scriptSelectMenu, scriptHelpMenu } from './utils';
-import { parseArgs } from '@ninjalib/util';
+import { scriptSelectMenu, scriptHelpMenu } from './utils';
+import { parseArgv, type ArgV, logger } from '@ninjalib/util';
 import { createProject, createProjectOptions } from './createProject/script';
 import { copy, copyOptions } from './copy/script';
 import { vite, viteOptions } from './vite/script';
@@ -9,55 +9,59 @@ import { test, testOptions } from './test/script';
 import { publish, publishOptions } from './publish/script';
 import { start, startOptions } from './start/script';
 
-type ScriptFn = (args) => void;
+const log = logger('build:cli');
+
+type ScriptFn = (argv: ArgV) => Promise<any> | any;
 type ScriptOptions = {
     script: ScriptFn;
-    helpOptions: Record<string, any>;
+    help: Record<string, string>;
 };
 
 export const options: Record<string, ScriptOptions> = {
     publish: {
         script: publish,
-        helpOptions: publishOptions,
+        help: publishOptions,
     },
     copy: {
         script: copy,
-        helpOptions: copyOptions,
+        help: copyOptions,
     },
     vite: {
         script: vite,
-        helpOptions: viteOptions,
+        help: viteOptions,
     },
     start: {
         script: start,
-        helpOptions: startOptions,
+        help: startOptions,
     },
     node: {
         script: node,
-        helpOptions: nodeOptions,
+        help: nodeOptions,
     },
     test: {
         script: test,
-        helpOptions: testOptions,
+        help: testOptions,
     },
-    'create-project': {
-        script: createProject,
-        helpOptions: createProjectOptions,
-    },
+    // 'create-project': {
+    //     script: createProject,
+    //     helpOptions: createProjectOptions,
+    // },
 };
 
 const main = async () => {
-    const [execPath, jsFile, ...args] = process.argv;
+    const argv = parseArgv();
 
-    const firstArg = args[0];
+    log.debug('Raw argv', process.argv, 'Processed argv', argv);
+
+    const scriptArg = argv.args[0];
     const optionKeys = Object.keys(options);
-    let option = optionKeys[Number(firstArg) - 1] || firstArg;
+    let option = optionKeys[Number(scriptArg) - 1] || scriptArg;
 
-    // Show help menu
-    if (option === '--help' || option === '-h') {
-        // TODO: show some sort of general help/overview menu
-        logLine('');
-        logWarn('Help menu is not yet made');
+    const wantsHelp = argv.opts.h || argv.opts.help;
+
+    // TODO: show some sort of general help/overview menu
+    if (argv.args.length === 0 && wantsHelp) {
+        log.warn('Help menu is not yet made');
         return;
     }
 
@@ -73,21 +77,27 @@ const main = async () => {
     // Invalid script
     const validOption = options[option];
     if (!validOption) {
-        logLine('');
-        logError(`invalid cli script '${option}'. Use --help to see all available scripts and what they do`);
+        log.error(`Invalid cli script '${option}'. Use --help to see all available scripts`);
         return;
     }
-
-    const parsedArgs = parseArgs(process.argv);
 
     // Script-specific help menu
-    if (Object.keys(parsedArgs)?.[0] === '--help') {
-        scriptHelpMenu(option, validOption.helpOptions);
+    if (wantsHelp) {
+        scriptHelpMenu(option, validOption.help);
         return;
     }
 
+    // strip script argument as irrelevant at this point
+    argv.args.splice(0, 1);
+
     // Run script
-    await validOption.script(parsedArgs);
+    await validOption.script(argv);
 };
 
+const startTime = Date.now();
 await main();
+
+process.on('beforeExit', () => {
+    const timeDiff = Date.now() - startTime;
+    log.debug(`Exited after ${timeDiff}ms`);
+});

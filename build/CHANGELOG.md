@@ -6,7 +6,7 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   changed available opts/args for scripts
 
 ## [0.3.2] - 26/08/2023
 

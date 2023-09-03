@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { logger } from '@ninjalib/util';
+import { logger, type ArgV } from '@ninjalib/util';
 import child_process from 'node:child_process';
 
 const log = logger('build:vite');
@@ -7,12 +7,12 @@ const log = logger('build:vite');
 /**
  * Runtime/builder for vite
  */
-export async function vite(args: Record<string, string>) {
+export async function vite({ opts, args }: ArgV) {
     const cwd = process.cwd();
-    const devMode = args['--dev'];
-    const buildMode = args['--build'];
-    const previewMode = args['--preview'];
-    const extraViteArgs = args['viteArgs'];
+    const devMode = opts.d ?? opts.dev;
+    const buildMode = opts.b ?? opts.build;
+    const previewMode = opts.p ?? opts.preview;
+    const extraViteArgs = opts['vite-args'];
 
     const passedNoMode = !devMode && !buildMode && !previewMode;
 
@@ -32,7 +32,9 @@ export async function vite(args: Record<string, string>) {
         viteArgs.push(...extraViteArgs.split(','));
     }
 
-    const configFile = args.configFile ? path.join(cwd, args.configFile) : path.join(cwd, 'node_modules', '@ninjalib', 'build', 'configs', 'vite.config.ts');
+    const configFile = opts['config-file']
+        ? path.join(cwd, opts['config-file'])
+        : path.join(cwd, 'node_modules', '@ninjalib', 'build', 'configs', 'vite.config.ts');
     viteArgs.push('--clearScreen=false');
     viteArgs.push(`--config="${configFile}"`);
     viteArgs.push(cwd);
@@ -57,9 +59,9 @@ export async function vite(args: Record<string, string>) {
 }
 
 export const viteOptions = {
-    '(optional) --dev': 'Runs the dev server',
-    '(optional) --build': 'Builds the project',
-    '(optional) --preview': 'Previews the build',
-    '(optional) configFile': 'Alternative config file (relative to CWD)',
-    '(optional) viteArgs': 'Args to pass to vite, delimited by commas',
+    '<opt> -d --dev': 'Runs the dev server',
+    '<opt> -p --preview': 'Previews the build',
+    '<opt> -b --build': 'Builds the project',
+    '<opt> --config-file': 'Alternative config file - relative to CWD',
+    '<opt> --vite-args': 'Args to pass to vite, delimited by commas',
 };

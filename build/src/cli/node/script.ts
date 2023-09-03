@@ -1,20 +1,27 @@
 import path from 'node:path';
-import { logger, runAsync, pathExists } from '@ninjalib/util';
+import { logger, runAsync, pathExists, type ArgV } from '@ninjalib/util';
 import child_process from 'node:child_process';
 import { replaceTscAliasPaths } from 'tsc-alias';
 import fs from 'node:fs/promises';
 
 const log = logger('build:node');
 
-export async function runtime(args) {
+export async function runtime({ opts, args }: ArgV) {
     const cwd = process.cwd();
-    const entryPoint = args.entry ? path.join(cwd, args.entry) : path.join(cwd, 'src/server/server.ts');
+    const entrypoint = args.length ? path.join(cwd, args[args.length - 1]) : path.join(cwd, 'src/server/server.ts');
+    const shouldWatch = (opts.w || opts.watch) && !opts.nw && !opts['no-watch'];
+
+    const entrypointExists = await pathExists(entrypoint);
+    if (!entrypointExists) {
+        log.error(`Entrypoint '${entrypoint}' does not exist`);
+        return;
+    }
 
     const tsxArgs: string[] = [];
-    if (args['--watch']) {
+    if (shouldWatch) {
         tsxArgs.push('watch', '--clear-screen=false');
     }
-    tsxArgs.push(entryPoint);
+    tsxArgs.push(entrypoint);
     log.debug('Running tsx with args', tsxArgs);
 
     // stdio needs to be inherit for Logger terminal padding
@@ -27,23 +34,29 @@ export async function runtime(args) {
     return subProc;
 }
 
-async function build(args) {
+async function build({ opts, args }: ArgV) {
     const cwd = process.cwd();
-    const entryPoint = args.entry ? path.join(cwd, args.entry) : path.join(cwd, 'src/server/server.ts');
-    const outDir = args.outDir ? path.join(cwd, args.outDir) : path.join(cwd, 'dist/node');
+    const entrypoint = args.length ? path.join(cwd, args[args.length - 1]) : path.join(cwd, 'src/server/server.ts');
+    const out = opts.o || opts.out ? path.join(cwd, opts.out) : path.join(cwd, 'dist/node');
 
-    // if outDir exists, remove old build
-    if (await pathExists(outDir)) {
-        await fs.rm(outDir, { recursive: true, force: true });
+    const entrypointExists = await pathExists(entrypoint);
+    if (!entrypointExists) {
+        log.error(`Entrypoint '${entrypoint}' does not exist`);
+        return;
+    }
+
+    // if output directory already exists, remove old build
+    if (await pathExists(out)) {
+        await fs.rm(out, { recursive: true, force: true });
     }
 
     const tempFilePath = path.join(cwd, 'node.tsconfig.json');
     const tempFile = {
         extends: './tsconfig.json',
         compilerOptions: {
-            outDir: outDir,
+            outDir: out,
         },
-        include: [entryPoint],
+        include: [entrypoint],
     };
     await fs.writeFile(tempFilePath, JSON.stringify(tempFile));
 
@@ -72,17 +85,20 @@ async function build(args) {
 /**
  * Runtime/builder for node with typescript, compatible with ESM and ts paths
  */
-export async function node(args: Record<string, string>) {
-    if (args['--build']) {
-        await build(args);
+export async function node(argv: ArgV) {
+    const shouldBuild = argv.opts['b'] || argv.opts['build'];
+
+    if (shouldBuild) {
+        await build(argv);
     } else {
-        await runtime(args);
+        await runtime(argv);
     }
 }
 
 export const nodeOptions = {
-    '(optional) entry': `The entry point for runtime/building (relative to cwd, defaults to CWD/src/server/server.ts)`,
-    '(optional) outDir': 'Where to build the project too (relative to cwd, defaults to CWD/dist/node)',
-    '(optional) --watch': 'Enables auto reloading when files are changed',
-    '(optional) --build': 'Builds the project instead of running node (cwd must have base tsconfig at root)',
+    '<arg> entrypoint': 'Entrypoint to use for building/runtime - defaults to CWD/src/server/server.ts',
+    '<opt> -b --build': 'Builds the project instead of running node - CWD must have base tsconfig at root',
+    '<opt> -w --watch': 'Enables auto reloading when files are changed',
+    '<opt> -nw --no-watch': 'Overrides -w --watch flags',
+    '<opt> --out': 'Where the output of the build goes to - relative to CWD, defaults to CWD/dist/node',
 };

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { selectMenu, readTmp, writeTmp } from '../utils';
-import { logger, colours, runAsync, copyFile, copyDirRecursive } from '@ninjalib/util';
+import { logger, colours, runAsync, copyFile, copyDirRecursive, type ArgV } from '@ninjalib/util';
 
 const log = logger('build:copy');
 
@@ -54,23 +54,17 @@ async function getTargetOptions(srcDir: string): Promise<string[]> {
     return options;
 }
 
-type CopyArgs = {
-    sourceDir?: string;
-    targetDir?: string;
-    ['--force']?: boolean;
-};
-
 /**
  * copies source library to a target project/library
  *
  * useful for testing libs in real projects without publishing
  */
-export async function copy(args: CopyArgs) {
+export async function copy({ opts, args }: ArgV) {
     const cwd = process.cwd();
-    const force = args['--force'];
+    const force = Boolean(opts.f || opts.force);
 
     // get source package.json
-    const srcDir = args.sourceDir ? path.join(cwd, args.sourceDir) : cwd;
+    const srcDir = opts.source ? path.join(cwd, opts.source) : cwd;
     const srcPkgJsonPath = path.join(srcDir, 'package.json');
     const srcPkgJson = await readPackageJson(srcPkgJsonPath, 'source');
     if (!srcPkgJson) return;
@@ -83,7 +77,7 @@ export async function copy(args: CopyArgs) {
 
     let selectedTarget!: string;
 
-    if (!args.targetDir) {
+    if (!opts.target) {
         const targetOptions = await getTargetOptions(srcDir);
         const tmpContents = await readTmp('ninjalib-copy');
         if (tmpContents.length) {
@@ -118,13 +112,13 @@ export async function copy(args: CopyArgs) {
     }
 
     // get target package.json
-    const targetDir = args.targetDir ? path.join(cwd, args.targetDir) : path.join(cwd, '..', selectedTarget);
+    const targetDir = opts.target ? path.join(cwd, opts.target) : path.join(cwd, '..', selectedTarget);
     const targetPkgJsonPath = path.join(targetDir, 'package.json');
     const targetPkgJson = await readPackageJson(targetPkgJsonPath, 'target');
     if (!targetPkgJson) return;
 
-    log.debug(`Saving target ${args.targetDir ?? selectedTarget} to temp so it can be remembered`);
-    await writeTmp('ninjalib-copy', args.targetDir ?? selectedTarget);
+    log.debug(`Saving target ${opts.target ?? selectedTarget} to temp so it can be remembered`);
+    await writeTmp('ninjalib-copy', opts.target ?? selectedTarget);
 
     if (srcPkgJson.name === targetPkgJson.name) {
         log.error(`Cannot copy ${srcPkgJson.name} to itself`);
@@ -194,7 +188,7 @@ export async function copy(args: CopyArgs) {
 }
 
 export const copyOptions = {
-    '(optional) sourceDir': 'What directory to copy from (relative to cwd)',
-    '(optional) targetDir': 'What directory to copy to (relative to cwd)',
-    '(optional) --force': 'Copies source regardless of if target requires it',
+    '<opt> --source': 'What directory to copy from - relative to cwd, defaults to cwd',
+    '<opt> --target': 'What directory to copy to - relative to cwd',
+    '<opt> -f --force': 'Copies source regardless of if target requires it',
 };

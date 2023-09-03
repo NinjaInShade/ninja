@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { selectMenu } from '../utils';
-import { logger, runAsync } from '@ninjalib/util';
+import { logger, runAsync, type ArgV } from '@ninjalib/util';
 import type { PackageJson } from '../copy/script';
 import fs from 'node:fs/promises';
 import semver from 'semver';
@@ -13,12 +13,6 @@ const DEFAULT_VERSION_TYPE = 'minor';
 
 const log = logger('build:publish');
 
-type PublishOptions = {
-    type: semver.ReleaseType;
-    ['release-branch']: string;
-    message: string;
-};
-
 /**
  * Publish script for publishing ninja packages
  *
@@ -27,7 +21,7 @@ type PublishOptions = {
  * - updates pkg.json version, adds a tag & commits version upgrade
  * - publishes to npm
  */
-export async function publish(args: PublishOptions) {
+export async function publish({ opts, args }: ArgV) {
     const cwd = process.cwd();
 
     let pkgJson: PackageJson;
@@ -48,7 +42,7 @@ export async function publish(args: PublishOptions) {
     const pkgNamePrefix = '@ninjalib/';
     const pkgCurrVersion = pkgJson.version;
     const libName = pkgName.substring(pkgNamePrefix.length);
-    const commitMessage = args.message ?? `(${libName}) version %v`;
+    const commitMessage = opts.message ?? `(${libName}) version %v`;
 
     if (!pkgName.startsWith('@ninjalib')) {
         log.error('Must be in a @ninjalib package to publish');
@@ -60,7 +54,7 @@ export async function publish(args: PublishOptions) {
         return;
     }
 
-    let type = args.type;
+    let type = args.at(-1) as semver.ReleaseType | undefined;
     if (!type) {
         const selected = await selectMenu({
             title: '[PUBLISH] Select the type of version upgrade:',
@@ -109,7 +103,7 @@ export async function publish(args: PublishOptions) {
 
     log.info('checking git is clean...');
 
-    const releaseBranch = (args['release-branch'] ?? 'master').trim();
+    const releaseBranch = (opts['release-branch'] ?? 'master').trim();
     const currBranch = (await runAsync('git rev-parse --abbrev-ref HEAD')).stdout.trim(); // git branch --show-current is shorter & more intuitive but requires git 2.22 (maybe fine?)
     if (currBranch !== releaseBranch) {
         log.error(`you must be on the release branch (${releaseBranch}) to publish`);
@@ -227,7 +221,7 @@ export async function publish(args: PublishOptions) {
 }
 
 export const publishOptions = {
-    '(optional) type': 'The type of version upgrade <major|minor|patch>',
-    '(optional) release-branch': 'The branch were releases are tagged and published at',
-    '(optional) message': 'The message used in the version commit (must use %v somewhere - replaced with version number in runtime)',
+    '<arg> type': 'The type of version upgrade <major|minor|patch>',
+    '<opt> --release-branch': 'The branch where releases are tagged and published at',
+    '<opt> --message': 'The message used in the version commit - must use %v somewhere - replaced with version number in runtime',
 };

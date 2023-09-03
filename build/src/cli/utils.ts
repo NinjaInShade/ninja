@@ -114,7 +114,7 @@ export async function writeTmp(file: string, data: string) {
  * Shows help menu for a particular script
  */
 export function scriptHelpMenu(optionName, options: Record<string, any>) {
-    logLine('\n' + colours.blue + colours.bold + `Here all available options for the '${optionName}' script:` + '\n');
+    logLine('\n' + colours.blue + colours.bold + `Here all available options and arguments for the '${optionName}' script:` + '\n');
     for (const [option, description] of Object.entries(options)) {
         logLine(colours.blue + colours.bold + option + colours.reset + colours.grey + ' ' + description);
     }

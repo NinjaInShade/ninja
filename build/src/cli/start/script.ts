@@ -1,14 +1,9 @@
 import wtf from 'wtfnode';
-import { logger, parseArgs } from '@ninjalib/util';
+import { logger, parseArgv, ArgV } from '@ninjalib/util';
 import { vite as startVite } from '../vite/script';
 import { runtime as startNode } from '../node/script';
 
 const log = logger('build:start');
-
-type StartOptions = {
-    viteArgs?: string;
-    nodeArgs?: string;
-};
 
 // TODO: move to util
 async function sleep(ms: number) {
@@ -22,26 +17,29 @@ async function sleep(ms: number) {
 /**
  * Process manager for vite/node
  */
-export async function start(options: StartOptions) {
-    function createArgs(userArgs: string | undefined) {
-        // TODO: fix this hack with first elements being empty
-        // Essentially this is done because parseArgs() expects raw argsV where the first 3 elements aren't really relevant
-        return userArgs ? ['', '', '', ...userArgs.split(',').filter((arg) => arg.length)] : [];
-    }
+export async function start({ opts, args }: ArgV) {
+    const createArgs = (userArgs: string) =>
+        userArgs
+            .split(',')
+            .filter((arg) => arg.length)
+            .join(' ');
 
-    const defaultNodeArgs = { '--watch': true };
-    const nodeArgs = Object.assign({}, defaultNodeArgs, parseArgs(createArgs(options.nodeArgs)));
-    const nodeProc = await startNode(nodeArgs);
+    const nodeArgv = opts['node-args'] ? parseArgv(createArgs(opts['node-args'])) : { opts: {}, args: [] };
+    nodeArgv.opts.watch = '--watch';
+    const nodeProc = await startNode(nodeArgv);
+
     await sleep(250);
 
-    const viteArgs = parseArgs(createArgs(options.viteArgs));
-    const viteProc = await startVite(viteArgs);
+    const viteArgv = opts['vite-args'] ? parseArgv(createArgs(opts['vite-args'])) : { opts: {}, args: [] };
+    const viteProc = await startVite(viteArgv);
 
     const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
     for (const sig of signals) {
         process.on(sig, async () => {
             log.debug(`Caught '${sig}', passing down to processes`);
-            nodeProc.kill(sig);
+            if (nodeProc) {
+                nodeProc.kill(sig);
+            }
             viteProc.kill(sig);
 
             // TODO: Document properly
@@ -55,7 +53,7 @@ export async function start(options: StartOptions) {
 
     await Promise.all([
         // node
-        new Promise<void>((resolve) => nodeProc.on('exit', () => resolve())),
+        ...(nodeProc ? [new Promise<void>((resolve) => nodeProc.on('exit', () => resolve()))] : []),
         // vite
         new Promise<void>((resolve) => viteProc.on('exit', () => resolve())),
     ]);
@@ -63,4 +61,7 @@ export async function start(options: StartOptions) {
     log.debug('All processes exited');
 }
 
-export const startOptions = {};
+export const startOptions = {
+    '<opt> --vite-args': 'Options/Arguments to pass down to the vite script',
+    '<opt> --node-args': 'Options/Arguments to pass down to the node script',
+};
