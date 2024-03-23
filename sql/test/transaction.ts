@@ -16,6 +16,7 @@ describe('MySQL transactions', async () => {
     let db: sql.MySQL;
 
     const setupData = async () => {
+        await db.query(`DROP TABLE IF EXISTS tx_test`);
         const createTableQuery = `
             CREATE TABLE tx_test (
                 id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -38,16 +39,8 @@ describe('MySQL transactions', async () => {
                 ('michael', 'jordan', 'nbamichael@gmail.com'),
                 ('mike', 'imposter', 'mikeimposter@gmail.com')
         `;
-        await db.transaction(async () => {
-            await db.query(createTableQuery);
-            await db.query(insertDataQuery);
-        });
-    };
-
-    const destroyData = async () => {
-        await db.transaction(async () => {
-            await db.query(`DROP TABLE tx_test`);
-        });
+        await db.query(createTableQuery);
+        await db.query(insertDataQuery);
     };
 
     before(async () => {
@@ -56,70 +49,33 @@ describe('MySQL transactions', async () => {
     });
 
     after(async () => {
-        await destroyData();
+        await db.query(`DROP TABLE tx_test`);
         await db.dispose();
     });
 
-    it(`should throw when trying to run 'START TRANSACTION' manually`, async () => {
-        await assert.rejects(async () => await db.query('START TRANSACTION'), {
-            message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead`,
-        });
+    it(`should throw when trying to run transaction queries manually`, async () => {
+        const forbidden = ['START TRANSACTION', 'BEGIN', 'COMMIT', 'ROLLBACK'];
+        for (const query of forbidden) {
+            await assert.rejects(async () => await db.query(query), {
+                message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead`,
+            });
+        }
     });
 
-    it(`should throw when trying to run 'BEGIN' manually`, async () => {
-        await assert.rejects(async () => await db.query('BEGIN'), { message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead` });
-    });
-
-    it(`should throw when trying to run 'COMMIT' manually`, async () => {
-        await assert.rejects(async () => await db.query('COMMIT'), { message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead` });
-    });
-
-    it(`should throw when trying to run 'ROLLBACK' manually`, async () => {
-        await assert.rejects(async () => await db.query('ROLLBACK'), {
-            message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead`,
-        });
-    });
-
-    it(`should throw when trying to run an INSERT query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`INSERT INTO irrelevant (name) VALUES ('test')`), {
-            message: `Cannot run 'INSERT' query without a transaction`,
-        });
-    });
-
-    it(`should throw when trying to run an UPDATE query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`UPDATE irrelevant SET name = 'bob'`), { message: `Cannot run 'UPDATE' query without a transaction` });
-    });
-
-    it(`should throw when trying to run a DELETE query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`DELETE FROM irrelevant`), { message: `Cannot run 'DELETE' query without a transaction` });
-    });
-
-    it(`should throw when trying to run a CREATE query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`CREATE DATABASE irrelevant`), { message: `Cannot run 'CREATE' query without a transaction` });
-    });
-
-    it(`should throw when trying to run a DROP query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`DROP DATABASE irrelevant`), { message: `Cannot run 'DROP' query without a transaction` });
-    });
-
-    it(`should throw when trying to run an ALTER query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`ALTER TABLE irrelevant ADD COLUMN test INT(11) NOT NULL`), {
-            message: `Cannot run 'ALTER' query without a transaction`,
+    it('should have access to helpers', async () => {
+        await db.transaction(async (tx) => {
+            for (const method of Object.keys(db.helpers)) {
+                assert.ok(method in tx);
+                assert.ok(typeof tx[method] === 'function');
+            }
         });
     });
 
     it('should not insert into the database if transaction errors', async () => {
-        const tx_testBefore = await db.getRows<User>('tx_test');
-        assert.equal(tx_testBefore.length, 8);
-
+        assert.equal((await db.getRows<User>('tx_test')).length, 8);
         try {
-            await db.transaction(async () => {
-                const query = `
-                    INSERT INTO tx_test (first_name, last_name, email)
-                    VALUES
-                        ('bob', 'thomas', 'thomasbob@gmail.com')
-                `;
-                await db.query(query, []);
+            await db.transaction(async (tx) => {
+                await tx.insertOne('tx_test', { first_name: 'bob', last_name: 'thomas', email: 'thomasbob@gmail.com' });
                 throw new Error('pretend_error');
             });
         } catch (err) {
@@ -127,25 +83,46 @@ describe('MySQL transactions', async () => {
                 throw err;
             }
         }
-
-        const tx_testAfter = await db.getRows<User>('tx_test');
-        assert.equal(tx_testAfter.length, 8);
+        // should stay as 8 rows because transaction failed, so all queries should have been rolled back
+        assert.equal((await db.getRows<User>('tx_test')).length, 8);
     });
 
     it(`should successfully commit to db if transaction doesn't error`, async () => {
-        const tx_testBefore = await db.getRows<User>('tx_test');
-        assert.equal(tx_testBefore.length, 8);
-
-        await db.transaction(async () => {
-            const query = `
-                    INSERT INTO tx_test (first_name, last_name, email)
-                    VALUES
-                        ('bob', 'thomas', 'thomasbob@gmail.com')
-                `;
-            await db.query(query, []);
+        assert.equal((await db.getRows<User>('tx_test')).length, 8);
+        await db.transaction(async (tx) => {
+            await tx.insertOne('tx_test', { first_name: 'bob', last_name: 'thomas', email: 'thomasbob@gmail.com' });
         });
+        // should be 9 rows now because transaction was committed
+        assert.equal((await db.getRows<User>('tx_test')).length, 9);
+    });
 
-        const tx_testAfter = await db.getRows<User>('tx_test');
-        assert.equal(tx_testAfter.length, 9);
+    it('should not leak queries within transactions into other connections', async () => {
+        assert.equal((await db.getRows<User>('tx_test')).length, 9);
+        await db.transaction(async (tx) => {
+            // insert using transaction connection
+            await tx.insertOne('tx_test', { first_name: 'bob', last_name: 'thomas', email: 'thomasbob@gmail.com' });
+            // assert the new row exists in the transaction connection
+            assert.equal((await tx.getRows<User>('tx_test')).length, 10);
+            // assert the same amount of rows exist as before in the main connection
+            assert.equal((await db.getRows<User>('tx_test')).length, 9);
+        });
+        // should be 10 rows now because transaction was committed
+        assert.equal((await db.getRows<User>('tx_test')).length, 10);
+    });
+
+    it('should not leak queries within transactions into other transactions', async () => {
+        assert.equal((await db.getRows<User>('tx_test')).length, 10);
+        await db.transaction(async (tx) => {
+            await db.transaction(async (tx2) => {
+                // insert using transaction connection
+                await tx.insertOne('tx_test', { first_name: 'bob', last_name: 'thomas', email: 'thomasbob@gmail.com' });
+                // assert the new row exists in the transaction connection
+                assert.equal((await tx.getRows<User>('tx_test')).length, 11);
+                // assert the same amount of rows exist as before in the other transaction connection
+                assert.equal((await tx2.getRows<User>('tx_test')).length, 10);
+            });
+        });
+        // should be 11 rows now because transaction was committed
+        assert.equal((await db.getRows<User>('tx_test')).length, 11);
     });
 });

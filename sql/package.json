@@ -15,7 +15,7 @@
     },
     "types": "dist/node/index.d.ts",
     "scripts": {
-        "build": "ninja-cli node --build ./",
+        "build": "ninja-cli node --build ./src",
         "test": "docker compose up -d && ninja-cli test"
     },
     "engines": {
@@ -39,7 +39,7 @@
     "license": "ISC",
     "dependencies": {
         "@ninjalib/build": "^0.4.0",
-        "@ninjalib/util": "^0.2.1",
+        "@ninjalib/util": "^0.5.0",
         "mysql2": "^3.9.2"
     },
     "devDependencies": {

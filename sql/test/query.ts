@@ -17,8 +17,8 @@ describe('MySQL queries', async () => {
 
     const rollbackHook = async (fn: Function) => {
         try {
-            await db.transaction(async () => {
-                await fn();
+            await db.transaction(async (tx) => {
+                await fn(tx);
                 throw new Error('rollback');
             });
         } catch (err) {
@@ -52,16 +52,8 @@ describe('MySQL queries', async () => {
                 ('michael', 'jordan', 'nbamichael@gmail.com'),
                 ('mike', 'imposter', 'mikeimposter@gmail.com')
         `;
-        await db.transaction(async () => {
-            await db.query(createTableQuery);
-            await db.query(insertDataQuery);
-        });
-    };
-
-    const destroyData = async () => {
-        await db.transaction(async () => {
-            await db.query(`DROP TABLE query_test`);
-        });
+        await db.query(createTableQuery);
+        await db.query(insertDataQuery);
     };
 
     before(async () => {
@@ -70,7 +62,7 @@ describe('MySQL queries', async () => {
     });
 
     after(async () => {
-        await destroyData();
+        await db.query(`DROP TABLE query_test`);
         await db.dispose();
     });
 
