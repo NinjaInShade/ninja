@@ -1,0 +1,15 @@
+version: '3.5'
+services:
+    db:
+        image: mariadb
+        ports:
+            - ${DB_PORT}:3306
+        environment:
+            MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MARIADB_USER: ${DB_USER}
+            MARIADB_PASSWORD: ${DB_PASSWORD}
+            MARIADB_DATABASE: test
+        volumes:
+            - test-db:/var/lib/mysql
+volumes:
+    test-db: {}

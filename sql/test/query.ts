@@ -1,5 +1,5 @@
-import util from '@ninjalib/util';
 import { describe, it, before, after } from 'node:test';
+import { getDB } from './testutil';
 import assert from 'node:assert';
 import sql from '~/index';
 
@@ -12,7 +12,7 @@ type User = {
     timestamp: string;
 };
 
-describe('MySQL queries', () => {
+describe('MySQL queries', async () => {
     let db: sql.MySQL;
 
     const rollbackHook = async (fn: Function) => {
@@ -25,15 +25,13 @@ describe('MySQL queries', () => {
             if (err.message === 'rollback') {
                 return;
             }
-            console.log(err);
             throw err;
         }
     };
 
     const setupData = async () => {
-        const createDBQuery = `CREATE DATABASE testing`;
         const createTableQuery = `
-            CREATE TABLE testing.users (
+            CREATE TABLE query_test (
                 id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 first_name VARCHAR(255) NOT NULL,
                 last_name VARCHAR(255) DEFAULT NULL,
@@ -43,7 +41,7 @@ describe('MySQL queries', () => {
             )
         `;
         const insertDataQuery = `
-            INSERT INTO testing.users (first_name, last_name, email)
+            INSERT INTO query_test (first_name, last_name, email)
             VALUES
                 ('leon', 'michalak', 'leonmichalak@gmail.com'),
                 ('leon', 'obama', 'obamaleon@gmail.com'),
@@ -55,7 +53,6 @@ describe('MySQL queries', () => {
                 ('mike', 'imposter', 'mikeimposter@gmail.com')
         `;
         await db.transaction(async () => {
-            await db.query(createDBQuery);
             await db.query(createTableQuery);
             await db.query(insertDataQuery);
         });
@@ -63,20 +60,12 @@ describe('MySQL queries', () => {
 
     const destroyData = async () => {
         await db.transaction(async () => {
-            await db.query(`DROP DATABASE testing`);
+            await db.query(`DROP TABLE query_test`);
         });
     };
 
     before(async () => {
-        await util.loadEnv();
-        const settings = {
-            user: process.env.DB_USER,
-            host: process.env.DB_HOST,
-            password: process.env.DB_PASSWORD,
-            database: 'tracker',
-        };
-        db = new sql.MySQL(settings);
-        await db.connect();
+        db = await getDB();
         await setupData();
     });
 
@@ -86,55 +75,61 @@ describe('MySQL queries', () => {
     });
 
     it('[query] should throw if query param is undefined', async () => {
-        await assert.rejects(async () => await db.query<User>('SELECT * FROM testing.users WHERE first_name = ?', [undefined]), { message: 'Query parameter 1 is undefined' });
+        await assert.rejects(async () => await db.query<User>('SELECT * FROM query_test WHERE first_name = ?', [undefined]), {
+            message: 'Query parameter 1 is undefined',
+        });
     });
 
     it('[query] should throw if table does not exist', async () => {
-        await assert.rejects(async () => await db.query<User>('SELECT * FROM not_defined'), { message: `Query failed: Table 'tracker.not_defined' doesn't exist` });
+        await assert.rejects(async () => await db.query<User>('SELECT * FROM not_defined'), {
+            message: `Query failed: Table 'test.not_defined' doesn't exist`,
+        });
     });
 
     it('[query] should throw if column in where condition does not exist', async () => {
-        await assert.rejects(async () => await db.query<User>('SELECT * FROM testing.users WHERE not_defined = ?', ['test']), { message: `Query failed: Unknown column 'not_defined' in 'where clause'` });
+        await assert.rejects(async () => await db.query<User>('SELECT * FROM query_test WHERE not_defined = ?', ['test']), {
+            message: `Query failed: Unknown column 'not_defined' in 'where clause'`,
+        });
     });
 
     it('[getRows] should get all rows', async () => {
-        const users = await db.getRows<User>('testing.users');
-        assert.equal(users.length, 8);
+        const query_test = await db.getRows<User>('query_test');
+        assert.equal(query_test.length, 8);
     });
 
     it('[getRows] should get all rows based on where condition', async () => {
-        const users = await db.getRows<User>('testing.users', { first_name: 'leon' });
-        assert.equal(users.length, 2);
+        const query_test = await db.getRows<User>('query_test', { first_name: 'leon' });
+        assert.equal(query_test.length, 2);
     });
 
     it('[getRows] should return empty array if no matches found', async () => {
-        const users = await db.getRows<User>('testing.users', { first_name: 'not', last_name: 'defined' });
-        assert.equal(users.length, 0);
+        const query_test = await db.getRows<User>('query_test', { first_name: 'not', last_name: 'defined' });
+        assert.equal(query_test.length, 0);
     });
 
     it('[getRow] should get row', async () => {
-        const user = await db.getRow<User>('testing.users');
+        const user = await db.getRow<User>('query_test');
         assert.equal(user.first_name, 'leon');
         assert.equal(user.last_name, 'michalak');
         assert.equal(user.email, 'leonmichalak@gmail.com');
     });
 
     it('[getRow] should get row based on where condition', async () => {
-        const user = await db.getRow<User>('testing.users', { first_name: 'mike', last_name: 'tyson' });
+        const user = await db.getRow<User>('query_test', { first_name: 'mike', last_name: 'tyson' });
         assert.equal(user.first_name, 'mike');
         assert.equal(user.last_name, 'tyson');
         assert.equal(user.email, 'miketyson@gmail.com');
     });
 
     it('[getRow] should return default value if no row found', async () => {
-        const user = await db.getRow<User, string>('testing.users', { first_name: 'made', last_name: 'up' }, 'not_found');
+        const user = await db.getRow<User, string>('query_test', { first_name: 'made', last_name: 'up' }, 'not_found');
         assert.equal(user, 'not_found');
     });
 
     it(`[insertOne] should insert an entry into the database and return every created rows' id`, async () => {
         await rollbackHook(async () => {
-            const id = await db.insertOne('testing.users', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' });
-            const newRow = await db.getRow<User>('testing.users', { id });
+            const id = await db.insertOne('query_test', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' });
+            const newRow = await db.getRow<User>('query_test', { id });
             assert.equal(newRow.first_name, 'new');
             assert.equal(newRow.last_name, 'guy');
             assert.equal(newRow.email, 'newguy@gmail.com');
@@ -148,7 +143,9 @@ describe('MySQL queries', () => {
                 { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com', unexpected_field: 'test' },
                 { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' },
             ];
-            await assert.rejects(async () => await db.insertMany('testing.users', data), { message: `Got field mismatch, 'unexpected_field' isn't part of the fields. Make sure every dataset has the same fields` });
+            await assert.rejects(async () => await db.insertMany('query_test', data), {
+                message: `Got field mismatch, 'unexpected_field' isn't part of the fields. Make sure every dataset has the same fields`,
+            });
         });
     });
 
@@ -161,12 +158,12 @@ describe('MySQL queries', () => {
                 { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' },
                 { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' },
             ];
-            await db.insertMany('testing.users', data);
-            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' }));
-            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' }));
-            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' }));
-            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' }));
-            assert.ok(await db.getRow<User>('testing.users', { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' }));
+            await db.insertMany('query_test', data);
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' }));
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' }));
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' }));
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' }));
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' }));
         });
     });
 });

@@ -1,5 +1,5 @@
-import util from '@ninjalib/util';
 import { describe, it, before, after } from 'node:test';
+import { getDB } from './testutil';
 import assert from 'node:assert';
 import sql from '~/index';
 
@@ -12,13 +12,12 @@ type User = {
     timestamp: string;
 };
 
-describe('MySQL transactions', () => {
+describe('MySQL transactions', async () => {
     let db: sql.MySQL;
 
     const setupData = async () => {
-        const createDBQuery = `CREATE DATABASE testing`;
         const createTableQuery = `
-            CREATE TABLE testing.users (
+            CREATE TABLE tx_test (
                 id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 first_name VARCHAR(255) NOT NULL,
                 last_name VARCHAR(255) DEFAULT NULL,
@@ -28,7 +27,7 @@ describe('MySQL transactions', () => {
             )
         `;
         const insertDataQuery = `
-            INSERT INTO testing.users (first_name, last_name, email)
+            INSERT INTO tx_test (first_name, last_name, email)
             VALUES
                 ('leon', 'michalak', 'leonmichalak@gmail.com'),
                 ('leon', 'obama', 'obamaleon@gmail.com'),
@@ -40,7 +39,6 @@ describe('MySQL transactions', () => {
                 ('mike', 'imposter', 'mikeimposter@gmail.com')
         `;
         await db.transaction(async () => {
-            await db.query(createDBQuery);
             await db.query(createTableQuery);
             await db.query(insertDataQuery);
         });
@@ -48,20 +46,12 @@ describe('MySQL transactions', () => {
 
     const destroyData = async () => {
         await db.transaction(async () => {
-            await db.query(`DROP DATABASE testing`);
+            await db.query(`DROP TABLE tx_test`);
         });
     };
 
     before(async () => {
-        await util.loadEnv();
-        const settings = {
-            user: process.env.DB_USER,
-            host: process.env.DB_HOST,
-            password: process.env.DB_PASSWORD,
-            database: 'tracker',
-        };
-        db = new sql.MySQL(settings);
-        await db.connect();
+        db = await getDB();
         await setupData();
     });
 
@@ -71,7 +61,9 @@ describe('MySQL transactions', () => {
     });
 
     it(`should throw when trying to run 'START TRANSACTION' manually`, async () => {
-        await assert.rejects(async () => await db.query('START TRANSACTION'), { message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead` });
+        await assert.rejects(async () => await db.query('START TRANSACTION'), {
+            message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead`,
+        });
     });
 
     it(`should throw when trying to run 'BEGIN' manually`, async () => {
@@ -83,11 +75,15 @@ describe('MySQL transactions', () => {
     });
 
     it(`should throw when trying to run 'ROLLBACK' manually`, async () => {
-        await assert.rejects(async () => await db.query('ROLLBACK'), { message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead` });
+        await assert.rejects(async () => await db.query('ROLLBACK'), {
+            message: `Manually handling transactions is forbidden. Use 'db.transaction()' instead`,
+        });
     });
 
     it(`should throw when trying to run an INSERT query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`INSERT INTO irrelevant (name) VALUES ('test')`), { message: `Cannot run 'INSERT' query without a transaction` });
+        await assert.rejects(async () => await db.query(`INSERT INTO irrelevant (name) VALUES ('test')`), {
+            message: `Cannot run 'INSERT' query without a transaction`,
+        });
     });
 
     it(`should throw when trying to run an UPDATE query without transaction`, async () => {
@@ -107,17 +103,19 @@ describe('MySQL transactions', () => {
     });
 
     it(`should throw when trying to run an ALTER query without transaction`, async () => {
-        await assert.rejects(async () => await db.query(`ALTER TABLE irrelevant ADD COLUMN test INT(11) NOT NULL`), { message: `Cannot run 'ALTER' query without a transaction` });
+        await assert.rejects(async () => await db.query(`ALTER TABLE irrelevant ADD COLUMN test INT(11) NOT NULL`), {
+            message: `Cannot run 'ALTER' query without a transaction`,
+        });
     });
 
     it('should not insert into the database if transaction errors', async () => {
-        const usersBefore = await db.getRows<User>('testing.users');
-        assert.equal(usersBefore.length, 8);
+        const tx_testBefore = await db.getRows<User>('tx_test');
+        assert.equal(tx_testBefore.length, 8);
 
         try {
             await db.transaction(async () => {
                 const query = `
-                    INSERT INTO testing.users (first_name, last_name, email)
+                    INSERT INTO tx_test (first_name, last_name, email)
                     VALUES
                         ('bob', 'thomas', 'thomasbob@gmail.com')
                 `;
@@ -130,24 +128,24 @@ describe('MySQL transactions', () => {
             }
         }
 
-        const usersAfter = await db.getRows<User>('testing.users');
-        assert.equal(usersAfter.length, 8);
+        const tx_testAfter = await db.getRows<User>('tx_test');
+        assert.equal(tx_testAfter.length, 8);
     });
 
     it(`should successfully commit to db if transaction doesn't error`, async () => {
-        const usersBefore = await db.getRows<User>('testing.users');
-        assert.equal(usersBefore.length, 8);
+        const tx_testBefore = await db.getRows<User>('tx_test');
+        assert.equal(tx_testBefore.length, 8);
 
         await db.transaction(async () => {
             const query = `
-                    INSERT INTO testing.users (first_name, last_name, email)
+                    INSERT INTO tx_test (first_name, last_name, email)
                     VALUES
                         ('bob', 'thomas', 'thomasbob@gmail.com')
                 `;
             await db.query(query, []);
         });
 
-        const usersAfter = await db.getRows<User>('testing.users');
-        assert.equal(usersAfter.length, 9);
+        const tx_testAfter = await db.getRows<User>('tx_test');
+        assert.equal(tx_testAfter.length, 9);
     });
 });

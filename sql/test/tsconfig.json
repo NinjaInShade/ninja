@@ -1,0 +1,9 @@
+{
+    "extends": "@ninjalib/build/configs/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "../",
+    },
+    "include": [
+        "./**/*.ts",
+    ]
+}

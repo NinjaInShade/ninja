@@ -61,7 +61,9 @@ describe('[loadEnv] variable parsing', () => {
         process.env.FOO = 'existing';
         assert.equal(process.env.FOO, 'existing');
         await createEnv(_path);
-        await assert.rejects(async () => await util.loadEnv(_path), { message: `Env variable 'FOO' already exists. Call with 'force' parameter true if you want to forcefully overwrite it` });
+        await assert.rejects(async () => await util.loadEnv(_path), {
+            message: `Env variable 'FOO' already exists. Call with 'force' parameter true if you want to forcefully overwrite it`,
+        });
         assert.equal(process.env.FOO, 'existing');
     });
 

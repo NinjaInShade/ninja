@@ -112,3 +112,11 @@ const data = [
 
 const firstId = await db.insertMany<number>('auth.users', data);
 ```
+
+## Testing
+
+After installing dependencies with `npm i`, you should be able to run `npm test` in the package root.
+
+NOTE: when adding new tests: node's test runner (which npm test uses under the hood), runs files in parallel. Be careful with this, as querying the same table that two files use can fail since one file might have cleaned up already (dropped the table) whilst the other is trying to use it (as an example, but you get the picture).
+
+We could pass `--test-concurrency=1` into the test runner, but it will run slower. The solution is to give any tables being tested within a file some unique prefix that no other file would use.
