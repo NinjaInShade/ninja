@@ -19,13 +19,15 @@
     },
     "types": "dist/node/index.d.ts",
     "scripts": {
-        "build": "ninja-cli node --build file=./",
-        "test": "ninja-cli test",
-        "node": "ninja-cli node"
+        "build": "ninja-cli node --build ./",
+        "test": "ninja-cli test"
+    },
+    "engines": {
+        "node": ">=21.0.0"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/NinjaInShade/ninja/tree/master/util"
+        "url": "git+https://github.com/NinjaInShade/ninja"
     },
     "bugs": {
         "url": "https://github.com/NinjaInShade/ninja/issues"
@@ -39,13 +41,13 @@
     ],
     "author": "Leon Michalak",
     "license": "ISC",
-    "devDependencies": {
-        "@types/node": "^18.14.5",
-        "tsc-alias": "^1.8.2",
-        "typescript": "^5.0.4"
-    },
     "dependencies": {
-        "@ninjalib/build": "^0.1.18",
-        "tsx": "^3.12.7"
+        "@ninjalib/build": "^0.4.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.28",
+        "tsc-alias": "^1.8.8",
+        "typescript": "^5.0.4",
+        "tsx": "^4.7.1"
     }
 }

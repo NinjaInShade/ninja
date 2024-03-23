@@ -20,17 +20,20 @@
         "test": "ninja-cli test",
         "node": "ninja-cli node"
     },
+    "engines": {
+        "node": ">=21.0.0"
+    },
     "keywords": [],
     "author": "Leon Michalak",
     "license": "ISC",
     "dependencies": {
         "@ninjalib/util": "^0.5.0",
         "@sveltejs/vite-plugin-svelte": "^2.1.1",
-        "@types/node": "^18.14.5",
+        "@types/node": "^20.11.28",
         "@types/semver": "^7.3.13",
         "semver": "^7.3.8",
-        "tsc-alias": "^1.8.2",
-        "tsx": "^3.12.7",
+        "tsc-alias": "^1.8.8",
+        "tsx": "^4.7.1",
         "typescript": "^5.0.4",
         "vite": "^4.3.3",
         "wtfnode": "^0.9.1"

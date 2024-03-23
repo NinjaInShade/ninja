@@ -16,15 +16,18 @@
             "svelte": "./dist/index.js"
         }
     },
+    "engines": {
+        "node": ">=21.0.0"
+    },
     "types": "./dist/index.d.ts",
     "dependencies": {
-        "@ninjalib/build": "^0.1.9",
+        "@ninjalib/build": "^0.4.0",
         "svelte": "^3.58.0"
     },
     "devDependencies": {
         "@sveltejs/package": "^2.0.0",
         "@sveltejs/vite-plugin-svelte": "^2.0.4",
-        "@types/node": "^18.15.11",
+        "@types/node": "^20.11.28",
         "svelte-preprocess": "^5.0.3",
         "tslib": "^2.5.0",
         "typescript": "^5.0.4",
