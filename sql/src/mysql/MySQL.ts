@@ -59,6 +59,7 @@ export default class MySQL {
     public async dispose() {
         if (this.pool) {
             await this.pool.end();
+            this.pool = undefined;
         }
     }
 
