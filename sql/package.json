@@ -6,8 +6,8 @@
     "exports": {
         ".": {
             "node": {
-                "default": "./dist/node/node.js",
-                "types": "./dist/node/node.d.ts"
+                "default": "./dist/node/index.js",
+                "types": "./dist/node/index.d.ts"
             },
             "default": "./dist/node/index.js",
             "types": "./dist/node/index.d.ts"
@@ -38,12 +38,12 @@
     "author": "Leon Michalak",
     "license": "ISC",
     "dependencies": {
-        "@ninjalib/build": "^0.4.0",
+        "@ninjalib/build": "^0.4.1",
         "@ninjalib/util": "^0.5.0",
-        "mysql2": "^3.9.2"
+        "mysql2": "^3.9.6"
     },
     "devDependencies": {
-        "@types/node": "^20.11.28",
+        "@types/node": "^20.12.7",
         "tsc-alias": "^1.8.8",
         "typescript": "^5.0.4",
         "tsx": "^4.7.1"
