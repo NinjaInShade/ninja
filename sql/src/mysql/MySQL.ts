@@ -64,7 +64,7 @@ export default class MySQL {
     /**
      * Runs the code in a transaction context, rolling back if it encounter any error
      */
-    public async transaction(fn: (tx: TX) => Promise<void>) {
+    public async transaction(fn: (tx: TX) => Promise<any>) {
         if (!this.pool) {
             throw new Error("DB connection hasn't been initialised");
         }
@@ -72,8 +72,9 @@ export default class MySQL {
         const tx = new Transaction(this, connection) as TX; // TODO: fix typing
         try {
             await connection.beginTransaction();
-            await fn(tx);
+            const result = await fn(tx);
             await connection.commit();
+            return result;
         } catch (err) {
             await connection.rollback();
             throw err;
