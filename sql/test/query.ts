@@ -201,4 +201,63 @@ describe('MySQL queries', async () => {
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new-inserted', email: 'newguyupserted@gmail.com' }));
         });
     });
+
+    it(`[delete] should not delete any rows if conditions aren't matched`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' },
+            ];
+            await db.insertMany('query_test', data);
+
+            const rowsAmount = (await db.getRows('query_test')).length;
+
+            // Delete with conditions that will never match
+            await db.delete('query_test', { email: 'never-going-to-match' })
+
+            // Assert no rows were deleted
+            const rowsAmountAfterDelete = (await db.getRows('query_test')).length;
+            assert.equal(rowsAmount, rowsAmountAfterDelete);
+        })
+    })
+
+    it(`[delete] should only delete rows where conditions are matched`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2-for-delete', last_name: 'guy', email: 'newguy2@gmail.com' },
+            ];
+            await db.insertMany('query_test', data);
+
+            const rowsAmount = (await db.getRows('query_test')).length;
+
+            // Delete with conditions that will only match one of our rows
+            await db.delete('query_test', { first_name: 'new2-for-delete' });
+
+            // Assert only 1 row was deleted
+            const rowsAmountAfterDelete = (await db.getRows('query_test')).length;
+            assert.equal(rowsAmount - 1, rowsAmountAfterDelete);
+
+            // Assert it was the correct row that was deleted
+            const missingRow = await db.getRow('query_test', { first_name: 'new2-for-delete' });
+            assert.deepEqual(missingRow, null);
+        })
+    })
+
+    it(`[delete] should delete all rows if no conditions given`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2-for-delete', last_name: 'guy', email: 'newguy2@gmail.com' },
+            ];
+            await db.insertMany('query_test', data);
+
+            // Delete with no conditions
+            await db.delete('query_test');
+
+            // Assert no rows remain
+            const rowsAmountAfterDelete = (await db.getRows('query_test')).length;
+            assert.equal(rowsAmountAfterDelete, 0);
+        })
+    })
 });

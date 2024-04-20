@@ -259,5 +259,23 @@ export default class MySQL {
         await this.query(query, args);
     }
 
-    public helpers = { getRows: this.getRows, getRow: this.getRow, insertOne: this.insertOne, insertMany: this.insertMany, upsert: this.upsert };
+    /**
+     * Deletes from the given table, deleting only the rows matching the given conditions
+     */
+    public delete(table: string, where: Row = {}) {
+        const args = [table];
+        let query = `
+            DELETE FROM ??
+            WHERE TRUE
+        `;
+
+        for (const [key, value] of Object.entries(where)) {
+            query += `AND ?? = ?`;
+            args.push(key, value);
+        }
+
+        return this.query(query, args);
+    }
+
+    public helpers = { getRows: this.getRows, getRow: this.getRow, insertOne: this.insertOne, insertMany: this.insertMany, upsert: this.upsert, delete: this.delete };
 }
