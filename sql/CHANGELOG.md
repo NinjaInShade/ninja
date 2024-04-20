@@ -5,6 +5,9 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-   add delete helper
+-   add upsert helper
+-   add migration capability
 -   add proper transaction support (now accurately gets dedicated, isolated connection)
 
 ## [0.2.1] - 10/03/2023
