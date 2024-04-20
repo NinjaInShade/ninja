@@ -158,4 +158,47 @@ describe('MySQL queries', async () => {
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' }));
         });
     });
+
+    it(`[upsert] should throw when datasets fields don't all match`, async () => {
+        await rollbackHook(async () => {
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com', unexpected_field: 'test' },
+                { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' },
+            ];
+            await assert.rejects(async () => await db.upsert('query_test', data), {
+                message: `Got field mismatch, 'unexpected_field' isn't part of the fields. Make sure every dataset has the same fields`,
+            });
+        });
+    });
+
+    it(`[insertMany] should upsert entries into the database`, async () => {
+        await rollbackHook(async () => {
+            // Insert initial data
+            const data = [
+                { first_name: 'new', last_name: 'guy', email: 'newguy@gmail.com' },
+                { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' },
+            ];
+            const firstCreatedId = await db.insertMany('query_test', data);
+            const insertedRows = await db.getRow<User, null>('query_test', { id: firstCreatedId });
+            if (!insertedRows) {
+                throw new Error('Expected inserted row');
+            }
+
+            // upsert data
+            await db.upsert('query_test', [
+                { id: insertedRows.id, first_name: 'new-upserted', email: insertedRows.email },
+                { id: null, first_name: 'new-inserted', email: 'newguyupserted@gmail.com' },
+            ])
+
+            // We updated this rows name
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new-upserted', last_name: 'guy', email: 'newguy@gmail.com' }));
+
+            // We left this row alone
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new2', last_name: 'guy', email: 'newguy2@gmail.com' }));
+
+            // We inserted this new row
+            assert.ok(await db.getRow<User>('query_test', { first_name: 'new-inserted', email: 'newguyupserted@gmail.com' }));
+        });
+    });
 });

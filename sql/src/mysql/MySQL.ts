@@ -226,5 +226,38 @@ export default class MySQL {
         return result.insertId as number;
     }
 
-    public helpers = { getRows: this.getRows, getRow: this.getRow, insertOne: this.insertOne, insertMany: this.insertMany };
+    /**
+     * Inserts row/s into the given table but if primary key matches it updates the row
+     */
+    public async upsert(table: string, data: Row[]) {
+        const fields: string[] = [];
+        const values: Array<Array<any>> = [];
+
+        // Populate fields from first data object
+        for (const field of Object.keys(data[0])) {
+            fields.push(field);
+        }
+
+        for (const entry of data) {
+            const _values: any[] = [];
+            for (const [key, value] of Object.entries(entry)) {
+                if (!fields.includes(key)) {
+                    throw new Error(`Got field mismatch, '${key}' isn't part of the fields. Make sure every dataset has the same fields`);
+                }
+                _values.push(value);
+            }
+            values.push(_values);
+        }
+
+        const query = `
+            INSERT INTO ?? (${fields.map(() => '??').join(', ')})
+            VALUES ${values.map((_values) => `\n(${_values.map(() => '?').join(', ')})`).join(',')}
+            ON DUPLICATE KEY UPDATE ${fields.map(() => `\n?? = VALUES(??)`).join(',')}
+        `;
+        const args = [table, ...fields, ...values.flat(), ...fields.flatMap(x => ([x, x]))];
+
+        await this.query(query, args);
+    }
+
+    public helpers = { getRows: this.getRows, getRow: this.getRow, insertOne: this.insertOne, insertMany: this.insertMany, upsert: this.upsert };
 }
