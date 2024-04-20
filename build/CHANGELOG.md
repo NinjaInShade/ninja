@@ -6,6 +6,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.4.1] - 20/04/2024
+
 - fix issue with glob pattern not working when running tests
 - require Node v21.0.0
 
