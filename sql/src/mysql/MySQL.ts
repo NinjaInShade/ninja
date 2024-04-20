@@ -1,5 +1,6 @@
 import * as mysql from 'mysql2/promise';
 import { Transaction, type TX } from './Transaction';
+import { migrator, type Migration } from "./migrate";
 import util from '@ninjalib/util';
 
 interface ConnectionOptions extends mysql.ConnectionOptions {
@@ -135,6 +136,14 @@ export default class MySQL {
             log.debug(`Running '${queryType}' query without a transaction`);
         }
         return await this._query<T>(this.pool, query, values);
+    }
+
+    /**
+     * Migrate the DB.
+     * Keeps track of which steps it's done and knows which steps to execute next.
+     */
+    public migrate(migration: Migration) {
+        return migrator(migration, this);
     }
 
     /**
