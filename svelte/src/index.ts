@@ -10,6 +10,8 @@ export { default as Checkbox } from './Checkbox.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as Select } from './Select.svelte';
 export { default as Table } from './Table.svelte';
+export { default as FocusTrap } from './FocusTrap.svelte';
+
 export { default as nav } from './nav';
 
 export * as default from './index';

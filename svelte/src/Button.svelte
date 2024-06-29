@@ -185,7 +185,7 @@
     }
 
     /* focus */
-    .btn:focus-visible {
+    .btn:focus {
         outline: var(--focus-outline);
     }
 

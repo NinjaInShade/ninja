@@ -210,7 +210,13 @@
                         <button style="cursor: {sortable ? 'pointer' : 'unset'}" on:click={() => setSort(col.key)}>
                             {col.label ?? col.key}
                             {#if sortable && sortKey && sortKey === col.key}
-                                <NW.Icon name="arrow-up-wide-short" class="table-header-sort-icon" style={sortDir === 'asc' ? 'transform: rotateX(180deg)' : ''} --size="14px" --color="var(--grey-500)" />
+                                <NW.Icon
+                                    name="arrow-up-wide-short"
+                                    class="table-header-sort-icon"
+                                    style={sortDir === 'asc' ? 'transform: rotateX(180deg)' : ''}
+                                    --size="14px"
+                                    --color="var(--grey-500)"
+                                />
                             {/if}
                         </button>
                     </th>
@@ -335,7 +341,7 @@
         gap: 6px;
     }
 
-    .th-cell button:focus-visible {
+    .th-cell button:focus {
         outline: var(--focus-outline);
     }
 

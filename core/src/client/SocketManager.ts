@@ -4,7 +4,7 @@ import { logger } from '@ninjalib/util';
 const log = logger('nw:socketManager');
 
 type Disposer = () => void;
-type DataHandler = (data?: AcceptableSocketData) => void;
+type DataHandler = (...data: AcceptableSocketData[]) => void;
 
 type EventsMap = {
     connect: () => void;

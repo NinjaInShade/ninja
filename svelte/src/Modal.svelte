@@ -21,32 +21,42 @@
     export let component: typeof SvelteComponent | undefined = undefined;
 
     function closeModal() {
-        NW.nav.closeModal(1, null);
+        NW.nav.closeModal(1);
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
     }
 </script>
 
-<div class="modal {_class ?? ''}" style={style ?? ''} transition:fade={{ duration: 150, easing: sineInOut }}>
-    <div class="modal-header" style={headerStyle ?? ''}>
-        <p class="modal-title">{title ?? ''}</p>
-        <button class="close-btn" on:click={closeModal}>
-            <NW.Icon name="close" --size="1.35em" />
-        </button>
+<svelte:window on:keydown={onKeyDown} />
+
+<NW.FocusTrap>
+    <div class="modal {_class ?? ''}" style={style ?? ''} transition:fade={{ duration: 150, easing: sineInOut }}>
+        <div class="modal-header" style={headerStyle ?? ''}>
+            <p class="modal-title">{title ?? ''}</p>
+            <button class="close-btn" on:click={closeModal}>
+                <NW.Icon name="close" --size="1.35em" />
+            </button>
+        </div>
+        <div class="modal-content" style={contentStyle ?? ''}>
+            {#if component}
+                <svelte:component this={component} {...$$restProps} />
+            {:else}
+                <slot />
+            {/if}
+        </div>
+        <div class="modal-footer" style={footerStyle ?? ''}>
+            {#if $$slots.controls}
+                <slot name="controls" />
+            {:else}
+                <NW.Button onClick={closeModal}>Close</NW.Button>
+            {/if}
+        </div>
     </div>
-    <div class="modal-content" style={contentStyle ?? ''}>
-        {#if component}
-            <svelte:component this={component} {...$$restProps} />
-        {:else}
-            <slot />
-        {/if}
-    </div>
-    <div class="modal-footer" style={footerStyle ?? ''}>
-        {#if $$slots.controls}
-            <slot name="controls" />
-        {:else}
-            <NW.Button onClick={closeModal}>Close</NW.Button>
-        {/if}
-    </div>
-</div>
+</NW.FocusTrap>
 
 <style>
     .modal {
@@ -79,7 +89,7 @@
         font-size: 1.35em;
     }
 
-    .close-btn:focus-visible {
+    .close-btn:focus {
         outline: var(--focus-outline);
     }
 

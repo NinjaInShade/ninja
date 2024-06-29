@@ -159,7 +159,7 @@ export default class MySQL {
         `;
 
         for (const [key, value] of Object.entries(where)) {
-            query += `AND ?? = ?`;
+            query += `AND ?? = ?\n`;
             args.push(key, value);
         }
 

@@ -157,7 +157,17 @@
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="inner-container select-{size}" on:click|stopPropagation bind:this={thisInstance}>
         <!-- Select button -->
-        <button class="select {_class || ''}" class:error disabled={disabled || loading} {title} {style} name={htmlName} id={htmlName} on:click={handleOpen} bind:this={thisButtonInstance}>
+        <button
+            class="select {_class || ''}"
+            class:error
+            disabled={disabled || loading}
+            {title}
+            {style}
+            name={htmlName}
+            id={htmlName}
+            on:click={handleOpen}
+            bind:this={thisButtonInstance}
+        >
             {#if loading}
                 <div class="spinner-container">
                     <NW.Spinner --color="var(--grey-darkest)" />
@@ -182,12 +192,19 @@
             {#key value}
                 {#if allowClear}
                     <li>
-                        <button class="select-menu-item clear" on:click={() => handleSelect(null)}><NW.Icon name="ban" --size="0.75em" --color="var(--grey-400)" />Clear</button>
+                        <button class="select-menu-item clear" on:click={() => handleSelect(null)} tabindex={open ? 0 : -1}
+                            ><NW.Icon name="ban" --size="0.75em" --color="var(--grey-400)" />Clear</button
+                        >
                     </li>
                 {/if}
                 {#each data as item}
                     <li>
-                        <button class="select-menu-item" class:active={isActive(item.value)} on:click|stopPropagation={() => handleSelect(item.value)}>{item.label}</button>
+                        <button
+                            class="select-menu-item"
+                            class:active={isActive(item.value)}
+                            on:click|stopPropagation={() => handleSelect(item.value)}
+                            tabindex={open ? 0 : -1}>{item.label}</button
+                        >
                     </li>
                 {/each}
             {/key}

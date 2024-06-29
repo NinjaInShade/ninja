@@ -64,8 +64,9 @@ function createObservable<T>(options: ObservableOptions): Observable<T> {
         // Read
         if (arguments.length === 0) {
             // Register dependency
-            if (computedStack.length) {
-                computedStack.at(-1)(observable);
+            const lastInStack = computedStack.at(-1);
+            if (lastInStack) {
+                lastInStack(observable);
             }
             return value;
         }
@@ -92,6 +93,14 @@ function createObservable<T>(options: ObservableOptions): Observable<T> {
         };
     }
 
+    function on() {
+        //
+    }
+
+    function off() {
+        //
+    }
+
     /**
      * @private
      * Notifies subscribers with new value
@@ -105,15 +114,11 @@ function createObservable<T>(options: ObservableOptions): Observable<T> {
     // Svelte custom store compatibility
 
     function subscribe(cb: Subscription<T>): UnsubscribeFn {
-        subscriptions.push(cb);
-        const index = subscriptions.indexOf(cb);
-        cb(value);
-        return () => {
-            subscriptions.splice(index, 1);
-        };
+        return onChange(cb);
     }
 
     function set(newValue: T) {
+        // TODO: factor this out
         if (newValue !== value) {
             value = newValue;
             _notifySubscribers();

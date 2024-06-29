@@ -1,5 +1,6 @@
 import SocketManager, { type HandlerFn } from './SocketManager';
 import type { AcceptableSocketData } from '~/browser';
+import { TagManager } from './TagManager';
 import { logger } from '@ninjalib/util';
 
 const log = logger('nw:client');
@@ -26,6 +27,7 @@ export class Client {
     private socket: SocketManager;
 
     public variables: Record<string, any> = {};
+    public tag: TagManager;
 
     private reconnectInterval: ReturnType<typeof setInterval> | null = null;
     private reconnectAttempts = 0;
@@ -43,7 +45,30 @@ export class Client {
         this.options = Object.assign({}, defaultOptions, options);
 
         const serverURL = this.options.domain + ':' + this.options.port;
+
         this.socket = new SocketManager(serverURL);
+        this.tag = new TagManager(this);
+
+        this.handleReconnection();
+    }
+
+    private handleReconnection() {
+        const reconnect = async () => {
+            if (this.socket.readyState === 'CONNECTING' || this.socket.readyState === 'OPEN') {
+                return;
+            }
+            log.info('Socket disconnected, re-trying connection. Attempt number:', this.reconnectAttempts);
+            try {
+                await this.connect();
+                if (this.reconnectInterval) {
+                    clearInterval(this.reconnectInterval);
+                    this.reconnectInterval = null;
+                }
+                this.reconnectAttempts = 0;
+            } catch (err) {
+                log.warn('Got error whilst reconnecting:', err);
+            }
+        };
 
         this.socket.on('disconnect', () => {
             if (this.reconnectInterval) {
@@ -52,29 +77,11 @@ export class Client {
 
             this.reconnectAttempts += 1;
 
-            const reconnect = () => {
-                if (this.socket.readyState === 'CONNECTING' || this.socket.readyState === 'OPEN') {
-                    return;
-                }
-                log.info('Socket disconnected, re-trying connection. Attempt number:', this.reconnectAttempts);
-                void this.connect()
-                    .then(() => {
-                        if (this.reconnectInterval) {
-                            clearInterval(this.reconnectInterval);
-                            this.reconnectInterval = null;
-                        }
-                        this.reconnectAttempts = 0;
-                    })
-                    .catch((err) => {
-                        log.warn('Got error whilst reconnecting:', err);
-                    });
-            };
-
             // we want to try to reconnect immediately
-            reconnect();
+            void reconnect();
 
             this.reconnectInterval = setInterval(() => {
-                reconnect();
+                void reconnect();
             }, 2500);
         });
     }
