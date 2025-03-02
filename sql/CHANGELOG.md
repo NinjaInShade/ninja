@@ -5,7 +5,8 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
--
+-   fix `db.upsert` and `db.insertMany` erroring if passed empty dataset
+-   resolve `db.connect` once database is safe to query
 
 ## [0.3.0] - 20/04/2024
 
