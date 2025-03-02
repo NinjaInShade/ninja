@@ -7,6 +7,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -
 
+## [0.5.0] - 02/03/2025
+
+-
+
 ## [0.4.0] - 02/03/2025
 
 -   fix `db.upsert` and `db.insertMany` erroring if passed empty dataset
