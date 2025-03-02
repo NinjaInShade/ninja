@@ -13,6 +13,9 @@ type QueryType = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE' | 'DROP' |
 
 const log = util.logger('sql:mysql');
 
+const CONN_RETRY_TIMEOUT = 2500;
+const CONN_RETRY_START_LOGS = 3; // Start logging db is not ready need to retry after `n` attempts
+
 /**
  * MySQL ORM
  */
@@ -40,17 +43,35 @@ export default class MySQL {
         if (this.pool) {
             throw new Error('You already have an open pool, do not try to connect again!');
         }
-        try {
-            const pool = mysql.createPool(this.options);
-            this.pool = pool;
-            pool.on('connection', (connection) => {
-                connection.on('error', (err) => {
-                    log.error(`MySQL pool connection error: ${err}`);
+
+        let retries = 0;
+
+        return new Promise<void>((resolve, reject) => {
+            try {
+                const pool = mysql.createPool(this.options);
+                pool.on('connection', (connection) => {
+                    connection.on('error', (err) => {
+                        log.error(`MySQL pool connection error: ${err}`);
+                    });
                 });
-            });
-        } catch (err) {
-            throw new Error(`Failed to create pool: ${err.message}`);
-        }
+                const testConnection = async () => {
+                    try {
+                        await pool.query('SELECT 1');
+                        this.pool = pool;
+                        resolve();
+                    } catch (err) {
+                        if (retries > CONN_RETRY_START_LOGS) {
+                            log.warn(`Database not ready yet, retrying... (${retries + 1} attempts)`);
+                        }
+                        retries++;
+                        setTimeout(testConnection, CONN_RETRY_TIMEOUT);
+                    }
+                };
+                void testConnection();
+            } catch (err) {
+                reject(new Error(`Failed to create pool: ${err.message}`));
+            }
+        });
     }
 
     /**
