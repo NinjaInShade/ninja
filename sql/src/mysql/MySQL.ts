@@ -217,7 +217,11 @@ export default class MySQL {
     /**
      * Inserts multiple rows into the given table and returns the first created rows' id
      */
-    public async insertMany<T extends Row>(table: string, data: Row[]): Promise<number> {
+    public async insertMany<T extends Row>(table: string, data: Row[]): Promise<number | null> {
+        if (!data.length) {
+            return null;
+        }
+
         const fields: string[] = [];
         const values: Array<Array<any>> = [];
 
@@ -251,6 +255,10 @@ export default class MySQL {
      * Inserts row/s into the given table but if primary key matches it updates the row
      */
     public async upsert(table: string, data: Row[]) {
+        if (!data.length) {
+            return;
+        }
+
         const fields: string[] = [];
         const values: Array<Array<any>> = [];
 

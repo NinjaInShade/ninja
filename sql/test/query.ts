@@ -128,6 +128,12 @@ describe('MySQL queries', async () => {
         });
     });
 
+    it('[insertMany] should cope with empty dataset being given', async () => {
+        await rollbackHook(async () => {
+            await db.insertMany('query_test', []);
+        });
+    });
+
     it(`[insertMany] should throw when datasets fields don't all match`, async () => {
         await rollbackHook(async () => {
             const data = [
@@ -156,6 +162,12 @@ describe('MySQL queries', async () => {
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new3', last_name: 'guy', email: 'newguy3@gmail.com' }));
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new4', last_name: 'guy', email: 'newguy4@gmail.com' }));
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new5', last_name: 'guy', email: 'newguy5@gmail.com' }));
+        });
+    });
+
+    it('[upsert] should cope with empty dataset being given', async () => {
+        await rollbackHook(async () => {
+            await db.upsert('query_test', []);
         });
     });
 
