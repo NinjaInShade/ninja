@@ -40,7 +40,7 @@ export async function migrator(migration: Migration, db: MySQL) {
     const currentStep = await getCurrentStep();
 
     // Run migrations (in transaction)
-    await db.transaction(async () => {
+    await db.transaction(async (tx) => {
         for (const migration of steps) {
             if (migration.step <= currentStep) {
                 // Already ran
@@ -49,12 +49,12 @@ export async function migrator(migration: Migration, db: MySQL) {
             log.info(`Migrating step ${migration.step}...`)
             try {
                 if (typeof migration.query === 'function') {
-                    await migration.query(db);
+                    await migration.query(tx);
                 } else {
-                    await db.query(migration.query);
+                    await tx.query(migration.query);
                 }
-                await db.query('UPDATE __migration__ SET step = step + 1');
-                log.info(`Finished migrating step ${migration.step}`)
+                await tx.query('UPDATE __migration__ SET step = step + 1');
+                log.info(`Finished migrating step ${migration.step}`);
             } catch (err) {
                 throw new Error(`Failed to migrate step "${migration.step}": ${err}`);
             }
