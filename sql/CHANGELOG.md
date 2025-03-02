@@ -5,6 +5,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 ## [Unreleased]
 
+-
+
+## [0.5.1] - 02/03/2025
+
 -   fix migrate not using transaction context
 
 ## [0.5.0] - 02/03/2025
