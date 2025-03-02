@@ -1,6 +1,6 @@
 import * as mysql from 'mysql2/promise';
 import { Transaction, type TX } from './Transaction';
-import { migrator, type Migration } from "./migrate";
+import { migrator, type Migration } from './migrate';
 import util from '@ninjalib/util';
 
 interface ConnectionOptions extends mysql.ConnectionOptions {
@@ -159,7 +159,7 @@ export default class MySQL {
         `;
 
         for (const [key, value] of Object.entries(where)) {
-            query += `AND ?? = ?`;
+            query += `AND ?? = ?\n`;
             args.push(key, value);
         }
 
@@ -254,7 +254,7 @@ export default class MySQL {
             VALUES ${values.map((_values) => `\n(${_values.map(() => '?').join(', ')})`).join(',')}
             ON DUPLICATE KEY UPDATE ${fields.map(() => `\n?? = VALUES(??)`).join(',')}
         `;
-        const args = [table, ...fields, ...values.flat(), ...fields.flatMap(x => ([x, x]))];
+        const args = [table, ...fields, ...values.flat(), ...fields.flatMap((x) => [x, x])];
 
         await this.query(query, args);
     }
@@ -270,12 +270,19 @@ export default class MySQL {
         `;
 
         for (const [key, value] of Object.entries(where)) {
-            query += `AND ?? = ?`;
+            query += `AND ?? = ?\n`;
             args.push(key, value);
         }
 
         return this.query(query, args);
     }
 
-    public helpers = { getRows: this.getRows, getRow: this.getRow, insertOne: this.insertOne, insertMany: this.insertMany, upsert: this.upsert, delete: this.delete };
+    public helpers = {
+        getRows: this.getRows,
+        getRow: this.getRow,
+        insertOne: this.insertOne,
+        insertMany: this.insertMany,
+        upsert: this.upsert,
+        delete: this.delete,
+    };
 }

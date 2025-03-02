@@ -80,7 +80,7 @@ describe('MySQL queries', async () => {
 
     it('[query] should throw if column in where condition does not exist', async () => {
         await assert.rejects(async () => await db.query<User>('SELECT * FROM query_test WHERE not_defined = ?', ['test']), {
-            message: `Query failed: Unknown column 'not_defined' in 'where clause'`,
+            message: `Query failed: Unknown column 'not_defined' in 'WHERE'`,
         });
     });
 
@@ -189,7 +189,7 @@ describe('MySQL queries', async () => {
             await db.upsert('query_test', [
                 { id: insertedRows.id, first_name: 'new-upserted', email: insertedRows.email },
                 { id: null, first_name: 'new-inserted', email: 'newguyupserted@gmail.com' },
-            ])
+            ]);
 
             // We updated this rows name
             assert.ok(await db.getRow<User>('query_test', { first_name: 'new-upserted', last_name: 'guy', email: 'newguy@gmail.com' }));
@@ -213,13 +213,13 @@ describe('MySQL queries', async () => {
             const rowsAmount = (await db.getRows('query_test')).length;
 
             // Delete with conditions that will never match
-            await db.delete('query_test', { email: 'never-going-to-match' })
+            await db.delete('query_test', { email: 'never-going-to-match' });
 
             // Assert no rows were deleted
             const rowsAmountAfterDelete = (await db.getRows('query_test')).length;
             assert.equal(rowsAmount, rowsAmountAfterDelete);
-        })
-    })
+        });
+    });
 
     it(`[delete] should only delete rows where conditions are matched`, async () => {
         await rollbackHook(async () => {
@@ -241,8 +241,8 @@ describe('MySQL queries', async () => {
             // Assert it was the correct row that was deleted
             const missingRow = await db.getRow('query_test', { first_name: 'new2-for-delete' });
             assert.deepEqual(missingRow, null);
-        })
-    })
+        });
+    });
 
     it(`[delete] should delete all rows if no conditions given`, async () => {
         await rollbackHook(async () => {
@@ -258,6 +258,6 @@ describe('MySQL queries', async () => {
             // Assert no rows remain
             const rowsAmountAfterDelete = (await db.getRows('query_test')).length;
             assert.equal(rowsAmountAfterDelete, 0);
-        })
-    })
+        });
+    });
 });
