@@ -19,7 +19,7 @@
     },
     "types": "dist/node/index.d.ts",
     "scripts": {
-        "build": "ninja-cli node --build ./",
+        "build": "ninja-cli node --build ./src",
         "test": "ninja-cli test"
     },
     "engines": {
