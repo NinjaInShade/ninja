@@ -319,7 +319,9 @@ export class Logger {
         let msg = '';
 
         // Process name
-        msg += colourTheme.cyan + '[' + padString(this.options.processName ?? '????', 4) + ']' + ' ';
+        if (this.options.processName) {
+            msg += colourTheme.cyan + '[' + padString(this.options.processName, 4) + ']' + ' ';
+        }
 
         if (showBeginningMeta) {
             msg += colourTheme.grey + '<';
