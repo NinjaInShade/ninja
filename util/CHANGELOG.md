@@ -7,6 +7,10 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -
 
+## [0.5.3] - 18/04/2025
+
+-
+
 ## [0.5.2] - 18/04/2025
 
 -
