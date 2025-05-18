@@ -7,6 +7,18 @@ Refer to https://keepachangelog.com/en/1.0.0/ for how to maintain changelog<br /
 
 -
 
+## [0.5.3] - 18/04/2025
+
+-
+
+## [0.5.2] - 18/04/2025
+
+-
+
+## [0.5.1] - 18/05/2025
+
+-
+
 ## [0.5.0] - 03/09/2023
 
 -   renamed `shell.parseArgs` to `shell.parseArgv`, params changed, return changed and made more versatile

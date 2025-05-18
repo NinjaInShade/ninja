@@ -1,6 +1,6 @@
 {
     "name": "@ninjalib/util",
-    "version": "0.5.0",
+    "version": "0.5.3",
     "description": "Utility package",
     "type": "module",
     "exports": {
