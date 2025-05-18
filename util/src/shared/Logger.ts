@@ -31,6 +31,12 @@ type LoggerOptions = {
      */
     namespaceColour?: string;
     /**
+     * Number of characters to allocate for the namespace of the logger
+     *
+     * @default Logger.namespaceWidth - which defaults to 20
+     */
+    namespaceWidth?: number;
+    /**
      * The name of the current process e.g. vite (should be 4 or less characters long).
      * Will prefix the start of the log with this.
      *
@@ -112,6 +118,7 @@ export class Logger {
     public static showTimestamp = !isBrowser();
     public static showDate = false;
     public static namespaceColour = Logger.colourTheme.purple;
+    public static namespaceWidth = 20;
 
     private disableLogging = false;
     private enabledLogLevels: Set<AbbrLogLevel> = new Set();
@@ -126,6 +133,7 @@ export class Logger {
             showTimestamp: Logger.showTimestamp,
             showDate: Logger.showDate,
             namespaceColour: Logger.namespaceColour,
+            namespaceWidth: Logger.namespaceWidth,
             colourTheme: Logger.colourTheme,
             processName: getEnvVar('LOG_PROCESS_NAME')?.trim() ?? null,
         };
@@ -349,7 +357,7 @@ export class Logger {
         msg += colourTheme[colour] + colourTheme.bold + type.toUpperCase() + colourTheme.reset;
 
         // namespace
-        msg += ' ' + namespaceColour + padString(this.namespace, 20) + ' ';
+        msg += ' ' + namespaceColour + padString(this.namespace, this.options.namespaceWidth) + ' ';
 
         // separator
         msg += colourTheme.grey + '>>' + colourTheme.reset;
